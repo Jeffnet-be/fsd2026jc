@@ -4,6 +4,7 @@ using ChampionsLeague.Infrastructure.Data;
 using ChampionsLeague.Infrastructure.Repositories;
 using ChampionsLeague.Infrastructure.Services;
 using ChampionsLeague.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
@@ -21,17 +22,14 @@ builder.Services.AddAutoMapper(
     typeof(ChampionsLeague.Web.AutoMapper.AutoMapperProfile).Assembly);
 
 // ── EF Core ───────────────────────────────────────────────────────────
-// On Azure, the connection string is set as an App Service environment
-// variable named:  ConnectionStrings__DefaultConnection
-// (double underscore = colon in Azure configuration)
-// Locally it falls back to the value in appsettings.json.
+// On Azure: set App Setting  ConnectionStrings__DefaultConnection  (type SQLAzure)
+// Locally:  falls back to appsettings.json DefaultConnection value
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
         sql =>
         {
             sql.MigrationsAssembly("ChampionsLeague.Infrastructure");
-            // Retry on transient Azure SQL connection errors
             sql.EnableRetryOnFailure(
                 maxRetryCount: 5,
                 maxRetryDelay: TimeSpan.FromSeconds(30),
@@ -56,13 +54,11 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath        = "/Account/Login";
     options.LogoutPath       = "/Account/Logout";
     options.AccessDeniedPath = "/Account/Login";
-
-    // Required when running behind Azure's reverse proxy (HTTPS offloading)
     options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
     options.Cookie.SameSite     = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
 });
 
-// ── Repositories (Scoped = one per HTTP request) ──────────────────────
+// ── Repositories ──────────────────────────────────────────────────────
 builder.Services.AddScoped<IMatchRepository,        MatchRepository>();
 builder.Services.AddScoped<ITicketRepository,       TicketRepository>();
 builder.Services.AddScoped<IOrderRepository,        OrderRepository>();
@@ -83,7 +79,12 @@ builder.Services.AddHttpClient<IHotelApiService, HotelApiService>(client =>
 
 // ── Localisation ──────────────────────────────────────────────────────
 builder.Services.AddLocalization(opts => opts.ResourcesPath = "Resources");
-var supportedCultures = new[] { new CultureInfo("nl"), new CultureInfo("fr"), new CultureInfo("en") };
+var supportedCultures = new[]
+{
+    new CultureInfo("nl"),
+    new CultureInfo("fr"),
+    new CultureInfo("en")
+};
 builder.Services.Configure<RequestLocalizationOptions>(opts =>
 {
     opts.DefaultRequestCulture = new RequestCulture("nl");
@@ -96,9 +97,9 @@ builder.Services.Configure<RequestLocalizationOptions>(opts =>
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(opts =>
 {
-    opts.IdleTimeout        = TimeSpan.FromMinutes(30);
-    opts.Cookie.HttpOnly    = true;
-    opts.Cookie.IsEssential = true;
+    opts.IdleTimeout         = TimeSpan.FromMinutes(30);
+    opts.Cookie.HttpOnly     = true;
+    opts.Cookie.IsEssential  = true;
     opts.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
 });
 
@@ -107,12 +108,9 @@ var app = builder.Build();
 // ════════════════════════════════════════════════════════════════════
 
 // ── Run EF Core migrations on startup ────────────────────────────────
-// Works both locally and on Azure — safe to run every deployment because
-// EF Core skips migrations that have already been applied.
 using (var scope = app.Services.CreateScope())
 {
-    var logger = scope.ServiceProvider
-        .GetRequiredService<ILogger<Program>>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     try
     {
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -128,29 +126,23 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        // Log but don't crash — lets you diagnose connection issues
-        // from the Azure App Service logs without a cold-start failure.
         logger.LogError(ex,
-            "An error occurred applying migrations. " +
-            "Check the ConnectionStrings__DefaultConnection app setting in Azure.");
+            "Migration failed. Check ConnectionStrings__DefaultConnection in Azure App Settings.");
     }
 }
 
 // ── Middleware pipeline ───────────────────────────────────────────────
-
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
-// Azure terminates TLS at the load balancer — forwarded headers let
-// the app know the original request was HTTPS.
-app.UseForwardedHeaders(new Microsoft.AspNetCore.HttpOverrides.ForwardedHeadersOptions
+// UseForwardedHeaders MUST come before UseHttpsRedirection so Azure's
+// load-balancer HTTPS is correctly recognised.
+app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
-    ForwardedHeaders =
-        Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor |
-        Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
 
 app.UseHttpsRedirection();

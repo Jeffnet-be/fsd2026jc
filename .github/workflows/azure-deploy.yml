@@ -1,18 +1,13 @@
 # ============================================================
 #  .github/workflows/azure-deploy.yml
 #
-#  Builds and deploys ChampionsLeague.Web to Azure App Service
-#  on every push to the main branch.
+#  Builds and deploys ChampionsLeague.Web to Azure App Service.
+#  Triggers on every push to main.
 #
-#  REQUIRED SECRETS — set these in GitHub:
-#  Repository → Settings → Secrets and variables → Actions
-#
-#    AZURE_WEBAPP_PUBLISH_PROFILE
-#      Download from Azure Portal:
-#      App Service → Overview → Get publish profile → paste full XML
-#
-#    AZURE_WEBAPP_NAME
-#      The name of your Azure App Service (e.g. cl-tickets-app)
+#  REQUIRED GITHUB SECRETS:
+#    AZURE_WEBAPP_NAME           — your App Service name
+#    AZURE_WEBAPP_PUBLISH_PROFILE — XML from Azure Portal → App Service
+#                                    → Overview → Get publish profile
 # ============================================================
 
 name: Build and deploy to Azure
@@ -20,7 +15,7 @@ name: Build and deploy to Azure
 on:
   push:
     branches:
-      - main       # change to master if your default branch is master
+      - main
 
 env:
   DOTNET_VERSION: '9.0.x'
@@ -31,37 +26,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Check out the repository
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4      # Node 20+ ✓
 
-      # 2. Install .NET 9
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v4  # Node 20+ ✓
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      # 3. Restore NuGet packages
       - name: Restore packages
         run: dotnet restore ${{ env.PROJECT_PATH }}
 
-      # 4. Build in Release mode
       - name: Build
         run: dotnet build ${{ env.PROJECT_PATH }}
               --configuration Release
               --no-restore
 
-      # 5. Publish self-contained output to ./publish folder
       - name: Publish
         run: dotnet publish ${{ env.PROJECT_PATH }}
               --configuration Release
               --no-build
               --output ./publish
 
-      # 6. Deploy to Azure App Service
       - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
+        uses: azure/webapps-deploy@v3  # Node 20+ ✓
         with:
-          app-name:       ${{ secrets.AZURE_WEBAPP_NAME }}
+          app-name:        ${{ secrets.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package:        ./publish
+          package:         ./publish
