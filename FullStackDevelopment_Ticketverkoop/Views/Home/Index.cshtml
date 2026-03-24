@@ -1,0 +1,40 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["WelcomeTitle"];
+}
+
+<div class="text-center py-5">
+    <h1 class="display-4">@Localizer["WelcomeTitle"]</h1>
+    <p class="lead">@Localizer["WelcomeSubtitle"]</p>
+
+    <div class="my-3">
+        <a asp-controller="Home" asp-action="SetLanguage"
+           asp-route-culture="nl" asp-route-returnUrl="/">🇧🇪 NL</a> |
+        <a asp-controller="Home" asp-action="SetLanguage"
+           asp-route-culture="fr" asp-route-returnUrl="/">🇫🇷 FR</a> |
+        <a asp-controller="Home" asp-action="SetLanguage"
+           asp-route-culture="en" asp-route-returnUrl="/">🇬🇧 EN</a>
+    </div>
+
+    <div class="mt-4">
+        <a asp-controller="Match" asp-action="Index"
+           class="btn btn-primary btn-lg">View Match Calendar</a>
+    </div>
+</div>
+
+@* Club intro cards *@
+<div class="row row-cols-2 row-cols-md-3 g-3 mt-4">
+    @foreach (var club in new[] {
+                "Real Madrid","Manchester City","FC Bayern München",
+                "Paris Saint-Germain","Club Brugge","FC Barcelona"})
+    {
+        <div class="col">
+            <div class="card text-center p-3">
+                <div class="card-body">
+                    <h5 class="card-title">@club</h5>
+                </div>
+            </div>
+        </div>
+    }
+</div>

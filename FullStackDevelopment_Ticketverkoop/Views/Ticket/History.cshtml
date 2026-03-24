@@ -1,0 +1,66 @@
+﻿@model IEnumerable<FullStackDevelopment_Ticketverkoop.Web.Models.ViewModels.TicketHistoryViewModel>
+@{
+    ViewData["Title"] = "My Tickets";
+}
+
+<div class="container mt-4">
+    <h1>My Ticket History</h1>
+
+    @if (TempData["Success"] is string ok)
+    {
+        <div class="alert alert-success">@ok</div>
+    }
+    @if (TempData["Error"] is string err)
+    {
+        <div class="alert alert-danger">@err</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <p>You have not purchased any tickets yet.</p>
+    }
+    else
+    {
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Match</th>
+                    <th>Date</th>
+                    <th>Section</th>
+                    <th>Seat</th>
+                    <th>Price</th>
+                    <th>Voucher</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in Model)
+                {
+                    <tr>
+                        <td>@t.MatchDescription</td>
+                        <td>@t.MatchDate.ToString("dd/MM/yyyy")</td>
+                        <td>@t.SectionName</td>
+                        <td>@t.SeatRow @t.SeatNumber</td>
+                        <td>€@t.Price.ToString("0.00")</td>
+                        <td><code>@t.VoucherId</code></td>
+                        <td>@t.Status</td>
+                        <td>
+                            @if (t.Status == "Sold")
+                            {
+                                <form asp-action="Cancel" method="post">
+                                    <input type="hidden" name="ticketId" value="@t.TicketId" />
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-sm btn-danger"
+                                            onclick="return confirm('Cancel this ticket?')">
+                                        Cancel
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

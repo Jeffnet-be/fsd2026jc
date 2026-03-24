@@ -1,0 +1,12 @@
+C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop.data\bin\Debug\net9.0\FullStackDevelopment_Ticketverkoop.data.deps.json
+C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop.data\bin\Debug\net9.0\FullStackDevelopment_Ticketverkoop.data.dll
+C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop.data\bin\Debug\net9.0\FullStackDevelopment_Ticketverkoop.data.pdb
+C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop.data\obj\Debug\net9.0\FullStackDevelopment_Ticketverkoop.data.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop.data\obj\Debug\net9.0\FullStackDevelopment_Ticketverkoop.data.AssemblyInfoInputs.cache
+C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop.data\obj\Debug\net9.0\FullStackDevelopment_Ticketverkoop.data.AssemblyInfo.cs
+C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop.data\obj\Debug\net9.0\FullStackDevelopment_Ticketverkoop.data.csproj.CoreCompileInputs.cache
+C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop.data\obj\Debug\net9.0\FullStackDevelopment_Ticketverkoop.data.sourcelink.json
+C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop.data\obj\Debug\net9.0\FullStackDevelopment_Ticketverkoop.data.dll
+C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop.data\obj\Debug\net9.0\refint\FullStackDevelopment_Ticketverkoop.data.dll
+C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop.data\obj\Debug\net9.0\FullStackDevelopment_Ticketverkoop.data.pdb
+C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop.data\obj\Debug\net9.0\ref\FullStackDevelopment_Ticketverkoop.data.dll

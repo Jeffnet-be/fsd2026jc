@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ChampionsLeagueTickets/FullStackDevelopment_Ticketverkoop.domain.csproj" Id="b9f9f37c-6587-4665-8004-6cdab8ec98e3" DisplayName="FullStackDevelopment_Ticketverkoop.Domain" />
+  <Project Path="FullStackDevelopment_Ticketverkoop.data/FullStackDevelopment_Ticketverkoop.data.csproj" Id="2c0c253c-fad9-48e8-a1b9-dcd2fa0b8a28" DisplayName="FullStackDevelopment_Ticketverkoop.Data" />
+  <Project Path="FullStackDevelopment_Ticketverkoop.Services/FullStackDevelopment_Ticketverkoop.Services.csproj" Id="499046a3-a08e-4ec5-bee1-5a760cb058ed" />
+  <Project Path="FullStackDevelopment_Ticketverkoop/FullStackDevelopment_Ticketverkoop.web.csproj" DisplayName="FullStackDevelopment_Ticketverkoop.Web" />
+</Solution>

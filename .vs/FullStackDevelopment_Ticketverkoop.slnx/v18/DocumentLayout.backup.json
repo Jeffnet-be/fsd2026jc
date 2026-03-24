@@ -1,0 +1,308 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\resources\\views.home.index.nl.resx||{81828910-B8B3-4D2B-99A3-067027C180C1}",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\resources\\views.home.index.nl.resx||{81828910-B8B3-4D2B-99A3-067027C180C1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\views\\ticket\\history.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\views\\ticket\\history.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\views\\shared\\_matchcard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\views\\shared\\_matchcard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\views\\match\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\views\\match\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\fullstackdevelopment_ticketverkoop.web.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\fullstackdevelopment_ticketverkoop.web.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\controllers\\api\\ticketapicontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\controllers\\api\\ticketapicontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\controllers\\ticketcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\controllers\\ticketcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\controllers\\hotelcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\controllers\\hotelcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\controllers\\matchcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\controllers\\matchcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\models\\viewmodels\\cartviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\models\\viewmodels\\cartviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\models\\viewmodels\\tickethistoryviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\models\\viewmodels\\tickethistoryviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\models\\viewmodels\\matchviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\models\\viewmodels\\matchviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\automapper\\mappingprofile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\automapper\\mappingprofile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|c:\\users\\jeffreyclauwaert\\source\\repos\\jeffnet-be\\fsd2026jc\\fullstackdevelopment_ticketverkoop\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB073C29-F37D-CABD-12A0-358B1250ADCD}|FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.web.csproj|solutionrelative:fullstackdevelopment_ticketverkoop\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\appsettings.json",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\appsettings.json",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\appsettings.json",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-03-24T17:13:10.007Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Views.Home.Index.nl.resx",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Resources\\Views.Home.Index.nl.resx",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\Resources\\Views.Home.Index.nl.resx",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Resources\\Views.Home.Index.nl.resx",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\Resources\\Views.Home.Index.nl.resx",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001005|",
+              "WhenOpened": "2026-03-24T17:11:23.774Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\Views\\Home\\Index.cshtml",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACcAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-24T17:08:58.912Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "History.cshtml",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Views\\Ticket\\History.cshtml",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\Views\\Ticket\\History.cshtml",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Views\\Ticket\\History.cshtml",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\Views\\Ticket\\History.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-24T17:08:39.124Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "_MatchCard.cshtml",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Views\\Shared\\_MatchCard.cshtml",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\Views\\Shared\\_MatchCard.cshtml",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Views\\Shared\\_MatchCard.cshtml",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\Views\\Shared\\_MatchCard.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-24T17:07:48.341Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Views\\Match\\Index.cshtml",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\Views\\Match\\Index.cshtml",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Views\\Match\\Index.cshtml",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\Views\\Match\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-24T17:06:41.405Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "TicketApiController.cs",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Controllers\\Api\\TicketApiController.cs",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\Controllers\\Api\\TicketApiController.cs",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Controllers\\Api\\TicketApiController.cs",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\Controllers\\Api\\TicketApiController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAABBAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-24T17:04:31.99Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "HotelController.cs",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Controllers\\HotelController.cs",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\Controllers\\HotelController.cs",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Controllers\\HotelController.cs",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\Controllers\\HotelController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-24T17:04:09.617Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "TicketController.cs",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Controllers\\TicketController.cs",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\Controllers\\TicketController.cs",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Controllers\\TicketController.cs",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\Controllers\\TicketController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-24T17:03:35.794Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "MatchController.cs",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Controllers\\MatchController.cs",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\Controllers\\MatchController.cs",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Controllers\\MatchController.cs",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\Controllers\\MatchController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-24T17:03:06.944Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\Controllers\\HomeController.cs",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\Controllers\\HomeController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-24T17:02:53.108Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "CartViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Models\\ViewModels\\CartViewModel.cs",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\Models\\ViewModels\\CartViewModel.cs",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Models\\ViewModels\\CartViewModel.cs",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\Models\\ViewModels\\CartViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-24T17:02:37.746Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "TicketHistoryViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Models\\ViewModels\\TicketHistoryViewModel.cs",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\Models\\ViewModels\\TicketHistoryViewModel.cs",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Models\\ViewModels\\TicketHistoryViewModel.cs",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\Models\\ViewModels\\TicketHistoryViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-24T17:02:11.31Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "MatchViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Models\\ViewModels\\MatchViewModel.cs",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\Models\\ViewModels\\MatchViewModel.cs",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Models\\ViewModels\\MatchViewModel.cs",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\Models\\ViewModels\\MatchViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-24T17:01:47.519Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "FullStackDevelopment_Ticketverkoop.Web",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.Web.csproj",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.Web.csproj",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.Web.csproj",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\FullStackDevelopment_Ticketverkoop.Web.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-03-24T16:59:25.398Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "MappingProfile.cs",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\AutoMapper\\MappingProfile.cs",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\AutoMapper\\MappingProfile.cs",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\AutoMapper\\MappingProfile.cs",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\AutoMapper\\MappingProfile.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-24T17:00:50.87Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Program.cs",
+              "RelativeDocumentMoniker": "FullStackDevelopment_Ticketverkoop\\Program.cs",
+              "ToolTip": "C:\\Users\\jeffreyclauwaert\\source\\repos\\Jeffnet-be\\fsd2026jc\\FullStackDevelopment_Ticketverkoop\\Program.cs",
+              "RelativeToolTip": "FullStackDevelopment_Ticketverkoop\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-24T16:58:51.942Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
