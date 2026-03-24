@@ -1,9 +1,0 @@
-C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop\obj\Debug\net9.0\rpswa.dswa.cache.json
-C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop\obj\Debug\net9.0\FullStackDevelopment_Ticketverkoop.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop\obj\Debug\net9.0\FullStackDevelopment_Ticketverkoop.AssemblyInfoInputs.cache
-C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop\obj\Debug\net9.0\FullStackDevelopment_Ticketverkoop.AssemblyInfo.cs
-C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop\obj\Debug\net9.0\FullStackDevelopment_Ticketverkoop.csproj.CoreCompileInputs.cache
-C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop\obj\Debug\net9.0\FullStackDevelopment_Ticketverkoop.MvcApplicationPartsAssemblyInfo.cache
-C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop\obj\Debug\net9.0\FullStackDevelopment_Ticketverkoop.RazorAssemblyInfo.cache
-C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop\obj\Debug\net9.0\FullStackDevelopment_Ticketverkoop.RazorAssemblyInfo.cs
-C:\Users\jeffreyclauwaert\source\repos\Jeffnet-be\fsd2026jc\FullStackDevelopment_Ticketverkoop\obj\Debug\net9.0\FullStackDevelopment_Ticketverkoop.sourcelink.json

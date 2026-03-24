@@ -1,0 +1,85 @@
+@model ChampionsLeague.Web.ViewModels.CartVM
+@{
+    ViewData["Title"] = "Shopping Cart";
+}
+
+<h1 class="mb-4">🛒 Shopping Cart</h1>
+
+@if (!Model.Items.Any())
+{
+    <div class="alert alert-info d-flex align-items-center gap-3">
+        <span style="font-size:2rem">🛒</span>
+        <div>
+            Your cart is empty.
+            <a asp-controller="Matches" asp-action="Index" class="alert-link">
+                Browse available matches
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Match</th>
+                <th>Date</th>
+                <th>Sector</th>
+                <th class="text-center">Qty</th>
+                <th class="text-end">Unit price</th>
+                <th class="text-end">Subtotal</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td class="fw-bold">@item.MatchDescription</td>
+                    <td>@item.MatchDate.ToString("dd/MM/yyyy")</td>
+                    <td><small>@item.SectorName</small></td>
+                    <td class="text-center">@item.Quantity</td>
+                    <td class="text-end">€ @item.UnitPrice.ToString("0.00")</td>
+                    <td class="text-end fw-bold">€ @item.Subtotal.ToString("0.00")</td>
+                    <td>
+                        <form asp-controller="Cart" asp-action="Remove" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="matchId"  value="@item.MatchId" />
+                            <input type="hidden" name="sectorId" value="@item.SectorId" />
+                            <button class="btn btn-outline-danger btn-sm" title="Remove">✕</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr class="table-light">
+                <td colspan="5" class="text-end fw-bold fs-5">Total:</td>
+                <td class="text-end fw-bold fs-5 text-success">
+                    € @Model.Total.ToString("0.00")
+                </td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <form asp-controller="Cart" asp-action="Clear" method="post">
+            @Html.AntiForgeryToken()
+            <button class="btn btn-outline-secondary"
+                    onclick="return confirm('Clear the entire cart?')">
+                🗑️ Clear cart
+            </button>
+        </form>
+        <div class="d-flex gap-2">
+            <a asp-controller="Matches" asp-action="Index"
+               class="btn btn-outline-dark">
+                ← Continue shopping
+            </a>
+            <a asp-controller="Checkout" asp-action="Review"
+               class="btn btn-success btn-lg px-4">
+                Checkout → 
+            </a>
+        </div>
+    </div>
+}

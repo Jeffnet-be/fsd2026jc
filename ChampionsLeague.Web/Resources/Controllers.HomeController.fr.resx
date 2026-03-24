@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+
+  <data name="HomeTitle" xml:space="preserve"><value>Bienvenue sur CL Tickets</value></data>
+  <data name="HomeHero" xml:space="preserve"><value>Billetterie Ligue des Champions</value></data>
+  <data name="HomeSubtitle" xml:space="preserve"><value>Achetez vos billets officiels pour les plus grands matchs d'Europe</value></data>
+  <data name="ViewMatches" xml:space="preserve"><value>Voir les matchs</value></data>
+  <data name="ParticipatingClubs" xml:space="preserve"><value>Clubs participants</value></data>
+  <data name="Home" xml:space="preserve"><value>Accueil</value></data>
+  <data name="Matches" xml:space="preserve"><value>Matchs</value></data>
+  <data name="MyTickets" xml:space="preserve"><value>Mes billets</value></data>
+  <data name="Login" xml:space="preserve"><value>Connexion</value></data>
+  <data name="Register" xml:space="preserve"><value>S'inscrire</value></data>
+  <data name="Logout" xml:space="preserve"><value>Déconnexion</value></data>
+</root>

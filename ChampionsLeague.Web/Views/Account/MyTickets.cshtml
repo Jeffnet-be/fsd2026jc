@@ -1,0 +1,86 @@
+@model IEnumerable<ChampionsLeague.Web.ViewModels.TicketHistoryItemVM>
+@{
+    ViewData["Title"] = "My Tickets";
+}
+
+<h1 class="mb-4">🎫 My Tickets</h1>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info d-flex align-items-center gap-3">
+        <span style="font-size:2rem">🎟️</span>
+        <div>
+            You have no tickets yet.
+            <a asp-controller="Matches" asp-action="Index" class="alert-link">
+                Find a match and buy your first ticket!
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    @*
+        jQuery DataTable — curriculum section 10.4.3.
+        Ordered by match date descending so newest tickets appear first.
+    *@
+    <table id="ticketTable" class="table table-hover table-striped align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Match</th>
+                <th>Date</th>
+                <th>Sector</th>
+                <th class="text-center">Seat</th>
+                <th class="text-end">Price paid</th>
+                <th class="text-center">Status</th>
+                <th>Voucher (short)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in Model)
+            {
+                <tr>
+                    <td class="fw-bold">@t.MatchDescription</td>
+                    <td data-order="@t.MatchDate.Ticks">
+                        @t.MatchDate.ToString("dd/MM/yyyy")
+                        <small class="text-muted d-block">@t.MatchDate.ToString("HH:mm") UTC</small>
+                    </td>
+                    <td><small>@t.SectorName</small></td>
+                    <td class="text-center">@t.SeatNumber</td>
+                    <td class="text-end">€ @t.PricePaid.ToString("0.00")</td>
+                    <td class="text-center">
+                        @{
+                            var badgeClass = t.Status switch
+                            {
+                                "Paid"      => "bg-success",
+                                "Cancelled" => "bg-secondary",
+                                _           => "bg-warning text-dark"
+                            };
+                        }
+                        <span class="badge @badgeClass">@t.Status</span>
+                    </td>
+                    <td>
+                        <code class="small">@t.VoucherId.ToString("D")[..8]…</code>
+                        <button class="btn btn-link btn-sm p-0 ms-1"
+                                onclick="navigator.clipboard.writeText('@t.VoucherId.ToString("D")')"
+                                title="Copy full voucher code">📋</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@section Scripts {
+<script>
+    $(function () {
+        $('#ticketTable').DataTable({
+            order: [[1, 'desc']],
+            pageLength: 10,
+            language: {
+                search: 'Search:',
+                info: 'Showing _START_ to _END_ of _TOTAL_ tickets'
+            }
+        });
+    });
+</script>
+}

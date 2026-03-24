@@ -1,0 +1,67 @@
+@model ChampionsLeague.Web.ViewModels.RegisterVM
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="row justify-content-center">
+<div class="col-md-6 col-lg-5">
+<div class="card shadow border-0">
+    <div class="card-header bg-dark text-white text-center py-3">
+        <h4 class="mb-0">⚽ Create Your Account</h4>
+        <small class="text-warning">Buy tickets in seconds</small>
+    </div>
+    <div class="card-body p-4">
+
+        @* Validation summary — shows model-level errors from Identity (e.g. duplicate email) *@
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+
+        <form asp-action="Register" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-3">
+                <div class="col-6">
+                    <label asp-for="FirstName" class="form-label fw-semibold"></label>
+                    <input asp-for="FirstName" class="form-control" placeholder="Jan" />
+                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                </div>
+                <div class="col-6">
+                    <label asp-for="LastName" class="form-label fw-semibold"></label>
+                    <input asp-for="LastName" class="form-control" placeholder="Peeters" />
+                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mb-3 mt-3">
+                <label asp-for="Email" class="form-label fw-semibold"></label>
+                <input asp-for="Email" class="form-control" placeholder="jan@example.com" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label fw-semibold"></label>
+                <input asp-for="Password" class="form-control" placeholder="Min. 8 characters" />
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="ConfirmPassword" class="form-label fw-semibold"></label>
+                <input asp-for="ConfirmPassword" class="form-control" placeholder="Repeat password" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-warning w-100 fw-bold py-2">
+                Register →
+            </button>
+        </form>
+    </div>
+    <div class="card-footer bg-white text-center py-3">
+        Already have an account?
+        <a asp-action="Login" class="fw-semibold">Login here</a>
+    </div>
+</div>
+</div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

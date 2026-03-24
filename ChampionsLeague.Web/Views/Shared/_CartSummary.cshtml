@@ -1,0 +1,9 @@
+@model ChampionsLeague.Web.ViewModels.CartVM
+@*
+    Partial view returned by CartController.AddToCart (AJAX response).
+    The JavaScript on the match detail page reads the cart-count span
+    to update the navbar badge without a full page reload.
+    Curriculum ref: section 10.4.7 extension — AJAX + partial views.
+*@
+<span id="cart-count">@Model.Count</span>
+<span id="cart-total">@Model.Total.ToString("0.00")</span>

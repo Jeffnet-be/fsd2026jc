@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] – CL Tickets</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<header>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+            ⚽ CL Tickets
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#mainNav" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Matches" asp-action="Index">Matches</a>
+                </li>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Account" asp-action="MyTickets">My Tickets</a>
+                    </li>
+                }
+            </ul>
+
+            <ul class="navbar-nav ms-auto align-items-center">
+
+                <!-- Language switcher -->
+                <li class="nav-item dropdown me-2">
+                    <a class="nav-link dropdown-toggle text-white" href="#"
+                       data-bs-toggle="dropdown">🌐 Language</a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="?culture=nl">🇧🇪 Nederlands</a></li>
+                        <li><a class="dropdown-item" href="?culture=fr">🇫🇷 Français</a></li>
+                        <li><a class="dropdown-item" href="?culture=en">🇬🇧 English</a></li>
+                    </ul>
+                </li>
+
+                <!-- Cart badge -->
+                <li class="nav-item me-2">
+                    <a class="nav-link position-relative" asp-controller="Cart" asp-action="Index">
+                        🛒
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark"
+                              id="cart-badge">0</span>
+                    </a>
+                </li>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <li class="nav-item">
+                        <span class="navbar-text text-light me-2">
+                            👤 @User.Identity.Name
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <form asp-controller="Account" asp-action="Logout"
+                              method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-light btn-sm">
+                                Logout
+                            </button>
+                        </form>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item me-1">
+                        <a class="btn btn-outline-light btn-sm"
+                           asp-controller="Account" asp-action="Login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-warning btn-sm"
+                           asp-controller="Account" asp-action="Register">Register</a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</nav>
+</header>
+
+<main class="container py-4 flex-grow-1">
+    @RenderBody()
+</main>
+
+<footer class="bg-dark text-white py-3 mt-auto">
+    <div class="container text-center">
+        <small>
+            &copy; @DateTime.Now.Year Champions League Ticket Portal &mdash;
+            VIVES Hogeschool &mdash; Full Stack Development
+        </small>
+    </div>
+</footer>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

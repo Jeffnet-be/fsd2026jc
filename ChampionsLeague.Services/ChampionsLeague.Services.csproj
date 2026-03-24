@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ChampionsLeague.Domain\ChampionsLeague.Domain.csproj" />
+    <ProjectReference Include="..\ChampionsLeague.Infrastructure\ChampionsLeague.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

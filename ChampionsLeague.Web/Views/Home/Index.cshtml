@@ -1,0 +1,59 @@
+@model IEnumerable<ChampionsLeague.Web.ViewModels.ClubCardVM>
+@{
+    ViewData["Title"] = "Home";
+}
+
+@* Hero section *@
+<div class="py-5 mb-4 text-white text-center rounded-3"
+     style="background: linear-gradient(135deg, #0d0d0d 0%, #001489 100%);">
+    <div class="py-3">
+        <h1 class="display-4 fw-bold">⚽ Champions League Tickets</h1>
+        <p class="lead mt-2 mb-4">
+            Buy official tickets for the biggest football matches in Europe.
+            <br />Six clubs &bull; One portal &bull; Your seat guaranteed.
+        </p>
+        <a asp-controller="Matches" asp-action="Index" class="btn btn-warning btn-lg px-5 fw-bold">
+            View Match Calendar →
+        </a>
+    </div>
+</div>
+
+@* Club grid — each card is rendered by the _ClubCard partial view *@
+<h2 class="mb-4">Participating Clubs</h2>
+<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+    @foreach (var club in Model)
+    {
+        @await Html.PartialAsync("_ClubCard", club)
+    }
+</div>
+
+@* Info strip *@
+<div class="row mt-5 g-3 text-center">
+    <div class="col-md-4">
+        <div class="card border-0 bg-light h-100 py-3">
+            <div class="card-body">
+                <h2>🎫</h2>
+                <h5>Official Tickets</h5>
+                <p class="text-muted small">All tickets come with a unique voucher code, emailed instantly after purchase.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 bg-light h-100 py-3">
+            <div class="card-body">
+                <h2>🔒</h2>
+                <h5>Secure & Fair</h5>
+                <p class="text-muted small">Maximum 4 tickets per person per match. Free cancellation up to 7 days before kick-off.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 bg-light h-100 py-3">
+            <div class="card-body">
+                <h2>🏨</h2>
+                <h5>Hotel Search</h5>
+                <p class="text-muted small">Find accommodation near the stadium directly from the match page.</p>
+            </div>
+        </div>
+    </div>
+</div>

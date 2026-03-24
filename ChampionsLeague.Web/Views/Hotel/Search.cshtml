@@ -1,0 +1,79 @@
+@model ChampionsLeague.Web.ViewModels.HotelSearchVM
+@{
+    ViewData["Title"] = "Find Hotels";
+}
+
+<h1 class="mb-4">🏨 Find Hotels Near the Stadium</h1>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form asp-action="Search" method="post">
+            @Html.AntiForgeryToken()
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label asp-for="City" class="form-label fw-semibold">City</label>
+                    <input asp-for="City" class="form-control" placeholder="e.g. Madrid" />
+                    <span asp-validation-for="City" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="CheckIn" class="form-label fw-semibold"></label>
+                    <input asp-for="CheckIn" type="date" class="form-control" />
+                    <span asp-validation-for="CheckIn" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="CheckOut" class="form-label fw-semibold"></label>
+                    <input asp-for="CheckOut" type="date" class="form-control" />
+                    <span asp-validation-for="CheckOut" class="text-danger small"></span>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-warning w-100 fw-bold">
+                        Search 🔍
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Results.Any())
+{
+    <h3 class="mb-3">
+        Results for <em>@Model.City</em>
+        <small class="text-muted fs-6">
+            (@Model.CheckIn.ToString("dd/MM") – @Model.CheckOut.ToString("dd/MM/yyyy"))
+        </small>
+    </h3>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3">
+        @foreach (var h in Model.Results)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <h5 class="card-title">@h.Name</h5>
+                        <p class="card-text text-muted small">📍 @h.Address</p>
+                        <p class="fw-bold text-success fs-5">
+                            € @h.PricePerNight.ToString("0.00")
+                            <small class="text-muted fs-6 fw-normal">/ night</small>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-white border-0">
+                        <a href="@h.BookingUrl" target="_blank" rel="noopener noreferrer"
+                           class="btn btn-outline-primary w-100">
+                            Book now →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else if (ViewContext.HttpContext.Request.Method == "POST")
+{
+    <div class="alert alert-warning">
+        No hotels found for <strong>@Model.City</strong>. Try a different city or dates.
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

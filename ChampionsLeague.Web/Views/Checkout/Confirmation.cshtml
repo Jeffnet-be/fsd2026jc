@@ -1,0 +1,25 @@
+@{
+    ViewData["Title"] = "Purchase Confirmed";
+}
+
+<div class="text-center py-5">
+    <div style="font-size:5rem">🎉</div>
+    <h1 class="display-5 fw-bold mt-3">Purchase Confirmed!</h1>
+    <p class="lead text-muted mt-2">
+        @TempData["Success"]
+    </p>
+    <p class="text-muted">
+        Your voucher codes have been sent to your registered email address.
+        Present them at the stadium gate on match day.
+    </p>
+    <div class="d-flex justify-content-center gap-3 mt-4">
+        <a asp-controller="Account" asp-action="MyTickets"
+           class="btn btn-primary btn-lg">
+            🎫 View My Tickets
+        </a>
+        <a asp-controller="Matches" asp-action="Index"
+           class="btn btn-outline-dark btn-lg">
+            Browse More Matches
+        </a>
+    </div>
+</div>

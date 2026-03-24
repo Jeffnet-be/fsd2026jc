@@ -1,0 +1,56 @@
+@model ChampionsLeague.Web.ViewModels.ClubCardVM
+@*
+    Partial view — reusable card component for a single club.
+    Curriculum ref: chapter 9 "Partial Views" — promotes code reuse across the home page.
+    Called with: @await Html.PartialAsync("_ClubCard", club)
+*@
+<div class="col">
+    <div class="card h-100 shadow-sm border-0">
+        <div class="card-header text-white text-center py-3"
+             style="background-color: @Model.PrimaryColor">
+            <img src="@Model.BadgeUrl"
+                 alt="@Model.Name badge"
+                 class="club-badge"
+                 onerror="this.src='/images/clubs/default.png'" />
+            <h5 class="mb-0 mt-2 text-white">@Model.Name</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-1">
+                <strong>🌍</strong> @Model.Country
+            </p>
+            <p class="mb-1">
+                <strong>🏟️</strong> @Model.StadiumName, @Model.StadiumCity
+            </p>
+            <p class="mb-2">
+                <strong>👥</strong> @Model.TotalCapacity.ToString("N0") total seats
+            </p>
+
+            <table class="table table-sm table-striped mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="font-size:.75rem">Sector</th>
+                        <th class="text-end" style="font-size:.75rem">Seats</th>
+                        <th class="text-end" style="font-size:.75rem">From €</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.Sectors)
+                    {
+                        <tr>
+                            <td style="font-size:.72rem">@s.Name</td>
+                            <td class="text-end" style="font-size:.72rem">@s.Capacity</td>
+                            <td class="text-end" style="font-size:.72rem">@s.BasePrice.ToString("0.00")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-white border-0 text-center">
+            <a asp-controller="Matches" asp-action="Index"
+               asp-route-clubId="@Model.Id"
+               class="btn btn-outline-dark btn-sm w-100">
+                View fixtures →
+            </a>
+        </div>
+    </div>
+</div>

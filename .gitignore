@@ -1,0 +1,20 @@
+## .NET
+*.user
+*.suo
+.vs/
+obj/
+bin/
+*.log
+
+## EF Core migrations (keep the Migrations folder but ignore generated snapshots from local runs)
+# Uncomment next line only if you want a clean slate every deploy:
+# **/Migrations/
+
+## User secrets
+appsettings.Development.json
+secrets.json
+
+## OS
+.DS_Store
+Thumbs.db
+desktop.ini

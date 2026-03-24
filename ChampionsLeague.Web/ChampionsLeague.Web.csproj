@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ChampionsLeague.Web</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ChampionsLeague.Domain\ChampionsLeague.Domain.csproj" />
+    <ProjectReference Include="..\ChampionsLeague.Infrastructure\ChampionsLeague.Infrastructure.csproj" />
+    <ProjectReference Include="..\ChampionsLeague.Services\ChampionsLeague.Services.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!--
+      AutoMapper 13+ ships DI integration in the same package.
+      Do NOT also reference AutoMapper.Extensions.Microsoft.DependencyInjection —
+      that old extension package conflicts with AutoMapper >= 13.
+    -->
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>

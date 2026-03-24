@@ -1,0 +1,68 @@
+@model ChampionsLeague.Web.ViewModels.CartVM
+@{
+    ViewData["Title"] = "Order Review";
+}
+
+<h1 class="mb-4">📋 Review Your Order</h1>
+
+@* Show any business-rule errors from a failed Confirm attempt *@
+@if (TempData["Errors"] is string rawErrors)
+{
+    foreach (var err in rawErrors.Split('|', StringSplitOptions.RemoveEmptyEntries))
+    {
+        <div class="alert alert-danger">@err</div>
+    }
+}
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Match</th>
+                    <th>Date</th>
+                    <th>Sector</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-end">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td class="fw-bold">@item.MatchDescription</td>
+                        <td>@item.MatchDate.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td><small>@item.SectorName</small></td>
+                        <td class="text-center">@item.Quantity</td>
+                        <td class="text-end">€ @item.Subtotal.ToString("0.00")</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr class="table-light">
+                    <td colspan="4" class="text-end fw-bold fs-5">Grand Total:</td>
+                    <td class="text-end fw-bold fs-5 text-success">
+                        € @Model.Total.ToString("0.00")
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<div class="alert alert-info">
+    <strong>💳 Payment simulation:</strong> In this demo, payment is instant.
+    Vouchers will be emailed to your registered address after confirmation.
+</div>
+
+<div class="d-flex gap-2 justify-content-end">
+    <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-secondary">
+        ← Back to cart
+    </a>
+    <form asp-action="Confirm" method="post">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-success btn-lg px-5">
+            ✅ Confirm &amp; Pay
+        </button>
+    </form>
+</div>
