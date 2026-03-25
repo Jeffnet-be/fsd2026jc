@@ -1,63 +1,60 @@
 @model ChampionsLeague.Web.ViewModels.ClubCardVM
 <div class="col">
-    <div class="card h-100 border-0 shadow-sm overflow-hidden"
-         style="border-radius:16px;transition:transform .2s,box-shadow .2s"
-         onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 12px 28px rgba(0,0,0,.15)'"
-         onmouseout="this.style.transform='';this.style.boxShadow=''">
+    <div class="card border-0 shadow-sm h-100"
+         style="border-radius:14px;overflow:hidden;transition:.2s">
 
-        <!-- Coloured header -->
-        <div class="text-center py-4 position-relative"
-             style="background:linear-gradient(160deg, @Model.PrimaryColor 0%, @(Model.PrimaryColor)cc 100%)">
-            <!-- Badge image — fallback to initial letter if missing -->
-            <div class="mx-auto mb-2 d-flex align-items-center justify-content-center rounded-circle bg-white shadow"
-                 style="width:72px;height:72px;overflow:hidden">
-                <img src="@Model.BadgeUrl" alt="@Model.Name"
-                     style="width:56px;height:56px;object-fit:contain"
-                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-                <span style="display:none;font-size:1.8rem;font-weight:700;color:@Model.PrimaryColor">
-                    @Model.Name[0]
-                </span>
+        <!-- Coloured header with club name clearly visible -->
+        <div class="text-center py-4"
+             style="background:@Model.PrimaryColor">
+            <div class="mx-auto rounded-circle bg-white d-flex align-items-center justify-content-center shadow mb-2"
+                 style="width:68px;height:68px">
+                <img src="@Model.BadgeUrl" alt="@Model.Name badge"
+                     style="width:52px;height:52px;object-fit:contain"
+                     onerror="this.parentElement.innerHTML='<span style=font-size:1.8rem;font-weight:700>@Model.Name[0]</span>'" />
             </div>
-            <h5 class="text-white fw-bold mb-0 px-2">@Model.Name</h5>
+            <h5 class="fw-bold mb-0 px-3"
+                style="color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.4)">
+                @Model.Name
+            </h5>
         </div>
 
-        <div class="card-body px-4 pt-3 pb-2">
-            <div class="d-flex align-items-center gap-2 text-muted small mb-1">
-                <i class="bi bi-geo-alt-fill" style="color:@Model.PrimaryColor"></i>
-                <span>@Model.Country</span>
+        <!-- Body -->
+        <div class="card-body bg-white px-4 pt-3 pb-2">
+            <div class="small text-muted mb-1">
+                <i class="bi bi-geo-alt-fill me-1" style="color:@Model.PrimaryColor"></i>
+                @Model.Country &nbsp;·&nbsp;
+                <i class="bi bi-building me-1" style="color:@Model.PrimaryColor"></i>
+                @Model.StadiumName, @Model.StadiumCity
             </div>
-            <div class="d-flex align-items-center gap-2 text-muted small mb-3">
-                <i class="bi bi-building" style="color:@Model.PrimaryColor"></i>
-                <span>@Model.StadiumName, @Model.StadiumCity</span>
-            </div>
-
-            <!-- Capacity pill -->
             <div class="mb-3">
-                <span class="badge rounded-pill px-3 py-2"
-                      style="background:@Model.PrimaryColor;color:white;font-size:.8rem">
+                <span class="badge text-white rounded-pill px-3"
+                      style="background:@Model.PrimaryColor">
                     <i class="bi bi-people-fill me-1"></i>
                     @Model.TotalCapacity.ToString("N0") seats
                 </span>
             </div>
 
-            <!-- Sector table -->
-            <table class="table table-sm mb-0" style="font-size:.78rem">
-                <thead>
-                    <tr style="background:#f0f4ff">
-                        <th class="fw-semibold text-secondary border-0">Sector</th>
-                        <th class="fw-semibold text-secondary border-0 text-end">Seats</th>
-                        <th class="fw-semibold text-secondary border-0 text-end">From €</th>
+            <table class="table table-sm table-striped mb-0"
+                   style="font-size:.78rem">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Sector</th>
+                        <th class="text-end">Seats</th>
+                        <th class="text-end">From&nbsp;€</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var s in Model.Sectors)
                     {
-                        <tr class="border-bottom border-light">
-                            <td class="text-muted py-1" style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                        <tr>
+                            <td class="text-muted"
+                                style="max-width:150px;overflow:hidden;
+                                       text-overflow:ellipsis;white-space:nowrap">
                                 @s.Name
                             </td>
-                            <td class="text-end py-1">@s.Capacity.ToString("N0")</td>
-                            <td class="text-end py-1 fw-semibold" style="color:@Model.PrimaryColor">
+                            <td class="text-end">@s.Capacity.ToString("N0")</td>
+                            <td class="text-end fw-semibold"
+                                style="color:@Model.PrimaryColor">
                                 @s.BasePrice.ToString("0.00")
                             </td>
                         </tr>
@@ -66,11 +63,12 @@
             </table>
         </div>
 
-        <div class="card-footer bg-white border-0 px-4 pb-4 pt-2">
+        <div class="card-footer bg-white border-0 px-4 pb-4 pt-0">
             <a asp-controller="Matches" asp-action="Index"
                asp-route-clubId="@Model.Id"
                class="btn w-100 fw-semibold text-white"
-               style="background:@Model.PrimaryColor;border:none">
+               style="background:@Model.PrimaryColor;
+                      border:none;border-radius:8px">
                 <i class="bi bi-calendar3 me-2"></i>View fixtures
             </a>
         </div>

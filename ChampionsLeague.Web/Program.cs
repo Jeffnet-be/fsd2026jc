@@ -90,7 +90,9 @@ builder.Services.Configure<RequestLocalizationOptions>(opts =>
     opts.DefaultRequestCulture = new RequestCulture("nl");
     opts.SupportedCultures     = supportedCultures;
     opts.SupportedUICultures   = supportedCultures;
-    opts.RequestCultureProviders.Insert(0, new QueryStringRequestCultureProvider());
+    // CookieRequestCultureProvider lets setLang() JS set the culture via cookie
+    opts.RequestCultureProviders.Insert(0, new CookieRequestCultureProvider());
+    opts.RequestCultureProviders.Insert(1, new QueryStringRequestCultureProvider());
 });
 
 // ── Session ───────────────────────────────────────────────────────────

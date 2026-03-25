@@ -1,101 +1,83 @@
 @model IEnumerable<ChampionsLeague.Web.ViewModels.ClubCardVM>
 @{
     ViewData["Title"] = "Home";
+    var totalSeats = Model.Sum(c => c.TotalCapacity);
 }
 
-<!-- ── Hero ────────────────────────────────────────────────────────── -->
-<div class="position-relative overflow-hidden text-white text-center py-5"
-     style="background: linear-gradient(135deg,#001489 0%,#0d0d2b 60%,#1a0a3d 100%);
-            min-height:340px;">
-    <!-- subtle pattern overlay -->
-    <div class="position-absolute top-0 start-0 w-100 h-100"
-         style="background:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22><circle cx=%2230%22 cy=%2230%22 r=%221.5%22 fill=%22rgba(255,255,255,.07)%22/></svg>') repeat;"></div>
-
-    <div class="container position-relative py-4">
-        <div class="mb-3" style="font-size:3.5rem">⚽</div>
-        <h1 class="display-4 fw-bold mb-2">
-            <span style="color:#FFD700">Champions League</span> Ticket Portal
+<!-- ── Hero ──────────────────────────────────────────────────── -->
+<div style="background:linear-gradient(135deg,#001489 0%,#0a0a40 100%);
+            padding:60px 0 50px">
+    <div class="container text-center text-white">
+        <div style="font-size:4rem;line-height:1;margin-bottom:16px">⚽</div>
+        <h1 class="fw-bold mb-3"
+            style="font-size:clamp(1.8rem,5vw,3rem)">
+            <span style="color:#FFD700">Champions League</span><br/>
+            Ticket Portal
         </h1>
-        <p class="lead text-white-75 mb-4" style="max-width:560px;margin:0 auto">
+        <p class="mb-4 mx-auto"
+           style="max-width:480px;opacity:.85;font-size:1.05rem">
             Buy official tickets for the biggest football matches in Europe.
             Six clubs &bull; One portal &bull; Your seat guaranteed.
         </p>
-        <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <div class="d-flex flex-wrap justify-content-center gap-3 mb-5">
             <a asp-controller="Matches" asp-action="Index"
-               class="btn btn-lg fw-bold px-5 py-3"
-               style="background:#FFD700;color:#001489;border:none">
+               class="btn btn-gold btn-lg px-4 fw-bold"
+               style="background:#FFD700;color:#001489;border:none;border-radius:8px">
                 <i class="bi bi-calendar3 me-2"></i>View Match Calendar
             </a>
             <a asp-controller="Account" asp-action="Register"
-               class="btn btn-lg btn-outline-light px-4 py-3">
+               class="btn btn-outline-light btn-lg px-4"
+               style="border-radius:8px">
                 <i class="bi bi-person-plus me-2"></i>Create Account
             </a>
         </div>
 
-        <!-- stats row -->
-        <div class="row justify-content-center mt-5 g-4">
-            @{
-                var totalSeats = Model.Sum(c => c.TotalCapacity);
-                var clubCount  = Model.Count();
+        <!-- Stat pills -->
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+            @foreach (var (label, value) in new (string,string)[] {
+                ("Clubs",        Model.Count().ToString()),
+                ("Matches",      "13"),
+                ("Total seats",  totalSeats.ToString("N0")),
+                ("Languages",    "3"),
+            })
+            {
+                <div class="text-center px-4 py-2 rounded-3"
+                     style="background:rgba(255,255,255,.12);min-width:90px">
+                    <div class="fw-bold fs-5" style="color:#FFD700">@value</div>
+                    <div class="small" style="color:rgba(255,255,255,.7)">@label</div>
+                </div>
             }
-            <div class="col-auto">
-                <div class="px-4 py-2 rounded-3" style="background:rgba(255,255,255,.1)">
-                    <div class="fw-bold fs-4" style="color:#FFD700">@clubCount</div>
-                    <div class="small text-white-50">Clubs</div>
-                </div>
-            </div>
-            <div class="col-auto">
-                <div class="px-4 py-2 rounded-3" style="background:rgba(255,255,255,.1)">
-                    <div class="fw-bold fs-4" style="color:#FFD700">13</div>
-                    <div class="small text-white-50">Matches</div>
-                </div>
-            </div>
-            <div class="col-auto">
-                <div class="px-4 py-2 rounded-3" style="background:rgba(255,255,255,.1)">
-                    <div class="fw-bold fs-4" style="color:#FFD700">@totalSeats.ToString("N0")</div>
-                    <div class="small text-white-50">Total seats</div>
-                </div>
-            </div>
-            <div class="col-auto">
-                <div class="px-4 py-2 rounded-3" style="background:rgba(255,255,255,.1)">
-                    <div class="fw-bold fs-4" style="color:#FFD700">3</div>
-                    <div class="small text-white-50">Languages</div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
 
-<!-- ── Feature strip ────────────────────────────────────────────────── -->
-<div style="background:#f8f9ff" class="border-bottom">
+<!-- ── Feature strip ──────────────────────────────────────────── -->
+<div style="background:#fff;border-bottom:1px solid #e9ecef">
     <div class="container py-3">
-        <div class="row text-center g-3">
+        <div class="row text-center gy-2">
             <div class="col-md-4">
-                <span class="me-2">🎫</span>
-                <strong>Official Tickets</strong>
+                <span class="fw-semibold"><span class="me-2">🎫</span>Official Tickets</span>
                 <span class="text-muted small ms-1">— Unique voucher by email</span>
             </div>
             <div class="col-md-4">
-                <span class="me-2">🔒</span>
-                <strong>Fair & Secure</strong>
+                <span class="fw-semibold"><span class="me-2">🔒</span>Fair &amp; Secure</span>
                 <span class="text-muted small ms-1">— Max 4 tickets per match</span>
             </div>
             <div class="col-md-4">
-                <span class="me-2">🏨</span>
-                <strong>Hotel Search</strong>
-                <span class="text-muted small ms-1">— Find hotels near the stadium</span>
+                <span class="fw-semibold"><span class="me-2">🏨</span>Hotel Search</span>
+                <span class="text-muted small ms-1">— Near the stadium</span>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ── Club grid ────────────────────────────────────────────────────── -->
+<!-- ── Club grid ──────────────────────────────────────────────── -->
 <div class="container py-5">
-    <div class="d-flex align-items-center mb-4">
-        <div class="me-3" style="width:4px;height:32px;background:#FFD700;border-radius:2px"></div>
-        <h2 class="fw-bold mb-0" style="color:#001489">Participating Clubs</h2>
-    </div>
-
+    <h2 class="fw-bold mb-4" style="color:#001489">
+        <span style="display:inline-block;width:4px;height:28px;background:#FFD700;
+                     border-radius:2px;margin-right:12px;vertical-align:middle"></span>
+        Participating Clubs
+    </h2>
     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
         @foreach (var club in Model)
         {
