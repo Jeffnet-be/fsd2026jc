@@ -7,8 +7,7 @@ namespace ChampionsLeague.Web.Controllers;
 
 /// <summary>
 /// Displays the match calendar with optional club filter.
-/// The Index view uses jQuery DataTables (curriculum section 10.4.3) for
-/// client-side ordering, searching, and paging — no extra controller actions needed.
+/// The Index view uses jQuery DataTables for client-side ordering, searching, and paging.
 /// </summary>
 public class MatchesController : Controller
 {
@@ -27,8 +26,7 @@ public class MatchesController : Controller
     }
 
     /// <summary>
-    /// Returns all matches (or filtered by clubId) mapped to MatchListItemVM.
-    /// The optional clubId query-string parameter drives the LINQ Where clause.
+    /// Match calendar — optionally filtered by club.
     /// </summary>
     public async Task<IActionResult> Index(int? clubId)
     {
@@ -51,47 +49,62 @@ public class MatchesController : Controller
     }
 
     /// <summary>
-    /// Detail page for one match: sector availability grid + add-to-cart controls.
-    /// Runs GetSoldCountAsync per sector in parallel with Task.WhenAll for efficiency.
+    /// Match detail page: sector availability grid + add-to-cart controls.
+    ///
+    /// IMPORTANT: queries are run sequentially (not with Task.WhenAll) because
+    /// EF Core DbContext is NOT thread-safe — running multiple async queries on
+    /// the same context instance in parallel throws an InvalidOperationException.
     /// </summary>
     public async Task<IActionResult> Detail(int id)
     {
+        // Load match with club navigation
         var allMatches = await _matches.GetAllWithClubsAsync();
         var match      = allMatches.FirstOrDefault(m => m.Id == id);
         if (match is null) return NotFound();
 
+        // Load home club with its stadium + sectors
         var club = await _clubs.GetWithStadiumAndSectorsAsync(match.HomeClubId);
-        var sectors = club?.Stadium?.Sectors ?? Enumerable.Empty<ChampionsLeague.Domain.Entities.Sector>();
+        var sectors = club?.Stadium?.Sectors?.ToList()
+                      ?? new List<ChampionsLeague.Domain.Entities.Sector>();
 
-        // Parallelise the sold-count queries with Task.WhenAll
-        var sectorTasks = sectors.Select(async sec =>
+        // Build sector availability — sequential awaits to avoid EF Core concurrency error
+        var sectorVms = new List<SectorAvailabilityVM>();
+        foreach (var sec in sectors)
         {
-            var sold = await _matches.GetSoldCountAsync(id, sec.Id);
-            return new SectorAvailabilityVM
+            int sold = 0;
+            try
+            {
+                sold = await _matches.GetSoldCountAsync(id, sec.Id);
+            }
+            catch
+            {
+                // If count fails, treat as 0 sold — don't crash the whole page
+                sold = 0;
+            }
+
+            sectorVms.Add(new SectorAvailabilityVM
             {
                 SectorId   = sec.Id,
                 SectorName = sec.Name,
                 Capacity   = sec.Capacity,
                 Available  = Math.Max(0, sec.Capacity - sold),
                 Price      = sec.BasePrice
-            };
-        });
-
-        var resolvedSectors = await Task.WhenAll(sectorTasks);
+            });
+        }
 
         var vm = new MatchDetailVM
         {
             Id            = match.Id,
-            HomeClubName  = match.HomeClub.Name,
-            AwayClubName  = match.AwayClub.Name,
-            HomeClubBadge = match.HomeClub.BadgeUrl,
-            AwayClubBadge = match.AwayClub.BadgeUrl,
+            HomeClubName  = match.HomeClub?.Name  ?? string.Empty,
+            AwayClubName  = match.AwayClub?.Name  ?? string.Empty,
+            HomeClubBadge = match.HomeClub?.BadgeUrl ?? string.Empty,
+            AwayClubBadge = match.AwayClub?.BadgeUrl ?? string.Empty,
             MatchDate     = match.MatchDate,
             Phase         = match.Phase,
-            StadiumName   = match.HomeClub.Stadium?.Name ?? string.Empty,
-            StadiumCity   = match.HomeClub.Stadium?.City ?? string.Empty,
+            StadiumName   = club?.Stadium?.Name ?? string.Empty,
+            StadiumCity   = club?.Stadium?.City ?? string.Empty,
             IsSaleOpen    = match.IsSaleOpen,
-            Sectors       = resolvedSectors.ToList()
+            Sectors       = sectorVms
         };
 
         return View(vm);

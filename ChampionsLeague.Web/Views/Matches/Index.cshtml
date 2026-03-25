@@ -1,12 +1,14 @@
 @model ChampionsLeague.Web.ViewModels.MatchListVM
 @{
-    ViewData["Title"] = "Match Calendar";
+    ViewData["Title"] = Tr.T("match_calendar_title");
 }
 
 <div style="background:linear-gradient(135deg,#001489,#0d0d2b)" class="text-white py-4 mb-4">
     <div class="container">
-        <h1 class="fw-bold mb-1"><i class="bi bi-calendar3 me-2" style="color:#FFD700"></i>Match Calendar</h1>
-        <p class="text-white-50 mb-0">All Champions League fixtures — click Tickets to buy</p>
+        <h1 class="fw-bold mb-1">
+            <i class="bi bi-calendar3 me-2" style="color:#FFD700"></i>@Tr.T("match_calendar_title")
+        </h1>
+        <p class="text-white-50 mb-0">@Tr.T("match_calendar_sub")</p>
     </div>
 </div>
 
@@ -15,8 +17,8 @@
     {
         <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
             <i class="bi bi-funnel-fill"></i>
-            Showing matches for <strong>@Model.FilterClub</strong>
-            <a asp-action="Index" class="ms-2 btn btn-sm btn-outline-secondary">✕ Clear filter</a>
+            @Model.FilterClub
+            <a asp-action="Index" class="ms-2 btn btn-sm btn-outline-secondary">✕</a>
         </div>
     }
 
@@ -45,14 +47,14 @@
                             </td>
                             <td>
                                 @{
-                                    var phaseColor = m.Phase switch {
-                                        "Final" => "danger",
-                                        "Semi-Final" => "warning text-dark",
+                                    var pc = m.Phase switch {
+                                        "Final"         => "danger",
+                                        "Semi-Final"    => "warning text-dark",
                                         "Quarter-Final" => "info text-dark",
-                                        _ => "secondary"
+                                        _               => "secondary"
                                     };
                                 }
-                                <span class="badge bg-@phaseColor">@m.Phase</span>
+                                <span class="badge bg-@pc">@m.Phase</span>
                             </td>
                             <td class="fw-semibold">
                                 <img src="@m.HomeClubBadge" alt="" style="height:22px;width:22px;object-fit:contain;margin-right:6px"
@@ -70,13 +72,13 @@
                                 @if (m.IsSaleOpen)
                                 {
                                     <span class="badge rounded-pill bg-success">
-                                        <i class="bi bi-check-circle me-1"></i>Open
+                                        <i class="bi bi-check-circle me-1"></i>@Tr.T("match_sale_open")
                                     </span>
                                 }
                                 else
                                 {
                                     <span class="badge rounded-pill bg-secondary">
-                                        <i class="bi bi-lock me-1"></i>Closed
+                                        <i class="bi bi-lock me-1"></i>@Tr.T("match_sale_closed")
                                     </span>
                                 }
                             </td>
@@ -84,7 +86,7 @@
                                 <a asp-action="Detail" asp-route-id="@m.Id"
                                    class="btn btn-sm fw-semibold text-dark"
                                    style="background:#FFD700;border:none;white-space:nowrap">
-                                    <i class="bi bi-ticket-perforated me-1"></i>Tickets
+                                    <i class="bi bi-ticket-perforated me-1"></i>@Tr.T("match_btn_tickets")
                                 </a>
                             </td>
                         </tr>
@@ -102,10 +104,10 @@ $(function () {
         order: [[0, 'asc']],
         pageLength: 13,
         language: {
-            search: '<i class="bi bi-search"></i>',
-            searchPlaceholder: 'Search matches...',
+            search: '',
+            searchPlaceholder: 'Search...',
             lengthMenu: 'Show _MENU_',
-            info: 'Showing _START_–_END_ of _TOTAL_ matches',
+            info: '_START_–_END_ / _TOTAL_',
             paginate: { next: 'Next ›', previous: '‹ Prev' }
         },
         dom: '<"d-flex justify-content-between align-items-center px-3 py-2"lf>t<"d-flex justify-content-between align-items-center px-3 py-2"ip>',

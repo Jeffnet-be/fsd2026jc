@@ -66,6 +66,8 @@ builder.Services.AddScoped<IClubRepository,         ClubRepository>();
 builder.Services.AddScoped<ISeasonTicketRepository, SeasonTicketRepository>();
 
 // ── Application services ──────────────────────────────────────────────
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ChampionsLeague.Web.Services.TranslationService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddSingleton<IEmailService, EmailService>();
 

@@ -4,41 +4,35 @@
     var totalSeats = Model.Sum(c => c.TotalCapacity);
 }
 
-<!-- ── Hero ──────────────────────────────────────────────────── -->
-<div style="background:linear-gradient(135deg,#001489 0%,#0a0a40 100%);
-            padding:60px 0 50px">
+<!-- Hero -->
+<div style="background:linear-gradient(135deg,#001489 0%,#0a0a40 100%);padding:60px 0 50px">
     <div class="container text-center text-white">
         <div style="font-size:4rem;line-height:1;margin-bottom:16px">⚽</div>
-        <h1 class="fw-bold mb-3"
-            style="font-size:clamp(1.8rem,5vw,3rem)">
+        <h1 class="fw-bold mb-3" style="font-size:clamp(1.8rem,5vw,3rem)">
             <span style="color:#FFD700">Champions League</span><br/>
-            Ticket Portal
+            @Tr.T("home_hero_title")
         </h1>
-        <p class="mb-4 mx-auto"
-           style="max-width:480px;opacity:.85;font-size:1.05rem">
-            Buy official tickets for the biggest football matches in Europe.
-            Six clubs &bull; One portal &bull; Your seat guaranteed.
+        <p class="mb-4 mx-auto" style="max-width:480px;opacity:.85;font-size:1.05rem">
+            @Tr.T("home_hero_subtitle")
         </p>
         <div class="d-flex flex-wrap justify-content-center gap-3 mb-5">
             <a asp-controller="Matches" asp-action="Index"
-               class="btn btn-gold btn-lg px-4 fw-bold"
+               class="btn btn-lg fw-bold px-4 py-3"
                style="background:#FFD700;color:#001489;border:none;border-radius:8px">
-                <i class="bi bi-calendar3 me-2"></i>View Match Calendar
+                <i class="bi bi-calendar3 me-2"></i>@Tr.T("home_view_calendar")
             </a>
             <a asp-controller="Account" asp-action="Register"
-               class="btn btn-outline-light btn-lg px-4"
-               style="border-radius:8px">
-                <i class="bi bi-person-plus me-2"></i>Create Account
+               class="btn btn-outline-light btn-lg px-4 py-3" style="border-radius:8px">
+                <i class="bi bi-person-plus me-2"></i>@Tr.T("home_create_account")
             </a>
         </div>
-
-        <!-- Stat pills -->
+        <!-- Stats -->
         <div class="d-flex flex-wrap justify-content-center gap-3">
             @foreach (var (label, value) in new (string,string)[] {
-                ("Clubs",        Model.Count().ToString()),
-                ("Matches",      "13"),
-                ("Total seats",  totalSeats.ToString("N0")),
-                ("Languages",    "3"),
+                (Tr.T("stat_clubs"),     Model.Count().ToString()),
+                (Tr.T("stat_matches"),   "13"),
+                (Tr.T("stat_seats"),     totalSeats.ToString("N0")),
+                (Tr.T("stat_languages"), "3"),
             })
             {
                 <div class="text-center px-4 py-2 rounded-3"
@@ -51,32 +45,32 @@
     </div>
 </div>
 
-<!-- ── Feature strip ──────────────────────────────────────────── -->
+<!-- Feature strip -->
 <div style="background:#fff;border-bottom:1px solid #e9ecef">
     <div class="container py-3">
         <div class="row text-center gy-2">
             <div class="col-md-4">
-                <span class="fw-semibold"><span class="me-2">🎫</span>Official Tickets</span>
-                <span class="text-muted small ms-1">— Unique voucher by email</span>
+                <span class="fw-semibold">🎫 @Tr.T("home_feat_tickets")</span>
+                <span class="text-muted small ms-1">— @Tr.T("home_feat_tickets_sub")</span>
             </div>
             <div class="col-md-4">
-                <span class="fw-semibold"><span class="me-2">🔒</span>Fair &amp; Secure</span>
-                <span class="text-muted small ms-1">— Max 4 tickets per match</span>
+                <span class="fw-semibold">🔒 @Tr.T("home_feat_fair")</span>
+                <span class="text-muted small ms-1">— @Tr.T("home_feat_fair_sub")</span>
             </div>
             <div class="col-md-4">
-                <span class="fw-semibold"><span class="me-2">🏨</span>Hotel Search</span>
-                <span class="text-muted small ms-1">— Near the stadium</span>
+                <span class="fw-semibold">🏨 @Tr.T("home_feat_hotel")</span>
+                <span class="text-muted small ms-1">— @Tr.T("home_feat_hotel_sub")</span>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ── Club grid ──────────────────────────────────────────────── -->
+<!-- Club grid -->
 <div class="container py-5">
     <h2 class="fw-bold mb-4" style="color:#001489">
         <span style="display:inline-block;width:4px;height:28px;background:#FFD700;
                      border-radius:2px;margin-right:12px;vertical-align:middle"></span>
-        Participating Clubs
+        @Tr.T("home_clubs_title")
     </h2>
     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
         @foreach (var club in Model)
