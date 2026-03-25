@@ -1,13 +1,9 @@
 @model ChampionsLeague.Web.ViewModels.MatchListVM
-@{
-    ViewData["Title"] = Tr.T("match_calendar_title");
-}
+@{ ViewData["Title"] = Tr.T("match_calendar_title"); }
 
 <div style="background:linear-gradient(135deg,#001489,#0d0d2b)" class="text-white py-4 mb-4">
     <div class="container">
-        <h1 class="fw-bold mb-1">
-            <i class="bi bi-calendar3 me-2" style="color:#FFD700"></i>@Tr.T("match_calendar_title")
-        </h1>
+        <h1 class="fw-bold mb-1"><i class="bi bi-calendar3 me-2" style="color:#FFD700"></i>@Tr.T("match_calendar_title")</h1>
         <p class="text-white-50 mb-0">@Tr.T("match_calendar_sub")</p>
     </div>
 </div>
@@ -16,24 +12,22 @@
     @if (Model.FilterClub != null)
     {
         <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
-            <i class="bi bi-funnel-fill"></i>
-            @Model.FilterClub
-            <a asp-action="Index" class="ms-2 btn btn-sm btn-outline-secondary">✕</a>
+            <i class="bi bi-funnel-fill"></i> @Model.FilterClub
+            <a asp-action="Index" class="ms-2 btn btn-sm btn-outline-secondary">✕ @Tr.T("match_filter_clear")</a>
         </div>
     }
-
     <div class="card border-0 shadow-sm" style="border-radius:16px;overflow:hidden">
         <div class="card-body p-0">
             <table id="matchTable" class="table table-hover mb-0 align-middle">
                 <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>Phase</th>
-                        <th>Home</th>
-                        <th>Away</th>
-                        <th>Stadium</th>
-                        <th>City</th>
-                        <th>Sale</th>
+                        <th>@Tr.T("match_col_date")</th>
+                        <th>@Tr.T("match_col_phase")</th>
+                        <th>@Tr.T("match_col_home")</th>
+                        <th>@Tr.T("match_col_away")</th>
+                        <th>@Tr.T("match_col_stadium")</th>
+                        <th>@Tr.T("match_col_city")</th>
+                        <th>@Tr.T("match_col_sale")</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -46,24 +40,15 @@
                                 <small class="text-muted d-block">@m.MatchDate.ToString("HH:mm") UTC</small>
                             </td>
                             <td>
-                                @{
-                                    var pc = m.Phase switch {
-                                        "Final"         => "danger",
-                                        "Semi-Final"    => "warning text-dark",
-                                        "Quarter-Final" => "info text-dark",
-                                        _               => "secondary"
-                                    };
-                                }
+                                @{ var pc = m.Phase switch { "Final"=>"danger","Semi-Final"=>"warning text-dark","Quarter-Final"=>"info text-dark",_=>"secondary" }; }
                                 <span class="badge bg-@pc">@m.Phase</span>
                             </td>
                             <td class="fw-semibold">
-                                <img src="@m.HomeClubBadge" alt="" style="height:22px;width:22px;object-fit:contain;margin-right:6px"
-                                     onerror="this.style.display='none'" />
+                                <img src="@m.HomeClubBadge" alt="" style="height:22px;width:22px;object-fit:contain;margin-right:6px" onerror="this.style.display='none'" />
                                 @m.HomeClubName
                             </td>
                             <td class="text-muted">
-                                <img src="@m.AwayClubBadge" alt="" style="height:22px;width:22px;object-fit:contain;margin-right:6px"
-                                     onerror="this.style.display='none'" />
+                                <img src="@m.AwayClubBadge" alt="" style="height:22px;width:22px;object-fit:contain;margin-right:6px" onerror="this.style.display='none'" />
                                 @m.AwayClubName
                             </td>
                             <td class="text-muted small">@m.StadiumName</td>
@@ -71,15 +56,11 @@
                             <td>
                                 @if (m.IsSaleOpen)
                                 {
-                                    <span class="badge rounded-pill bg-success">
-                                        <i class="bi bi-check-circle me-1"></i>@Tr.T("match_sale_open")
-                                    </span>
+                                    <span class="badge rounded-pill bg-success"><i class="bi bi-check-circle me-1"></i>@Tr.T("match_sale_open")</span>
                                 }
                                 else
                                 {
-                                    <span class="badge rounded-pill bg-secondary">
-                                        <i class="bi bi-lock me-1"></i>@Tr.T("match_sale_closed")
-                                    </span>
+                                    <span class="badge rounded-pill bg-secondary"><i class="bi bi-lock me-1"></i>@Tr.T("match_sale_closed")</span>
                                 }
                             </td>
                             <td>
@@ -101,15 +82,8 @@
 <script>
 $(function () {
     $('#matchTable').DataTable({
-        order: [[0, 'asc']],
-        pageLength: 13,
-        language: {
-            search: '',
-            searchPlaceholder: 'Search...',
-            lengthMenu: 'Show _MENU_',
-            info: '_START_–_END_ / _TOTAL_',
-            paginate: { next: 'Next ›', previous: '‹ Prev' }
-        },
+        order: [[0, 'asc']], pageLength: 13,
+        language: { search:'', searchPlaceholder:'Search...', lengthMenu:'Show _MENU_', info:'_START_–_END_ / _TOTAL_', paginate:{next:'Next ›',previous:'‹ Prev'} },
         dom: '<"d-flex justify-content-between align-items-center px-3 py-2"lf>t<"d-flex justify-content-between align-items-center px-3 py-2"ip>',
     });
 });

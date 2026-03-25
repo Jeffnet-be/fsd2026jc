@@ -1,25 +1,21 @@
-@{
-    ViewData["Title"] = "Purchase Confirmed";
-}
+@{ ViewData["Title"] = Tr.T("checkout_confirmed_title"); }
 
+<div class="container">
 <div class="text-center py-5">
     <div style="font-size:5rem">🎉</div>
-    <h1 class="display-5 fw-bold mt-3">Purchase Confirmed!</h1>
-    <p class="lead text-muted mt-2">
-        @TempData["Success"]
-    </p>
-    <p class="text-muted">
-        Your voucher codes have been sent to your registered email address.
-        Present them at the stadium gate on match day.
-    </p>
-    <div class="d-flex justify-content-center gap-3 mt-4">
+    <h1 class="display-5 fw-bold mt-3" style="color:#001489">@Tr.T("checkout_confirmed_title")</h1>
+    <p class="lead text-muted mt-2">@TempData["Success"]</p>
+    <p class="text-muted">@Tr.T("checkout_check_email")</p>
+    <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
         <a asp-controller="Account" asp-action="MyTickets"
-           class="btn btn-primary btn-lg">
-            🎫 View My Tickets
+           class="btn btn-lg fw-bold text-dark"
+           style="background:#FFD700;border:none;border-radius:8px">
+            🎫 @Tr.T("checkout_view_tickets")
         </a>
         <a asp-controller="Matches" asp-action="Index"
-           class="btn btn-outline-dark btn-lg">
-            Browse More Matches
+           class="btn btn-outline-dark btn-lg" style="border-radius:8px">
+            @Tr.T("checkout_browse_more")
         </a>
     </div>
+</div>
 </div>

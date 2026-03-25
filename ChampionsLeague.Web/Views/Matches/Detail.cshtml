@@ -1,81 +1,69 @@
 @model ChampionsLeague.Web.ViewModels.MatchDetailVM
-@{
-    ViewData["Title"] = $"{Model.HomeClubName} vs {Model.AwayClubName}";
-}
+@{ ViewData["Title"] = $"{Model.HomeClubName} vs {Model.AwayClubName}"; }
 
-@* Match header card *@
-<div class="card shadow mb-4 border-0">
+<div class="container py-4">
+<!-- Match header -->
+<div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-center align-items-center gap-5 flex-wrap py-2">
             <div class="text-center">
-                <img src="@Model.HomeClubBadge" alt="@Model.HomeClubName"
-                     style="height:90px" onerror="this.style.display='none'" />
-                <h4 class="mt-2">@Model.HomeClubName</h4>
-                <small class="text-muted">Home</small>
+                <img src="@Model.HomeClubBadge" alt="@Model.HomeClubName" style="height:80px" onerror="this.style.display='none'" />
+                <h4 class="mt-2 fw-bold">@Model.HomeClubName</h4>
+                <small class="text-muted">@Tr.T("detail_home")</small>
             </div>
             <div class="text-center">
                 <h2 class="display-6 fw-bold text-muted">vs</h2>
                 <span class="badge bg-secondary">@Model.Phase</span>
             </div>
             <div class="text-center">
-                <img src="@Model.AwayClubBadge" alt="@Model.AwayClubName"
-                     style="height:90px" onerror="this.style.display='none'" />
-                <h4 class="mt-2">@Model.AwayClubName</h4>
-                <small class="text-muted">Away</small>
+                <img src="@Model.AwayClubBadge" alt="@Model.AwayClubName" style="height:80px" onerror="this.style.display='none'" />
+                <h4 class="mt-2 fw-bold">@Model.AwayClubName</h4>
+                <small class="text-muted">@Tr.T("detail_away")</small>
             </div>
         </div>
         <hr />
         <p class="text-center mb-0 text-muted">
-            📅 @Model.MatchDate.ToString("dddd, dd MMMM yyyy") at @Model.MatchDate.ToString("HH:mm") UTC &nbsp;|&nbsp;
-            🏟️ @Model.StadiumName, @Model.StadiumCity
+            📅 @Model.MatchDate.ToString("dddd, dd MMMM yyyy") @Model.MatchDate.ToString("HH:mm") UTC
+            &nbsp;|&nbsp; 🏟️ @Model.StadiumName, @Model.StadiumCity
         </p>
     </div>
 </div>
 
-@* Sale not open message *@
 @if (!Model.IsSaleOpen)
 {
     <div class="alert alert-warning d-flex align-items-center gap-2">
         <span style="font-size:1.5rem">🔒</span>
         <div>
-            <strong>Ticket sale is not open yet.</strong>
-            Sale opens on <strong>@Model.MatchDate.AddMonths(-1).ToString("dd/MM/yyyy")</strong>.
+            <strong>@Tr.T("detail_sale_closed")</strong>
+            @Tr.T("detail_sale_opens") <strong>@Model.MatchDate.AddMonths(-1).ToString("dd/MM/yyyy")</strong>.
         </div>
     </div>
 }
 else
 {
-    @* Feedback zone for AJAX add-to-cart responses *@
     <div id="purchase-feedback" class="mb-3"></div>
+    <h3 class="mb-3 fw-bold" style="color:#001489">🎟️ @Tr.T("detail_select_sector")</h3>
 
-    <h3 class="mb-3">🎟️ Select Your Sector</h3>
     <div class="row row-cols-1 row-cols-md-2 g-3 mb-4">
         @foreach (var sec in Model.Sectors)
         {
             <div class="col">
-                <div class="card h-100 @(sec.Available > 0 ? "border-success" : "border-danger opacity-75")">
+                <div class="card h-100 border-@(sec.Available > 0 ? "success" : "danger") @(sec.Available == 0 ? "opacity-75" : "")">
                     <div class="card-body">
                         <h6 class="card-title fw-bold">@sec.SectorName</h6>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted small">
-                                Available: <strong>@sec.Available</strong> / @sec.Capacity
+                                @Tr.T("detail_available"): <strong>@sec.Available</strong> / @sec.Capacity
                             </span>
                             <span class="fw-bold text-success">
-                                € @sec.Price.ToString("0.00") / ticket
+                                € @sec.Price.ToString("0.00") / @Tr.T("detail_per_ticket")
                             </span>
                         </div>
-
-                        @* Availability bar *@
                         <div class="progress mb-3" style="height:6px">
-                            @{
-                                var pct = sec.Capacity > 0
-                                    ? (int)((double)sec.Available / sec.Capacity * 100)
-                                    : 0;
-                                var barColor = pct > 40 ? "bg-success" : pct > 15 ? "bg-warning" : "bg-danger";
-                            }
-                            <div class="progress-bar @barColor" style="width:@pct%"></div>
+                            @{ var pct = sec.Capacity > 0 ? (int)((double)sec.Available / sec.Capacity * 100) : 0;
+                               var bc  = pct > 40 ? "bg-success" : pct > 15 ? "bg-warning" : "bg-danger"; }
+                            <div class="progress-bar @bc" style="width:@pct%"></div>
                         </div>
-
                         @if (sec.Available > 0)
                         {
                             <div class="d-flex align-items-center gap-2">
@@ -88,17 +76,17 @@ else
                                         data-sectorname="@sec.SectorName">
                                     @for (int q = 1; q <= Math.Min(4, sec.Available); q++)
                                     {
-                                        <option value="@q">@q ticket@(q > 1 ? "s" : "")</option>
+                                        <option value="@q">@q @(q > 1 ? Tr.T("detail_tickets_pl") : Tr.T("detail_ticket_s"))</option>
                                     }
                                 </select>
-                                <button class="btn btn-warning btn-sm add-to-cart-btn">
-                                    🛒 Add to cart
+                                <button class="btn btn-warning btn-sm fw-semibold add-to-cart-btn">
+                                    🛒 @Tr.T("detail_add_cart")
                                 </button>
                             </div>
                         }
                         else
                         {
-                            <span class="badge bg-danger">Sold out</span>
+                            <span class="badge bg-danger">@Tr.T("detail_sold_out")</span>
                         }
                     </div>
                 </div>
@@ -106,66 +94,46 @@ else
         }
     </div>
 
-    @* Hotel link *@
-    <div class="mt-2">
-        <a asp-controller="Hotel" asp-action="Search"
-           asp-route-city="@Model.StadiumCity"
+    <div class="d-flex gap-2 flex-wrap">
+        <a asp-controller="Hotel" asp-action="Search" asp-route-city="@Model.StadiumCity"
            class="btn btn-outline-secondary">
-            🏨 Find hotels in @Model.StadiumCity
+            🏨 @Tr.T("detail_find_hotels") @Model.StadiumCity
         </a>
-        <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-dark ms-2">
-            🛒 View cart
+        <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-dark">
+            🛒 @Tr.T("detail_view_cart")
         </a>
     </div>
 }
+</div>
 
 @section Scripts {
 <script>
-/*
- * AJAX cart add — curriculum section 10.4.7 extension.
- * Sends a JSON POST to /Cart/AddToCart and updates the navbar badge
- * from the returned _CartSummary partial without a full page reload.
- */
 $(function () {
     $('.add-to-cart-btn').on('click', function () {
-        var btn    = $(this);
-        var sel    = btn.closest('.d-flex').find('.qty-select');
-
+        var btn = $(this), sel = btn.closest('.d-flex').find('.qty-select');
         var item = {
-            matchId         : parseInt(sel.data('matchid')),
+            matchId: parseInt(sel.data('matchid')),
             matchDescription: sel.data('matchdesc'),
-            matchDate       : sel.data('matchdate'),
-            sectorId        : parseInt(sel.data('sectorid')),
-            sectorName      : sel.data('sectorname'),
-            quantity        : parseInt(sel.val()),
-            unitPrice       : parseFloat(sel.data('price'))
+            matchDate: sel.data('matchdate'),
+            sectorId: parseInt(sel.data('sectorid')),
+            sectorName: sel.data('sectorname'),
+            quantity: parseInt(sel.val()),
+            unitPrice: parseFloat(sel.data('price'))
         };
-
-        btn.prop('disabled', true).text('Adding…');
-
+        btn.prop('disabled', true).text('...');
         $.ajax({
-            url        : '/Cart/AddToCart',
-            method     : 'POST',
-            contentType: 'application/json',
-            data       : JSON.stringify(item),
-            success: function (html) {
-                var count = $(html).filter('#cart-count').text() ||
-                            $(html).find('#cart-count').text();
+            url:'/Cart/AddToCart', method:'POST', contentType:'application/json',
+            data: JSON.stringify(item),
+            success: function(html) {
+                var count = $(html).filter('#cart-count').text() || $(html).find('#cart-count').text();
                 $('#cart-badge').text(count);
-                $('#purchase-feedback').html(
-                    '<div class="alert alert-success alert-dismissible fade show">' +
-                    '✅ Added to cart! <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>'
-                );
-                btn.prop('disabled', false).text('🛒 Add to cart');
+                $('#purchase-feedback').html('<div class="alert alert-success alert-dismissible fade show">✅ @Tr.T("detail_added") <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                btn.prop('disabled', false).html('🛒 @Tr.T("detail_add_cart")');
             },
-            error: function (xhr) {
-                var msg = (xhr.responseJSON && xhr.responseJSON.error)
-                    ? xhr.responseJSON.error
-                    : 'Could not add to cart. Please try again.';
-                $('#purchase-feedback').html(
-                    '<div class="alert alert-danger">' + msg + '</div>'
-                );
-                btn.prop('disabled', false).text('🛒 Add to cart');
+            error: function(xhr) {
+                var msg = (xhr.responseJSON && xhr.responseJSON.error) ? xhr.responseJSON.error : 'Error. Please try again.';
+                $('#purchase-feedback').html('<div class="alert alert-danger">' + msg + '</div>');
+                btn.prop('disabled', false).html('🛒 @Tr.T("detail_add_cart")');
             }
         });
     });

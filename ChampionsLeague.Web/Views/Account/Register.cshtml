@@ -1,67 +1,58 @@
 @model ChampionsLeague.Web.ViewModels.RegisterVM
-@{
-    ViewData["Title"] = "Register";
-}
+@{ ViewData["Title"] = Tr.T("reg_title"); }
 
+<div class="container py-4">
 <div class="row justify-content-center">
 <div class="col-md-6 col-lg-5">
-<div class="card shadow border-0">
-    <div class="card-header bg-dark text-white text-center py-3">
-        <h4 class="mb-0">⚽ Create Your Account</h4>
-        <small class="text-warning">Buy tickets in seconds</small>
+<div class="card border-0 shadow">
+    <div class="card-header text-white text-center py-3" style="background:#001489">
+        <h4 class="mb-0">⚽ @Tr.T("reg_title")</h4>
+        <small style="color:#FFD700">@Tr.T("reg_subtitle")</small>
     </div>
     <div class="card-body p-4">
-
-        @* Validation summary — shows model-level errors from Identity (e.g. duplicate email) *@
-        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
-
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
         <form asp-action="Register" method="post">
             @Html.AntiForgeryToken()
-
-            <div class="row g-3">
+            <div class="row g-3 mb-3">
                 <div class="col-6">
-                    <label asp-for="FirstName" class="form-label fw-semibold"></label>
-                    <input asp-for="FirstName" class="form-control" placeholder="Jan" />
+                    <label class="form-label fw-semibold">@Tr.T("reg_firstname")</label>
+                    <input asp-for="FirstName" class="form-control" />
                     <span asp-validation-for="FirstName" class="text-danger small"></span>
                 </div>
                 <div class="col-6">
-                    <label asp-for="LastName" class="form-label fw-semibold"></label>
-                    <input asp-for="LastName" class="form-control" placeholder="Peeters" />
+                    <label class="form-label fw-semibold">@Tr.T("reg_lastname")</label>
+                    <input asp-for="LastName" class="form-control" />
                     <span asp-validation-for="LastName" class="text-danger small"></span>
                 </div>
             </div>
-
-            <div class="mb-3 mt-3">
-                <label asp-for="Email" class="form-label fw-semibold"></label>
-                <input asp-for="Email" class="form-control" placeholder="jan@example.com" />
+            <div class="mb-3">
+                <label class="form-label fw-semibold">@Tr.T("reg_email")</label>
+                <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger small"></span>
             </div>
-
             <div class="mb-3">
-                <label asp-for="Password" class="form-label fw-semibold"></label>
-                <input asp-for="Password" class="form-control" placeholder="Min. 8 characters" />
+                <label class="form-label fw-semibold">@Tr.T("reg_password")</label>
+                <input asp-for="Password" class="form-control" />
                 <span asp-validation-for="Password" class="text-danger small"></span>
             </div>
-
             <div class="mb-4">
-                <label asp-for="ConfirmPassword" class="form-label fw-semibold"></label>
-                <input asp-for="ConfirmPassword" class="form-control" placeholder="Repeat password" />
+                <label class="form-label fw-semibold">@Tr.T("reg_confirm")</label>
+                <input asp-for="ConfirmPassword" class="form-control" />
                 <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
             </div>
-
-            <button type="submit" class="btn btn-warning w-100 fw-bold py-2">
-                Register →
+            <button type="submit" class="btn w-100 fw-bold py-2"
+                    style="background:#FFD700;color:#001489;border:none;border-radius:8px">
+                @Tr.T("reg_btn")
             </button>
         </form>
     </div>
     <div class="card-footer bg-white text-center py-3">
-        Already have an account?
-        <a asp-action="Login" class="fw-semibold">Login here</a>
+        @Tr.T("reg_have_account")
+        <a asp-action="Login" class="fw-semibold">@Tr.T("reg_login_link")</a>
     </div>
 </div>
 </div>
 </div>
+</div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

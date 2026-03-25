@@ -1,53 +1,46 @@
 @model ChampionsLeague.Web.ViewModels.LoginVM
-@{
-    ViewData["Title"] = "Login";
-}
+@{ ViewData["Title"] = Tr.T("login_title"); }
 
+<div class="container py-4">
 <div class="row justify-content-center">
 <div class="col-md-5 col-lg-4">
-<div class="card shadow border-0">
-    <div class="card-header bg-dark text-white text-center py-3">
-        <h4 class="mb-0">⚽ Login</h4>
-        <small class="text-warning">Access your tickets</small>
+<div class="card border-0 shadow">
+    <div class="card-header text-white text-center py-3" style="background:#001489">
+        <h4 class="mb-0">⚽ @Tr.T("login_title")</h4>
+        <small style="color:#FFD700">@Tr.T("login_subtitle")</small>
     </div>
     <div class="card-body p-4">
-
-        <div asp-validation-summary="All" class="alert alert-danger py-2"></div>
-
+        <div asp-validation-summary="All" class="alert alert-danger py-2 small"></div>
         <form asp-action="Login" method="post">
             @Html.AntiForgeryToken()
             <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
-
             <div class="mb-3">
-                <label asp-for="Email" class="form-label fw-semibold"></label>
+                <label class="form-label fw-semibold">@Tr.T("login_email")</label>
                 <input asp-for="Email" class="form-control" placeholder="jan@example.com" autocomplete="username" />
                 <span asp-validation-for="Email" class="text-danger small"></span>
             </div>
-
             <div class="mb-3">
-                <label asp-for="Password" class="form-label fw-semibold"></label>
-                <input asp-for="Password" class="form-control" placeholder="Password" autocomplete="current-password" />
+                <label class="form-label fw-semibold">@Tr.T("login_password")</label>
+                <input asp-for="Password" class="form-control" autocomplete="current-password" />
                 <span asp-validation-for="Password" class="text-danger small"></span>
             </div>
-
             <div class="mb-4 form-check">
                 <input asp-for="RememberMe" class="form-check-input" />
-                <label asp-for="RememberMe" class="form-check-label"></label>
+                <label asp-for="RememberMe" class="form-check-label">@Tr.T("login_remember")</label>
             </div>
-
-            <button type="submit" class="btn btn-warning w-100 fw-bold py-2">
-                Login →
+            <button type="submit" class="btn w-100 fw-bold py-2"
+                    style="background:#FFD700;color:#001489;border:none;border-radius:8px">
+                @Tr.T("login_btn")
             </button>
         </form>
     </div>
     <div class="card-footer bg-white text-center py-3">
-        No account yet?
-        <a asp-action="Register" class="fw-semibold">Register here</a>
+        @Tr.T("login_no_account")
+        <a asp-action="Register" class="fw-semibold">@Tr.T("login_register_link")</a>
     </div>
 </div>
 </div>
 </div>
+</div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

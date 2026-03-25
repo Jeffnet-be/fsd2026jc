@@ -1,86 +1,58 @@
 @model IEnumerable<ChampionsLeague.Web.ViewModels.TicketHistoryItemVM>
-@{
-    ViewData["Title"] = "My Tickets";
-}
+@{ ViewData["Title"] = Tr.T("tickets_title"); }
 
-<h1 class="mb-4">🎫 My Tickets</h1>
+<div class="container py-4">
+<h1 class="fw-bold mb-4" style="color:#001489">🎫 @Tr.T("tickets_title")</h1>
 
 @if (!Model.Any())
 {
     <div class="alert alert-info d-flex align-items-center gap-3">
         <span style="font-size:2rem">🎟️</span>
-        <div>
-            You have no tickets yet.
-            <a asp-controller="Matches" asp-action="Index" class="alert-link">
-                Find a match and buy your first ticket!
-            </a>
-        </div>
+        <div>@Tr.T("tickets_empty")</div>
     </div>
 }
 else
 {
-    @*
-        jQuery DataTable — curriculum section 10.4.3.
-        Ordered by match date descending so newest tickets appear first.
-    *@
-    <table id="ticketTable" class="table table-hover table-striped align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th>Match</th>
-                <th>Date</th>
-                <th>Sector</th>
-                <th class="text-center">Seat</th>
-                <th class="text-end">Price paid</th>
-                <th class="text-center">Status</th>
-                <th>Voucher (short)</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var t in Model)
-            {
+    <div class="card border-0 shadow-sm" style="border-radius:14px;overflow:hidden">
+        <table id="ticketTable" class="table table-hover table-striped align-middle mb-0">
+            <thead>
                 <tr>
-                    <td class="fw-bold">@t.MatchDescription</td>
-                    <td data-order="@t.MatchDate.Ticks">
-                        @t.MatchDate.ToString("dd/MM/yyyy")
-                        <small class="text-muted d-block">@t.MatchDate.ToString("HH:mm") UTC</small>
-                    </td>
-                    <td><small>@t.SectorName</small></td>
-                    <td class="text-center">@t.SeatNumber</td>
-                    <td class="text-end">€ @t.PricePaid.ToString("0.00")</td>
-                    <td class="text-center">
-                        @{
-                            var badgeClass = t.Status switch
-                            {
-                                "Paid"      => "bg-success",
-                                "Cancelled" => "bg-secondary",
-                                _           => "bg-warning text-dark"
-                            };
-                        }
-                        <span class="badge @badgeClass">@t.Status</span>
-                    </td>
-                    <td>
-                        <code class="small">@t.VoucherId.ToString("D")[..8]…</code>
-                        <button class="btn btn-link btn-sm p-0 ms-1"
-                                onclick="navigator.clipboard.writeText('@t.VoucherId.ToString("D")')"
-                                title="Copy full voucher code">📋</button>
-                    </td>
+                    <th>@Tr.T("tickets_col_match")</th>
+                    <th>@Tr.T("tickets_col_date")</th>
+                    <th>@Tr.T("tickets_col_sector")</th>
+                    <th class="text-center">@Tr.T("tickets_col_seat")</th>
+                    <th class="text-end">@Tr.T("tickets_col_price")</th>
+                    <th class="text-center">@Tr.T("tickets_col_status")</th>
+                    <th>@Tr.T("tickets_col_voucher")</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var t in Model)
+                {
+                    <tr>
+                        <td class="fw-bold">@t.MatchDescription</td>
+                        <td data-order="@t.MatchDate.Ticks">@t.MatchDate.ToString("dd/MM/yyyy")<small class="text-muted d-block">@t.MatchDate.ToString("HH:mm") UTC</small></td>
+                        <td><small class="text-muted">@t.SectorName</small></td>
+                        <td class="text-center">@t.SeatNumber</td>
+                        <td class="text-end">€ @t.PricePaid.ToString("0.00")</td>
+                        <td class="text-center">
+                            @{ var bc = t.Status switch { "Paid"=>"success","Cancelled"=>"secondary",_=>"warning text-dark" }; }
+                            <span class="badge bg-@bc">@t.Status</span>
+                        </td>
+                        <td>
+                            <code class="small">@t.VoucherId.ToString("D")[..8]…</code>
+                            <button class="btn btn-link btn-sm p-0 ms-1"
+                                    onclick="navigator.clipboard.writeText('@t.VoucherId.ToString("D")')"
+                                    title="Copy">📋</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
+</div>
 
 @section Scripts {
-<script>
-    $(function () {
-        $('#ticketTable').DataTable({
-            order: [[1, 'desc']],
-            pageLength: 10,
-            language: {
-                search: 'Search:',
-                info: 'Showing _START_ to _END_ of _TOTAL_ tickets'
-            }
-        });
-    });
-</script>
+<script>$(function(){ $('#ticketTable').DataTable({ order:[[1,'desc']], pageLength:10 }); });</script>
 }

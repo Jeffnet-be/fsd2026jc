@@ -1,33 +1,36 @@
 @model ChampionsLeague.Web.ViewModels.HotelSearchVM
-@{
-    ViewData["Title"] = "Find Hotels";
-}
+@{ ViewData["Title"] = Tr.T("hotel_title"); }
 
-<h1 class="mb-4">🏨 Find Hotels Near the Stadium</h1>
+<div style="background:linear-gradient(135deg,#001489,#0d0d2b)" class="text-white py-4 mb-4">
+    <div class="container">
+        <h1 class="fw-bold mb-1"><i class="bi bi-building me-2" style="color:#FFD700"></i>@Tr.T("hotel_title")</h1>
+        <p class="text-white-50 mb-0">@Tr.T("hotel_subtitle")</p>
+    </div>
+</div>
 
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
+<div class="container pb-5">
+<div class="card border-0 shadow-sm mb-4" style="border-radius:14px">
+    <div class="card-body p-4">
         <form asp-action="Search" method="post">
             @Html.AntiForgeryToken()
             <div class="row g-3 align-items-end">
                 <div class="col-md-4">
-                    <label asp-for="City" class="form-label fw-semibold">City</label>
+                    <label class="form-label fw-semibold">@Tr.T("hotel_city")</label>
                     <input asp-for="City" class="form-control" placeholder="e.g. Madrid" />
                     <span asp-validation-for="City" class="text-danger small"></span>
                 </div>
                 <div class="col-md-3">
-                    <label asp-for="CheckIn" class="form-label fw-semibold"></label>
+                    <label class="form-label fw-semibold">@Tr.T("hotel_checkin")</label>
                     <input asp-for="CheckIn" type="date" class="form-control" />
-                    <span asp-validation-for="CheckIn" class="text-danger small"></span>
                 </div>
                 <div class="col-md-3">
-                    <label asp-for="CheckOut" class="form-label fw-semibold"></label>
+                    <label class="form-label fw-semibold">@Tr.T("hotel_checkout")</label>
                     <input asp-for="CheckOut" type="date" class="form-control" />
-                    <span asp-validation-for="CheckOut" class="text-danger small"></span>
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-warning w-100 fw-bold">
-                        Search 🔍
+                    <button type="submit" class="btn w-100 fw-bold text-dark"
+                            style="background:#FFD700;border:none;border-radius:8px">
+                        🔍 @Tr.T("hotel_search_btn")
                     </button>
                 </div>
             </div>
@@ -37,29 +40,27 @@
 
 @if (Model.Results.Any())
 {
-    <h3 class="mb-3">
-        Results for <em>@Model.City</em>
-        <small class="text-muted fs-6">
-            (@Model.CheckIn.ToString("dd/MM") – @Model.CheckOut.ToString("dd/MM/yyyy"))
-        </small>
+    <h3 class="mb-3 fw-bold" style="color:#001489">
+        @Tr.T("hotel_results_for") <em>@Model.City</em>
+        <small class="text-muted fs-6 fw-normal">(@Model.CheckIn.ToString("dd/MM") – @Model.CheckOut.ToString("dd/MM/yyyy"))</small>
     </h3>
     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3">
         @foreach (var h in Model.Results)
         {
             <div class="col">
-                <div class="card h-100 shadow-sm border-0">
+                <div class="card h-100 border-0 shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title">@h.Name</h5>
-                        <p class="card-text text-muted small">📍 @h.Address</p>
-                        <p class="fw-bold text-success fs-5">
+                        <h5 class="fw-bold">@h.Name</h5>
+                        <p class="text-muted small">📍 @h.Address</p>
+                        <p class="fw-bold fs-5 text-success mb-0">
                             € @h.PricePerNight.ToString("0.00")
-                            <small class="text-muted fs-6 fw-normal">/ night</small>
+                            <small class="text-muted fs-6 fw-normal">@Tr.T("hotel_per_night")</small>
                         </p>
                     </div>
-                    <div class="card-footer bg-white border-0">
-                        <a href="@h.BookingUrl" target="_blank" rel="noopener noreferrer"
-                           class="btn btn-outline-primary w-100">
-                            Book now →
+                    <div class="card-footer bg-white border-0 pb-3">
+                        <a href="@h.BookingUrl" target="_blank" rel="noopener"
+                           class="btn btn-outline-primary w-100" style="border-radius:8px">
+                            @Tr.T("hotel_book")
                         </a>
                     </div>
                 </div>
@@ -69,11 +70,8 @@
 }
 else if (ViewContext.HttpContext.Request.Method == "POST")
 {
-    <div class="alert alert-warning">
-        No hotels found for <strong>@Model.City</strong>. Try a different city or dates.
-    </div>
+    <div class="alert alert-warning">@Tr.T("hotel_no_results")</div>
 }
+</div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
