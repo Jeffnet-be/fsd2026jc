@@ -3,91 +3,113 @@
     ViewData["Title"] = "Match Calendar";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="mb-0">📅 Match Calendar</h1>
-    @if (Model.FilterClub != null)
-    {
-        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
-            ✕ Clear filter: @Model.FilterClub
-        </a>
-    }
+<div style="background:linear-gradient(135deg,#001489,#0d0d2b)" class="text-white py-4 mb-4">
+    <div class="container">
+        <h1 class="fw-bold mb-1"><i class="bi bi-calendar3 me-2" style="color:#FFD700"></i>Match Calendar</h1>
+        <p class="text-white-50 mb-0">All Champions League fixtures — click Tickets to buy</p>
+    </div>
 </div>
 
-@*
-    jQuery DataTables: ordering, searching, and paging built-in.
-    Curriculum section 10.4.3 — client-side library for table enhancement.
-    No extra controller actions needed — all sorting/filtering happens in the browser.
-*@
-<table id="matchTable" class="table table-hover table-striped align-middle">
-    <thead class="table-dark">
-        <tr>
-            <th>Date &amp; Time</th>
-            <th>Phase</th>
-            <th>Home</th>
-            <th>Away</th>
-            <th>Stadium</th>
-            <th>City</th>
-            <th>Sale</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var m in Model.Matches)
-        {
-            <tr>
-                <td data-order="@m.MatchDate.Ticks">
-                    @m.MatchDate.ToString("dd/MM/yyyy")
-                    <small class="text-muted d-block">@m.MatchDate.ToString("HH:mm") UTC</small>
-                </td>
-                <td>
-                    <span class="badge bg-secondary">@m.Phase</span>
-                </td>
-                <td>
-                    <img src="@m.HomeClubBadge" alt="" style="height:22px"
-                         onerror="this.style.display='none'" />
-                    @m.HomeClubName
-                </td>
-                <td>
-                    <img src="@m.AwayClubBadge" alt="" style="height:22px"
-                         onerror="this.style.display='none'" />
-                    @m.AwayClubName
-                </td>
-                <td>@m.StadiumName</td>
-                <td>@m.StadiumCity</td>
-                <td>
-                    @if (m.IsSaleOpen)
+<div class="container pb-5">
+    @if (Model.FilterClub != null)
+    {
+        <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
+            <i class="bi bi-funnel-fill"></i>
+            Showing matches for <strong>@Model.FilterClub</strong>
+            <a asp-action="Index" class="ms-2 btn btn-sm btn-outline-secondary">✕ Clear filter</a>
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm" style="border-radius:16px;overflow:hidden">
+        <div class="card-body p-0">
+            <table id="matchTable" class="table table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Phase</th>
+                        <th>Home</th>
+                        <th>Away</th>
+                        <th>Stadium</th>
+                        <th>City</th>
+                        <th>Sale</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model.Matches)
                     {
-                        <span class="badge bg-success">🟢 Open</span>
+                        <tr>
+                            <td data-order="@m.MatchDate.Ticks" style="white-space:nowrap">
+                                <strong>@m.MatchDate.ToString("dd/MM/yyyy")</strong>
+                                <small class="text-muted d-block">@m.MatchDate.ToString("HH:mm") UTC</small>
+                            </td>
+                            <td>
+                                @{
+                                    var phaseColor = m.Phase switch {
+                                        "Final" => "danger",
+                                        "Semi-Final" => "warning text-dark",
+                                        "Quarter-Final" => "info text-dark",
+                                        _ => "secondary"
+                                    };
+                                }
+                                <span class="badge bg-@phaseColor">@m.Phase</span>
+                            </td>
+                            <td class="fw-semibold">
+                                <img src="@m.HomeClubBadge" alt="" style="height:22px;width:22px;object-fit:contain;margin-right:6px"
+                                     onerror="this.style.display='none'" />
+                                @m.HomeClubName
+                            </td>
+                            <td class="text-muted">
+                                <img src="@m.AwayClubBadge" alt="" style="height:22px;width:22px;object-fit:contain;margin-right:6px"
+                                     onerror="this.style.display='none'" />
+                                @m.AwayClubName
+                            </td>
+                            <td class="text-muted small">@m.StadiumName</td>
+                            <td class="text-muted small">@m.StadiumCity</td>
+                            <td>
+                                @if (m.IsSaleOpen)
+                                {
+                                    <span class="badge rounded-pill bg-success">
+                                        <i class="bi bi-check-circle me-1"></i>Open
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge rounded-pill bg-secondary">
+                                        <i class="bi bi-lock me-1"></i>Closed
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Detail" asp-route-id="@m.Id"
+                                   class="btn btn-sm fw-semibold text-dark"
+                                   style="background:#FFD700;border:none;white-space:nowrap">
+                                    <i class="bi bi-ticket-perforated me-1"></i>Tickets
+                                </a>
+                            </td>
+                        </tr>
                     }
-                    else
-                    {
-                        <span class="badge bg-danger">🔴 Closed</span>
-                    }
-                </td>
-                <td>
-                    <a asp-action="Detail" asp-route-id="@m.Id"
-                       class="btn btn-warning btn-sm">
-                        Tickets
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
 <script>
-    $(document).ready(function () {
-        $('#matchTable').DataTable({
-            order: [[0, 'asc']],
-            pageLength: 13,
-            language: {
-                search: 'Search:',
-                lengthMenu: 'Show _MENU_ matches',
-                info: 'Showing _START_ to _END_ of _TOTAL_ matches',
-                paginate: { next: 'Next ›', previous: '‹ Prev' }
-            }
-        });
+$(function () {
+    $('#matchTable').DataTable({
+        order: [[0, 'asc']],
+        pageLength: 13,
+        language: {
+            search: '<i class="bi bi-search"></i>',
+            searchPlaceholder: 'Search matches...',
+            lengthMenu: 'Show _MENU_',
+            info: 'Showing _START_–_END_ of _TOTAL_ matches',
+            paginate: { next: 'Next ›', previous: '‹ Prev' }
+        },
+        dom: '<"d-flex justify-content-between align-items-center px-3 py-2"lf>t<"d-flex justify-content-between align-items-center px-3 py-2"ip>',
     });
+});
 </script>
 }

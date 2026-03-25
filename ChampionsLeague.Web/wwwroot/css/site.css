@@ -1,69 +1,67 @@
-/* ═══════════════════════════════════════════════════════════
-   Champions League Ticket Portal — site.css
-   ═══════════════════════════════════════════════════════════ */
+/* ─────────────────────────────────────────────────────────────────
+   CL Tickets — site.css
+   All Bootstrap comes from CDN. This file only adds custom styles.
+───────────────────────────────────────────────────────────────── */
 
-/* ── Variables ───────────────────────────────────────────── */
 :root {
-    --cl-gold:  #FFD700;
     --cl-navy:  #001489;
-    --cl-dark:  #0d0d0d;
+    --cl-gold:  #FFD700;
+    --cl-dark:  #0d0d2b;
 }
 
-/* ── Base ────────────────────────────────────────────────── */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f8f9fa;
+/* ── Base ────────────────────────────────────────────────────── */
+html { scroll-behavior: smooth; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background:#f8f9ff; }
+
+/* ── Navbar active link indicator ───────────────────────────── */
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: var(--cl-gold) !important;
 }
 
-/* ── Navbar ──────────────────────────────────────────────── */
-.navbar-brand {
-    font-size: 1.5rem;
-    letter-spacing: 1px;
-}
+/* ── Cards ───────────────────────────────────────────────────── */
+.card { border-radius: 16px; }
 
-/* ── Cards ───────────────────────────────────────────────── */
-.card {
-    border-radius: 12px;
-    transition: transform .18s ease, box-shadow .18s ease;
-}
+/* ── Buttons ─────────────────────────────────────────────────── */
+.btn { border-radius: 8px; }
 
-.card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0,0,0,.12) !important;
+/* ── DataTable overrides ─────────────────────────────────────── */
+.dataTables_wrapper .dataTables_filter input,
+.dataTables_wrapper .dataTables_length select {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 4px 10px;
 }
-
-/* ── Club badge image ────────────────────────────────────── */
-.club-badge {
-    height:  64px;
-    width:   64px;
-    object-fit: contain;
-}
-
-/* ── Progress bar (sector availability) ─────────────────── */
-.progress {
-    border-radius: 4px;
-}
-
-/* ── DataTable overrides ─────────────────────────────────── */
 table.dataTable thead th {
     white-space: nowrap;
+    background: #001489 !important;
+    color: white !important;
+    border-color: #0022aa !important;
+}
+table.dataTable thead th:after,
+table.dataTable thead th:before { color: rgba(255,255,255,.5) !important; }
+
+/* ── Form controls ───────────────────────────────────────────── */
+.form-control:focus, .form-select:focus {
+    border-color: var(--cl-navy);
+    box-shadow: 0 0 0 .2rem rgba(0,20,137,.15);
 }
 
-/* ── Hero gradient ───────────────────────────────────────── */
-.hero-gradient {
-    background: linear-gradient(135deg, var(--cl-dark) 0%, var(--cl-navy) 100%);
+/* ── Alert / badge tweaks ────────────────────────────────────── */
+.badge { font-weight: 600; }
+
+/* ── Availability progress bar ───────────────────────────────── */
+.progress { border-radius: 6px; background: #e9ecef; }
+
+/* ── Voucher code chip ───────────────────────────────────────── */
+code {
+    background: #eef2ff;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: .82rem;
+    color: #c0392b;
 }
 
-/* ── Voucher code chip ───────────────────────────────────── */
-code.voucher {
-    background: #e9ecef;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: .8rem;
-}
-
-/* ── Responsive tweaks ───────────────────────────────────── */
+/* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 576px) {
     .display-4 { font-size: 2rem; }
-    .display-6 { font-size: 1.4rem; }
 }
