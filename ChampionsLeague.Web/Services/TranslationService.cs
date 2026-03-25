@@ -201,3 +201,72 @@ public class TranslationService
         return key;
     }
 }
+
+    // ── Sector name translations ──────────────────────────────────────
+    // The database stores sector names in Dutch (the seed language).
+    // This dictionary maps each Dutch DB value to its FR and EN equivalents.
+    private static readonly Dictionary<string, Dictionary<string, string>> _sectors = new()
+    {
+        ["Onderste ring \u2013 achter doel (thuisploeg)"] = new()
+        {
+            ["nl"] = "Onderste ring \u2013 achter doel (thuisploeg)",
+            ["fr"] = "Anneau inf\u00e9rieur \u2013 derri\u00e8re le but (\u00e9quipe locale)",
+            ["en"] = "Lower ring \u2013 behind goal (home side)"
+        },
+        ["Onderste ring \u2013 achter doel (bezoekers)"] = new()
+        {
+            ["nl"] = "Onderste ring \u2013 achter doel (bezoekers)",
+            ["fr"] = "Anneau inf\u00e9rieur \u2013 derri\u00e8re le but (visiteurs)",
+            ["en"] = "Lower ring \u2013 behind goal (away side)"
+        },
+        ["Onderste ring \u2013 zijlijn Oost"] = new()
+        {
+            ["nl"] = "Onderste ring \u2013 zijlijn Oost",
+            ["fr"] = "Anneau inf\u00e9rieur \u2013 ligne de touche Est",
+            ["en"] = "Lower ring \u2013 East sideline"
+        },
+        ["Onderste ring \u2013 zijlijn West"] = new()
+        {
+            ["nl"] = "Onderste ring \u2013 zijlijn West",
+            ["fr"] = "Anneau inf\u00e9rieur \u2013 ligne de touche Ouest",
+            ["en"] = "Lower ring \u2013 West sideline"
+        },
+        ["Bovenste ring \u2013 achter doel (thuisploeg)"] = new()
+        {
+            ["nl"] = "Bovenste ring \u2013 achter doel (thuisploeg)",
+            ["fr"] = "Anneau sup\u00e9rieur \u2013 derri\u00e8re le but (\u00e9quipe locale)",
+            ["en"] = "Upper ring \u2013 behind goal (home side)"
+        },
+        ["Bovenste ring \u2013 achter doel (bezoekers)"] = new()
+        {
+            ["nl"] = "Bovenste ring \u2013 achter doel (bezoekers)",
+            ["fr"] = "Anneau sup\u00e9rieur \u2013 derri\u00e8re le but (visiteurs)",
+            ["en"] = "Upper ring \u2013 behind goal (away side)"
+        },
+        ["Bovenste ring \u2013 zijlijn Oost"] = new()
+        {
+            ["nl"] = "Bovenste ring \u2013 zijlijn Oost",
+            ["fr"] = "Anneau sup\u00e9rieur \u2013 ligne de touche Est",
+            ["en"] = "Upper ring \u2013 East sideline"
+        },
+        ["Bovenste ring \u2013 zijlijn West"] = new()
+        {
+            ["nl"] = "Bovenste ring \u2013 zijlijn West",
+            ["fr"] = "Anneau sup\u00e9rieur \u2013 ligne de touche Ouest",
+            ["en"] = "Upper ring \u2013 West sideline"
+        },
+    };
+
+    /// <summary>
+    /// Translates a sector name stored in Dutch in the database to the
+    /// current UI language. Falls back to the original Dutch string if
+    /// no translation is found so nothing ever disappears.
+    /// </summary>
+    public string TranslateSector(string dutchName)
+    {
+        if (_sectors.TryGetValue(dutchName, out var translations))
+            if (translations.TryGetValue(Culture, out var translated))
+                return translated;
+        return dutchName; // fallback: show Dutch original
+    }
+}

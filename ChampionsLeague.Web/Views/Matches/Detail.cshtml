@@ -50,7 +50,7 @@ else
             <div class="col">
                 <div class="card h-100 border-@(sec.Available > 0 ? "success" : "danger") @(sec.Available == 0 ? "opacity-75" : "")">
                     <div class="card-body">
-                        <h6 class="card-title fw-bold">@sec.SectorName</h6>
+                        <h6 class="card-title fw-bold">@Tr.TranslateSector(sec.SectorName)</h6>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted small">
                                 @Tr.T("detail_available"): <strong>@sec.Available</strong> / @sec.Capacity

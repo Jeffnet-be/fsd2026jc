@@ -32,7 +32,7 @@ else
                     <tr>
                         <td class="fw-bold">@t.MatchDescription</td>
                         <td data-order="@t.MatchDate.Ticks">@t.MatchDate.ToString("dd/MM/yyyy")<small class="text-muted d-block">@t.MatchDate.ToString("HH:mm") UTC</small></td>
-                        <td><small class="text-muted">@t.SectorName</small></td>
+                        <td><small class="text-muted">@Tr.TranslateSector(t.SectorName)</small></td>
                         <td class="text-center">@t.SeatNumber</td>
                         <td class="text-end">€ @t.PricePaid.ToString("0.00")</td>
                         <td class="text-center">

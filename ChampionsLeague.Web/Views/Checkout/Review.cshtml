@@ -25,7 +25,7 @@
             {
                 <tr>
                     <td class="fw-bold">@item.MatchDescription<br/><small class="text-muted fw-normal">@item.MatchDate.ToString("dd/MM/yyyy HH:mm")</small></td>
-                    <td><small class="text-muted">@item.SectorName</small></td>
+                    <td><small class="text-muted">@Tr.TranslateSector(item.SectorName)</small></td>
                     <td class="text-center">@item.Quantity</td>
                     <td class="text-end fw-bold">€ @item.Subtotal.ToString("0.00")</td>
                 </tr>
