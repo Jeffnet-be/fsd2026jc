@@ -1,6 +1,7 @@
 using ChampionsLeague.Domain.Entities;
 using ChampionsLeague.Domain.Interfaces;
 using ChampionsLeague.Infrastructure.Services;
+using Microsoft.AspNetCore.Identity;
 
 namespace ChampionsLeague.Services;
 
@@ -29,45 +30,33 @@ public record CancelResult(bool Success, string? ErrorMessage = null);
 
 // ── Interface ──────────────────────────────────────────────────────────────
 
-/// <summary>
-/// Service contract for the ticket purchase flow.
-/// Controllers depend on this interface — never on the concrete class — enabling mocking in tests.
-/// </summary>
 public interface ITicketService
 {
-    /// <summary>Attempts to purchase seats; enforces all business rules.</summary>
     Task<PurchaseResult> PurchaseAsync(PurchaseRequest request);
-
-    /// <summary>Cancels a ticket within the free-cancellation window.</summary>
-    Task<CancelResult> CancelAsync(int ticketId, string userId);
-
-    /// <summary>Returns seat numbers still available in a sector for a match.</summary>
+    Task<CancelResult>   CancelAsync(int ticketId, string userId);
     Task<IEnumerable<int>> GetAvailableSeatsAsync(int matchId, int sectorId);
 }
 
 // ── Implementation ─────────────────────────────────────────────────────────
 
-/// <summary>
-/// Orchestrates the complete ticket purchase flow.
-/// All business rules from the project spec are enforced here — not in controllers or repositories.
-/// This is the Service Layer of the multilayer architecture (section 9.1 of the curriculum).
-/// </summary>
 public class TicketService : ITicketService
 {
-    private readonly ITicketRepository      _tickets;
-    private readonly IOrderRepository       _orders;
-    private readonly IMatchRepository       _matches;
+    private readonly ITicketRepository       _tickets;
+    private readonly IOrderRepository        _orders;
+    private readonly IMatchRepository        _matches;
     private readonly ISeasonTicketRepository _seasonTickets;
-    private readonly IClubRepository        _clubs;
-    private readonly IEmailService          _email;
+    private readonly IClubRepository         _clubs;
+    private readonly IEmailService           _email;
+    private readonly UserManager<ApplicationUser> _userManager;
 
     public TicketService(
-        ITicketRepository       tickets,
-        IOrderRepository        orders,
-        IMatchRepository        matches,
-        ISeasonTicketRepository seasonTickets,
-        IClubRepository         clubs,
-        IEmailService           email)
+        ITicketRepository        tickets,
+        IOrderRepository         orders,
+        IMatchRepository         matches,
+        ISeasonTicketRepository  seasonTickets,
+        IClubRepository          clubs,
+        IEmailService            email,
+        UserManager<ApplicationUser> userManager)
     {
         _tickets       = tickets;
         _orders        = orders;
@@ -75,6 +64,7 @@ public class TicketService : ITicketService
         _seasonTickets = seasonTickets;
         _clubs         = clubs;
         _email         = email;
+        _userManager   = userManager;
     }
 
     /// <inheritdoc/>
@@ -106,9 +96,8 @@ public class TicketService : ITicketService
         var soldSeats   = (await _tickets.GetReservedSeatsAsync(req.MatchId, req.SectorId)).ToHashSet();
         var allTaken    = seasonSeats.Union(soldSeats).ToHashSet();
 
-        // Find the sector capacity from the club's stadium
-        var club       = await _clubs.GetWithStadiumAndSectorsAsync(match.HomeClubId);
-        var sector     = club?.Stadium?.Sectors.FirstOrDefault(s => s.Id == req.SectorId);
+        var club   = await _clubs.GetWithStadiumAndSectorsAsync(match.HomeClubId);
+        var sector = club?.Stadium?.Sectors.FirstOrDefault(s => s.Id == req.SectorId);
         if (sector is null)
             return new PurchaseResult(false, "Sector not found.");
 
@@ -125,12 +114,12 @@ public class TicketService : ITicketService
         var order = new Order
         {
             UserId      = req.UserId,
-            Status      = OrderStatus.Paid,           // simplified: direct payment
+            Status      = OrderStatus.Paid,
             CreatedAt   = DateTime.UtcNow,
             TotalAmount = req.UnitPrice * req.Quantity
         };
         await _orders.AddAsync(order);
-        await _orders.SaveChangesAsync();             // flush to get order.Id
+        await _orders.SaveChangesAsync();
 
         var createdTickets = freeSeats.Select(seat => new Ticket
         {
@@ -155,7 +144,7 @@ public class TicketService : ITicketService
         order.OrderLines.Add(line);
         await _orders.SaveChangesAsync();
 
-        // ── Send voucher email (fire-and-forget for demo) ─────────────
+        // ── Send voucher email with REAL user email address ───────────
         _ = SendVoucherEmailAsync(req.UserId, createdTickets, match);
 
         return new PurchaseResult(true, null, createdTickets);
@@ -168,7 +157,6 @@ public class TicketService : ITicketService
         if (ticket is null)
             return new CancelResult(false, "Ticket not found.");
 
-        // Load match to check cancellation window
         var match = (await _matches.GetAllWithClubsAsync())
                         .FirstOrDefault(m => m.Id == ticket.MatchId);
 
@@ -190,8 +178,8 @@ public class TicketService : ITicketService
         var match   = matches.FirstOrDefault(m => m.Id == matchId);
         if (match is null) return Enumerable.Empty<int>();
 
-        var club    = await _clubs.GetWithStadiumAndSectorsAsync(match.HomeClubId);
-        var sector  = club?.Stadium?.Sectors.FirstOrDefault(s => s.Id == sectorId);
+        var club   = await _clubs.GetWithStadiumAndSectorsAsync(match.HomeClubId);
+        var sector = club?.Stadium?.Sectors.FirstOrDefault(s => s.Id == sectorId);
         if (sector is null) return Enumerable.Empty<int>();
 
         var seasonSeats = (await _seasonTickets.GetSeasonReservedSeatsAsync(sectorId)).ToHashSet();
@@ -201,17 +189,31 @@ public class TicketService : ITicketService
         return Enumerable.Range(1, sector.Capacity).Where(s => !allTaken.Contains(s));
     }
 
-    // ── Private helpers ───────────────────────────────────────────────────
+    // ── Private helpers ────────────────────────────────────────────────────
+
     private async Task SendVoucherEmailAsync(
         string userId, IEnumerable<Ticket> tickets, Match match)
     {
+        // Look up the real user email from Identity
+        var user      = await _userManager.FindByIdAsync(userId);
+        var realEmail = user?.Email ?? $"{userId}@unknown.com";
+        var firstName = user?.FirstName ?? "Supporter";
+
         var lines = string.Join("<br/>", tickets.Select(t =>
-            $"Seat <strong>{t.SeatNumber}</strong> — Voucher: <code>{t.VoucherId:D}</code>"));
+            $"&bull; Seat <strong>{t.SeatNumber}</strong> &mdash; " +
+            $"Voucher: <code>{t.VoucherId:D}</code>"));
 
         await _email.SendAsync(
-            to      : $"{userId}@example.com",   // real app: look up User.Email
+            to      : realEmail,
             subject : $"Your tickets: {match.HomeClub?.Name} vs {match.AwayClub?.Name}",
-            htmlBody: $"<p>Thank you for your purchase!</p><p>{lines}</p>"
+            htmlBody: $@"
+<p>Hello {firstName},</p>
+<p>Thank you for your purchase! Your tickets for
+<strong>{match.HomeClub?.Name} vs {match.AwayClub?.Name}</strong>
+on {match.MatchDate:dd MMMM yyyy} are confirmed.</p>
+<p>{lines}</p>
+<p>Present your voucher code at the stadium gate on match day.</p>
+<p>CL Tickets Portal</p>"
         );
     }
 }

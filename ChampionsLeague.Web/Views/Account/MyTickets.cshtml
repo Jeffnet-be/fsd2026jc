@@ -4,6 +4,19 @@
 <div class="container py-4">
 <h1 class="fw-bold mb-4" style="color:#001489">🎫 @Tr.T("tickets_title")</h1>
 
+@if (TempData["Success"] is string success)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        ✅ @success <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        ⚠️ @error <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 @if (!Model.Any())
 {
     <div class="alert alert-info d-flex align-items-center gap-3">
@@ -24,6 +37,7 @@ else
                     <th class="text-end">@Tr.T("tickets_col_price")</th>
                     <th class="text-center">@Tr.T("tickets_col_status")</th>
                     <th>@Tr.T("tickets_col_voucher")</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -31,7 +45,10 @@ else
                 {
                     <tr>
                         <td class="fw-bold">@t.MatchDescription</td>
-                        <td data-order="@t.MatchDate.Ticks">@t.MatchDate.ToString("dd/MM/yyyy")<small class="text-muted d-block">@t.MatchDate.ToString("HH:mm") UTC</small></td>
+                        <td data-order="@t.MatchDate.Ticks">
+                            @t.MatchDate.ToString("dd/MM/yyyy")
+                            <small class="text-muted d-block">@t.MatchDate.ToString("HH:mm") UTC</small>
+                        </td>
                         <td><small class="text-muted">@Tr.TranslateSector(t.SectorName)</small></td>
                         <td class="text-center">@t.SeatNumber</td>
                         <td class="text-end">€ @t.PricePaid.ToString("0.00")</td>
@@ -43,7 +60,25 @@ else
                             <code class="small">@t.VoucherId.ToString("D")[..8]…</code>
                             <button class="btn btn-link btn-sm p-0 ms-1"
                                     onclick="navigator.clipboard.writeText('@t.VoucherId.ToString("D")')"
-                                    title="Copy">📋</button>
+                                    title="Copy full code">📋</button>
+                        </td>
+                        <td>
+                            @if (t.IsCancellable && t.Status == "Paid")
+                            {
+                                <form asp-action="CancelTicket" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="ticketId" value="@t.Id" />
+                                    <button type="submit"
+                                            class="btn btn-outline-danger btn-sm"
+                                            onclick="return confirm('@Tr.T("tickets_cancel_confirm")')">
+                                        @Tr.T("tickets_cancel_btn")
+                                    </button>
+                                </form>
+                            }
+                            else if (t.Status == "Paid")
+                            {
+                                <small class="text-muted">@Tr.T("tickets_not_cancellable")</small>
+                            }
                         </td>
                     </tr>
                 }
@@ -54,5 +89,13 @@ else
 </div>
 
 @section Scripts {
-<script>$(function(){ $('#ticketTable').DataTable({ order:[[1,'desc']], pageLength:10 }); });</script>
+<script>
+$(function(){
+    $('#ticketTable').DataTable({
+        order:[[1,'desc']],
+        pageLength:10,
+        language:{ search:'', searchPlaceholder:'Search...' }
+    });
+});
+</script>
 }

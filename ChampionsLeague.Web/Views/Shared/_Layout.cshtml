@@ -58,6 +58,11 @@
                         <i class="bi bi-calendar3 me-1"></i>@Tr.T("nav_matches")
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="SeasonTicket" asp-action="Index">
+                        <i class="bi bi-calendar2-check me-1"></i>@Tr.T("nav_season")
+                    </a>
+                </li>
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <li class="nav-item">

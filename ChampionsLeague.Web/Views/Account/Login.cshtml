@@ -19,10 +19,13 @@
                 <input asp-for="Email" class="form-control" placeholder="jan@example.com" autocomplete="username" />
                 <span asp-validation-for="Email" class="text-danger small"></span>
             </div>
-            <div class="mb-3">
+            <div class="mb-2">
                 <label class="form-label fw-semibold">@Tr.T("login_password")</label>
                 <input asp-for="Password" class="form-control" autocomplete="current-password" />
                 <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+            <div class="mb-3 text-end">
+                <a asp-action="ForgotPassword" class="small text-muted">@Tr.T("forgot_title")?</a>
             </div>
             <div class="mb-4 form-check">
                 <input asp-for="RememberMe" class="form-check-input" />
@@ -42,5 +45,4 @@
 </div>
 </div>
 </div>
-
 @section Scripts { <partial name="_ValidationScriptsPartial" /> }

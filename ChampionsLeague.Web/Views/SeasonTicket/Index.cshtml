@@ -1,0 +1,100 @@
+@model IEnumerable<ChampionsLeague.Domain.Entities.Club>?
+@{
+    ViewData["Title"] = Tr.T("season_title");
+    bool closed = ViewBag.Closed == true;
+}
+
+<div style="background:linear-gradient(135deg,#001489,#0d0d2b)" class="text-white py-4 mb-4">
+    <div class="container">
+        <h1 class="fw-bold mb-1">
+            <i class="bi bi-calendar2-check me-2" style="color:#FFD700"></i>@Tr.T("season_title")
+        </h1>
+        <p class="text-white-50 mb-0">@Tr.T("season_subtitle")</p>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+@if (TempData["Success"] is string s)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        ✅ @s <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] is string e)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        ⚠️ @e <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (closed)
+{
+    <div class="alert alert-warning d-flex align-items-center gap-3">
+        <span style="font-size:2rem">🔒</span>
+        <div>
+            <strong>@Tr.T("season_closed_title")</strong><br/>
+            <span>@Tr.T("season_closed_text")</span>
+        </div>
+    </div>
+    <a asp-controller="Matches" asp-action="Index" class="btn btn-warning fw-bold">
+        <i class="bi bi-calendar3 me-2"></i>@Tr.T("home_view_calendar")
+    </a>
+}
+else if (Model != null)
+{
+    <div class="alert alert-info mb-4">
+        <i class="bi bi-info-circle me-2"></i>@Tr.T("season_info")
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        @foreach (var club in Model)
+        {
+            <div class="col">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:14px;overflow:hidden">
+                    <div class="text-center py-3" style="background:@club.PrimaryColor">
+                        <h5 class="fw-bold mb-0 text-white" style="text-shadow:0 1px 3px rgba(0,0,0,.4)">
+                            @club.Name
+                        </h5>
+                        <small class="text-white-50">@club.Stadium?.Name</small>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>@Tr.T("club_col_sector")</th>
+                                    <th class="text-end">@Tr.T("season_price")</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var sector in (club.Stadium?.Sectors ?? Enumerable.Empty<ChampionsLeague.Domain.Entities.Sector>()))
+                                {
+                                    var seasonPrice = sector.BasePrice * 10; // 10 matches × base price
+                                    <tr>
+                                        <td class="small">@Tr.TranslateSector(sector.Name)</td>
+                                        <td class="text-end fw-bold" style="color:@club.PrimaryColor">
+                                            € @seasonPrice.ToString("0.00")
+                                        </td>
+                                        <td>
+                                            <form asp-action="Purchase" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="sectorId"   value="@sector.Id" />
+                                                <input type="hidden" name="totalPrice" value="@seasonPrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)" />
+                                                <button type="submit" class="btn btn-sm fw-semibold text-dark"
+                                                        style="background:#FFD700;border:none;border-radius:6px">
+                                                    @Tr.T("season_buy_btn")
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+</div>

@@ -8,4 +8,8 @@
     <ProjectReference Include="..\ChampionsLeague.Domain\ChampionsLeague.Domain.csproj" />
     <ProjectReference Include="..\ChampionsLeague.Infrastructure\ChampionsLeague.Infrastructure.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Needed so TicketService can inject UserManager<ApplicationUser> to get real email -->
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
+  </ItemGroup>
 </Project>

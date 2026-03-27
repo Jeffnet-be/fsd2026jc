@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,23 +18,50 @@ builder.Services.AddControllersWithViews()
     .AddViewLocalization()
     .AddDataAnnotationsLocalization();
 
+// ── Swagger / OpenAPI (curriculum section 4) ──────────────────────────
+// Swagger UI available at /swagger — documents all API endpoints.
+// Use Postman to call /api/tickets, /api/matches etc.
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title       = "Champions League Ticket Portal API",
+        Version     = "v1",
+        Description = "REST API for the CL Tickets portal — Full Stack Development VIVES Hogeschool"
+    });
+
+    // Support Bearer token auth in Swagger UI (for testing authenticated endpoints)
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name         = "Authorization",
+        Type         = SecuritySchemeType.Http,
+        Scheme       = "bearer",
+        BearerFormat = "JWT",
+        In           = ParameterLocation.Header,
+        Description  = "Enter your bearer token here"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } },
+            Array.Empty<string>()
+        }
+    });
+});
+
 // ── AutoMapper 13 ────────────────────────────────────────────────────
 builder.Services.AddAutoMapper(
     typeof(ChampionsLeague.Web.AutoMapper.AutoMapperProfile).Assembly);
 
 // ── EF Core ───────────────────────────────────────────────────────────
-// On Azure: set App Setting  ConnectionStrings__DefaultConnection  (type SQLAzure)
-// Locally:  falls back to appsettings.json DefaultConnection value
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
         sql =>
         {
             sql.MigrationsAssembly("ChampionsLeague.Infrastructure");
-            sql.EnableRetryOnFailure(
-                maxRetryCount: 5,
-                maxRetryDelay: TimeSpan.FromSeconds(30),
-                errorNumbersToAdd: null);
+            sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null);
         }
     )
 );
@@ -71,11 +99,11 @@ builder.Services.AddScoped<ChampionsLeague.Web.Services.TranslationService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddSingleton<IEmailService, EmailService>();
 
-// ── Hotel API (typed HttpClient) ──────────────────────────────────────
+// ── Hotel API ─────────────────────────────────────────────────────────
 builder.Services.AddHttpClient<IHotelApiService, HotelApiService>(client =>
 {
-    client.BaseAddress = new Uri(
-        builder.Configuration["HotelApi:BaseUrl"] ?? "https://api.hotels.example.com/");
+    client.BaseAddress = new Uri(builder.Configuration["HotelApi:BaseUrl"]
+                                 ?? "https://api.hotels.example.com/");
     client.Timeout = TimeSpan.FromSeconds(10);
 });
 
@@ -92,7 +120,6 @@ builder.Services.Configure<RequestLocalizationOptions>(opts =>
     opts.DefaultRequestCulture = new RequestCulture("nl");
     opts.SupportedCultures     = supportedCultures;
     opts.SupportedUICultures   = supportedCultures;
-    // CookieRequestCultureProvider lets setLang() JS set the culture via cookie
     opts.RequestCultureProviders.Insert(0, new CookieRequestCultureProvider());
     opts.RequestCultureProviders.Insert(1, new QueryStringRequestCultureProvider());
 });
@@ -111,7 +138,7 @@ builder.Services.AddSession(opts =>
 var app = builder.Build();
 // ════════════════════════════════════════════════════════════════════
 
-// ── Run EF Core migrations on startup ────────────────────────────────
+// ── Migrations on startup ─────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
@@ -122,16 +149,14 @@ using (var scope = app.Services.CreateScope())
         db.Database.Migrate();
         logger.LogInformation("Migrations applied successfully.");
 
-        var roleManager = scope.ServiceProvider
-            .GetRequiredService<RoleManager<IdentityRole>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         foreach (var role in new[] { "Admin", "User" })
             if (!await roleManager.RoleExistsAsync(role))
                 await roleManager.CreateAsync(new IdentityRole(role));
     }
     catch (Exception ex)
     {
-        logger.LogError(ex,
-            "Migration failed. Check ConnectionStrings__DefaultConnection in Azure App Settings.");
+        logger.LogError(ex, "Migration failed. Check ConnectionStrings__DefaultConnection.");
     }
 }
 
@@ -142,8 +167,15 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// UseForwardedHeaders MUST come before UseHttpsRedirection so Azure's
-// load-balancer HTTPS is correctly recognised.
+// Swagger — available in all environments so jury can test on Azure
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "CL Tickets API v1");
+    c.RoutePrefix = "swagger";
+    c.DocumentTitle = "CL Tickets API";
+});
+
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto

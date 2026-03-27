@@ -61,3 +61,32 @@ public class TicketHistoryItemVM
     public string   Status           { get; set; } = string.Empty;
     public bool     IsCancellable    { get; set; }
 }
+
+/// <summary>ViewModel for the Forgot Password form.</summary>
+public class ForgotPasswordVM
+{
+    [Required(ErrorMessage = "Email is required.")]
+    [EmailAddress(ErrorMessage = "Please enter a valid e-mail address.")]
+    public string Email { get; set; } = string.Empty;
+}
+
+/// <summary>ViewModel for the Reset Password form (token arrives via email link).</summary>
+public class ResetPasswordVM
+{
+    [Required]
+    public string Token { get; set; } = string.Empty;
+
+    [Required, EmailAddress]
+    public string Email { get; set; } = string.Empty;
+
+    [Required]
+    [DataType(DataType.Password)]
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters.")]
+    public string Password { get; set; } = string.Empty;
+
+    [Required]
+    [DataType(DataType.Password)]
+    [Compare("Password", ErrorMessage = "Passwords do not match.")]
+    [Display(Name = "Confirm password")]
+    public string ConfirmPassword { get; set; } = string.Empty;
+}
