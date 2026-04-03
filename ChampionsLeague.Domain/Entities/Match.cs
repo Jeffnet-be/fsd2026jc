@@ -2,8 +2,7 @@ namespace ChampionsLeague.Domain.Entities;
 
 /// <summary>
 /// A single Champions League fixture between two clubs played at the home club's stadium.
-/// Business rule: tickets may only be purchased from one month before MatchDate.
-/// Computed properties enforce the rules without duplicating logic in controllers.
+/// Business rules are enforced via computed properties — controllers just read these flags.
 /// </summary>
 public class Match
 {
@@ -15,22 +14,27 @@ public class Match
     public int AwayClubId { get; set; }
     public Club AwayClub { get; set; } = null!;
 
-    /// <summary>Date and time kick-off (UTC stored, displayed in local TZ in views).</summary>
+    /// <summary>Date and time kick-off (UTC).</summary>
     public DateTime MatchDate { get; set; }
 
     /// <summary>Phase of the competition, e.g. "Group Stage", "Quarter-Final".</summary>
     public string Phase { get; set; } = string.Empty;
 
     /// <summary>
-    /// Derived: tickets become available exactly one calendar month before MatchDate.
-    /// Business rule enforced here — controllers just read this flag.
+    /// Business rule: tickets on sale from 1 month before kick-off UNTIL kick-off.
+    /// Past matches are always closed — you cannot buy tickets after the match has started.
     /// </summary>
-    public bool IsSaleOpen => DateTime.UtcNow >= MatchDate.AddMonths(-1);
+    public bool IsSaleOpen =>
+        DateTime.UtcNow >= MatchDate.AddMonths(-1) &&
+        DateTime.UtcNow <  MatchDate;
 
     /// <summary>
-    /// Derived: free cancellation is possible up to one week before MatchDate.
+    /// Business rule: free cancellation up to 7 days before kick-off.
+    /// Past matches cannot be cancelled.
     /// </summary>
-    public bool IsCancellable => DateTime.UtcNow <= MatchDate.AddDays(-7);
+    public bool IsCancellable =>
+        DateTime.UtcNow <  MatchDate &&
+        DateTime.UtcNow <= MatchDate.AddDays(-7);
 
     /// <summary>All tickets sold for this match across all sectors.</summary>
     public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();

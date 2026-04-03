@@ -91,23 +91,34 @@ public static class SeedData
     }
 
     // ── Matches — sample group stage + knockout fixtures ───────────────
+    // Dates are set in the near future relative to April 2026:
+    // - Matchday 1 (Apr 22): sale OPEN  — within 1 month window
+    // - Matchday 2 (Apr 29): sale OPEN  — within 1 month window
+    // - Matchday 3 (May 13): sale CLOSED — more than 1 month away
+    // - Knockouts: sale CLOSED
+    // This correctly demonstrates the "1 month before" business rule.
     private static void SeedMatches(ModelBuilder b)
     {
-        var d = new DateTime(2025, 9, 17, 20, 45, 0, DateTimeKind.Utc);
+        var d1 = new DateTime(2026, 4, 22, 20, 45, 0, DateTimeKind.Utc); // Matchday 1 — OPEN
+        var d2 = new DateTime(2026, 4, 29, 20, 45, 0, DateTimeKind.Utc); // Matchday 2 — OPEN
+        var d3 = new DateTime(2026, 5, 13, 20, 45, 0, DateTimeKind.Utc); // Matchday 3 — CLOSED
+        var qf = new DateTime(2026, 6, 3,  20, 45, 0, DateTimeKind.Utc); // Quarter-Finals
+        var sf = new DateTime(2026, 7, 8,  20, 45, 0, DateTimeKind.Utc); // Semi-Final
+        var fi = new DateTime(2026, 8, 12, 20, 45, 0, DateTimeKind.Utc); // Final
         b.Entity<Match>().HasData(
-            new Match { Id= 1, HomeClubId=1, AwayClubId=4, MatchDate=d,              Phase="Group Stage"   },
-            new Match { Id= 2, HomeClubId=2, AwayClubId=3, MatchDate=d,              Phase="Group Stage"   },
-            new Match { Id= 3, HomeClubId=5, AwayClubId=6, MatchDate=d,              Phase="Group Stage"   },
-            new Match { Id= 4, HomeClubId=4, AwayClubId=2, MatchDate=d.AddDays(14),  Phase="Group Stage"   },
-            new Match { Id= 5, HomeClubId=3, AwayClubId=1, MatchDate=d.AddDays(14),  Phase="Group Stage"   },
-            new Match { Id= 6, HomeClubId=6, AwayClubId=5, MatchDate=d.AddDays(14),  Phase="Group Stage"   },
-            new Match { Id= 7, HomeClubId=1, AwayClubId=2, MatchDate=d.AddDays(28),  Phase="Group Stage"   },
-            new Match { Id= 8, HomeClubId=3, AwayClubId=6, MatchDate=d.AddDays(28),  Phase="Group Stage"   },
-            new Match { Id= 9, HomeClubId=4, AwayClubId=5, MatchDate=d.AddDays(28),  Phase="Group Stage"   },
-            new Match { Id=10, HomeClubId=2, AwayClubId=6, MatchDate=d.AddDays(56),  Phase="Quarter-Final" },
-            new Match { Id=11, HomeClubId=1, AwayClubId=3, MatchDate=d.AddDays(56),  Phase="Quarter-Final" },
-            new Match { Id=12, HomeClubId=5, AwayClubId=4, MatchDate=d.AddDays(70),  Phase="Semi-Final"    },
-            new Match { Id=13, HomeClubId=6, AwayClubId=1, MatchDate=d.AddDays(84),  Phase="Final"         }
+            new Match { Id= 1, HomeClubId=1, AwayClubId=4, MatchDate=d1, Phase="Group Stage"   },
+            new Match { Id= 2, HomeClubId=2, AwayClubId=3, MatchDate=d1, Phase="Group Stage"   },
+            new Match { Id= 3, HomeClubId=5, AwayClubId=6, MatchDate=d1, Phase="Group Stage"   },
+            new Match { Id= 4, HomeClubId=4, AwayClubId=2, MatchDate=d2, Phase="Group Stage"   },
+            new Match { Id= 5, HomeClubId=3, AwayClubId=1, MatchDate=d2, Phase="Group Stage"   },
+            new Match { Id= 6, HomeClubId=6, AwayClubId=5, MatchDate=d2, Phase="Group Stage"   },
+            new Match { Id= 7, HomeClubId=1, AwayClubId=2, MatchDate=d3, Phase="Group Stage"   },
+            new Match { Id= 8, HomeClubId=3, AwayClubId=6, MatchDate=d3, Phase="Group Stage"   },
+            new Match { Id= 9, HomeClubId=4, AwayClubId=5, MatchDate=d3, Phase="Group Stage"   },
+            new Match { Id=10, HomeClubId=2, AwayClubId=6, MatchDate=qf, Phase="Quarter-Final" },
+            new Match { Id=11, HomeClubId=1, AwayClubId=3, MatchDate=qf, Phase="Quarter-Final" },
+            new Match { Id=12, HomeClubId=5, AwayClubId=4, MatchDate=sf, Phase="Semi-Final"    },
+            new Match { Id=13, HomeClubId=6, AwayClubId=1, MatchDate=fi, Phase="Final"         }
         );
     }
 }
