@@ -5,30 +5,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ChampionsLeague.Services;
 
-// ── DTOs / result records ──────────────────────────────────────────────────
-
-/// <summary>Input data for a ticket purchase request.</summary>
-public record PurchaseRequest(
-    string  UserId,
-    int     MatchId,
-    int     SectorId,
-    int     Quantity,
-    decimal UnitPrice);
-
-/// <summary>
-/// Result object — success or a business-rule violation message.
-/// Using a result object instead of exceptions keeps controllers clean:
-/// expected failures are not exceptional events.
-/// </summary>
-public record PurchaseResult(
-    bool                    Success,
-    string?                 ErrorMessage = null,
-    IEnumerable<Ticket>?    Tickets      = null);
-
-/// <summary>Result for cancellation attempts.</summary>
+public record PurchaseRequest(string UserId, int MatchId, int SectorId, int Quantity, decimal UnitPrice);
+public record PurchaseResult(bool Success, string? ErrorMessage = null, IEnumerable<Ticket>? Tickets = null);
 public record CancelResult(bool Success, string? ErrorMessage = null);
-
-// ── Interface ──────────────────────────────────────────────────────────────
 
 public interface ITicketService
 {
@@ -36,8 +15,6 @@ public interface ITicketService
     Task<CancelResult>   CancelAsync(int ticketId, string userId);
     Task<IEnumerable<int>> GetAvailableSeatsAsync(int matchId, int sectorId);
 }
-
-// ── Implementation ─────────────────────────────────────────────────────────
 
 public class TicketService : ITicketService
 {
@@ -67,7 +44,6 @@ public class TicketService : ITicketService
         _userManager   = userManager;
     }
 
-    /// <inheritdoc/>
     public async Task<PurchaseResult> PurchaseAsync(PurchaseRequest req)
     {
         // ── Rule 1: match must exist ──────────────────────────────────
@@ -76,22 +52,31 @@ public class TicketService : ITicketService
         if (match is null)
             return new PurchaseResult(false, "Match not found.");
 
-        // ── Rule 2: sale window must be open ──────────────────────────
+        // ── Rule 2: sale window — opens 1 month before, closes at kick-off ─
         if (!match.IsSaleOpen)
             return new PurchaseResult(false,
-                $"Ticket sale opens on {match.MatchDate.AddMonths(-1):dd/MM/yyyy}.");
+                $"Ticket sale is not open. Sale opens on {match.MatchDate.AddMonths(-1):dd/MM/yyyy} " +
+                $"and closes at kick-off ({match.MatchDate:dd/MM/yyyy HH:mm} UTC).");
 
-        // ── Rule 3: quantity 1-4 per match per person ─────────────────
-        if (req.Quantity is < 1 or > 4)
+        // ── Rule 3: max 4 tickets per person per match (across ALL orders) ──
+        // Check existing purchased tickets for this match, not just the current request
+        var alreadyOwned = await _tickets.GetUserTicketCountForMatchAsync(req.UserId, req.MatchId);
+        if (alreadyOwned + req.Quantity > 4)
             return new PurchaseResult(false,
-                "You may purchase between 1 and 4 tickets per match.");
+                $"Maximum 4 tickets per person per match. " +
+                $"You already have {alreadyOwned} ticket(s) for this match. " +
+                $"You can only add {4 - alreadyOwned} more.");
+
+        if (req.Quantity < 1)
+            return new PurchaseResult(false, "You must purchase at least 1 ticket.");
 
         // ── Rule 4: no two matches on the same calendar day ───────────
         if (await _orders.UserHasMatchOnDayAsync(req.UserId, match.MatchDate))
             return new PurchaseResult(false,
-                "You already have a ticket for another match on this day.");
+                "You already have a ticket for another match on this day. " +
+                "You cannot attend two matches on the same date.");
 
-        // ── Rule 5: capacity check (excl. season-ticket seats) ────────
+        // ── Rule 5: no overbooking — capacity check excl. season seats ─
         var seasonSeats = (await _seasonTickets.GetSeasonReservedSeatsAsync(req.SectorId)).ToHashSet();
         var soldSeats   = (await _tickets.GetReservedSeatsAsync(req.MatchId, req.SectorId)).ToHashSet();
         var allTaken    = seasonSeats.Union(soldSeats).ToHashSet();
@@ -108,7 +93,7 @@ public class TicketService : ITicketService
 
         if (freeSeats.Count < req.Quantity)
             return new PurchaseResult(false,
-                $"Only {freeSeats.Count} seat(s) available in this sector.");
+                $"Not enough seats available. Only {freeSeats.Count} seat(s) left in this sector.");
 
         // ── Create Order + OrderLine + Tickets ────────────────────────
         var order = new Order
@@ -144,22 +129,30 @@ public class TicketService : ITicketService
         order.OrderLines.Add(line);
         await _orders.SaveChangesAsync();
 
-        // ── Send voucher email with REAL user email address ───────────
+        // ── Send voucher email ────────────────────────────────────────
         _ = SendVoucherEmailAsync(req.UserId, createdTickets, match);
 
         return new PurchaseResult(true, null, createdTickets);
     }
 
-    /// <inheritdoc/>
     public async Task<CancelResult> CancelAsync(int ticketId, string userId)
     {
         var ticket = await _tickets.GetByIdAsync(ticketId);
         if (ticket is null)
             return new CancelResult(false, "Ticket not found.");
 
+        // Security: verify the ticket belongs to the requesting user
+        var userTickets = await _tickets.GetUserTicketsAsync(userId);
+        if (!userTickets.Any(t => t.Id == ticketId))
+            return new CancelResult(false, "You can only cancel your own tickets.");
+
+        if (ticket.Status == TicketStatus.Cancelled)
+            return new CancelResult(false, "This ticket is already cancelled.");
+
         var match = (await _matches.GetAllWithClubsAsync())
                         .FirstOrDefault(m => m.Id == ticket.MatchId);
 
+        // Rule: free cancellation up to 7 days before kick-off, not after
         if (match is null || !match.IsCancellable)
             return new CancelResult(false,
                 "Free cancellation is only available up to 7 days before kick-off.");
@@ -171,7 +164,6 @@ public class TicketService : ITicketService
         return new CancelResult(true);
     }
 
-    /// <inheritdoc/>
     public async Task<IEnumerable<int>> GetAvailableSeatsAsync(int matchId, int sectorId)
     {
         var matches = await _matches.GetAllWithClubsAsync();
@@ -189,12 +181,8 @@ public class TicketService : ITicketService
         return Enumerable.Range(1, sector.Capacity).Where(s => !allTaken.Contains(s));
     }
 
-    // ── Private helpers ────────────────────────────────────────────────────
-
-    private async Task SendVoucherEmailAsync(
-        string userId, IEnumerable<Ticket> tickets, Match match)
+    private async Task SendVoucherEmailAsync(string userId, IEnumerable<Ticket> tickets, Match match)
     {
-        // Look up the real user email from Identity
         var user      = await _userManager.FindByIdAsync(userId);
         var realEmail = user?.Email ?? $"{userId}@unknown.com";
         var firstName = user?.FirstName ?? "Supporter";
@@ -206,10 +194,8 @@ public class TicketService : ITicketService
         await _email.SendAsync(
             to      : realEmail,
             subject : $"Your tickets: {match.HomeClub?.Name} vs {match.AwayClub?.Name}",
-            htmlBody: $@"
-<p>Hello {firstName},</p>
-<p>Thank you for your purchase! Your tickets for
-<strong>{match.HomeClub?.Name} vs {match.AwayClub?.Name}</strong>
+            htmlBody: $@"<p>Hello {firstName},</p>
+<p>Your tickets for <strong>{match.HomeClub?.Name} vs {match.AwayClub?.Name}</strong>
 on {match.MatchDate:dd MMMM yyyy} are confirmed.</p>
 <p>{lines}</p>
 <p>Present your voucher code at the stadium gate on match day.</p>

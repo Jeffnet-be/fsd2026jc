@@ -185,7 +185,7 @@ public class AccountController : Controller
     public async Task<IActionResult> MyTickets()
     {
         var userId  = _userManager.GetUserId(User)!;
-        var tickets = await _tickets.GetUserTicketsAsync(userId);
+        var tickets = await _tickets.GetUserTicketHistoryAsync(userId); // full history incl. cancelled
         var vms     = _mapper.Map<IEnumerable<TicketHistoryItemVM>>(tickets);
         return View(vms);
     }

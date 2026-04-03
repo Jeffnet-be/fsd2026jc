@@ -5,10 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChampionsLeague.Infrastructure.Repositories;
 
-/// <summary>
-/// Concrete Ticket repository with user-history and seat-availability queries.
-/// All queries use eager loading (Include/ThenInclude) to avoid N+1 problems.
-/// </summary>
 public class TicketRepository : BaseRepository<Ticket>, ITicketRepository
 {
     public TicketRepository(AppDbContext context) : base(context) { }
@@ -18,6 +14,18 @@ public class TicketRepository : BaseRepository<Ticket>, ITicketRepository
         => await _set
             .Where(t => t.OrderLine.Order.UserId == userId
                      && t.Status != TicketStatus.Cancelled)
+            .Include(t => t.Match).ThenInclude(m => m.HomeClub)
+            .Include(t => t.Match).ThenInclude(m => m.AwayClub)
+            .Include(t => t.Sector)
+            .Include(t => t.OrderLine).ThenInclude(ol => ol.Order)
+            .OrderByDescending(t => t.Match.MatchDate)
+            .AsNoTracking()
+            .ToListAsync();
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<Ticket>> GetUserTicketHistoryAsync(string userId)
+        => await _set
+            .Where(t => t.OrderLine.Order.UserId == userId)
             .Include(t => t.Match).ThenInclude(m => m.HomeClub)
             .Include(t => t.Match).ThenInclude(m => m.AwayClub)
             .Include(t => t.Sector)
@@ -42,4 +50,12 @@ public class TicketRepository : BaseRepository<Ticket>, ITicketRepository
                      && t.Status   != TicketStatus.Cancelled)
             .Select(t => t.SeatNumber)
             .ToListAsync();
+
+    /// <inheritdoc/>
+    public async Task<int> GetUserTicketCountForMatchAsync(string userId, int matchId)
+        => await _set
+            .Where(t => t.OrderLine.Order.UserId == userId
+                     && t.MatchId                == matchId
+                     && t.Status                 != TicketStatus.Cancelled)
+            .CountAsync();
 }
