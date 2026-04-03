@@ -202,6 +202,16 @@ public class TranslationService
             ["fr"]="Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
             ["en"]="You can now log in with your new password." },
 
+        // ── Register — password requirements & strength ───────────────
+        ["reg_pwd_requirements_title"] = new(){ ["nl"]="Wachtwoordvereisten",   ["fr"]="Exigences du mot de passe", ["en"]="Password requirements" },
+        ["reg_pwd_req_length"]         = new(){ ["nl"]="Minimaal 8 tekens",     ["fr"]="Minimum 8 caractères",      ["en"]="At least 8 characters" },
+        ["reg_pwd_req_digit"]          = new(){ ["nl"]="Minimaal 1 cijfer (0-9)",["fr"]="Au moins 1 chiffre (0-9)", ["en"]="At least 1 digit (0-9)" },
+        ["reg_pwd_req_match"]          = new(){ ["nl"]="Beide wachtwoorden moeten overeenkomen", ["fr"]="Les deux mots de passe doivent correspondre", ["en"]="Both passwords must match" },
+        ["reg_pwd_weak"]               = new(){ ["nl"]="Zwak",     ["fr"]="Faible",   ["en"]="Weak" },
+        ["reg_pwd_fair"]               = new(){ ["nl"]="Matig",    ["fr"]="Moyen",    ["en"]="Fair" },
+        ["reg_pwd_good"]               = new(){ ["nl"]="Goed",     ["fr"]="Bon",      ["en"]="Good" },
+        ["reg_pwd_strong"]             = new(){ ["nl"]="Sterk",    ["fr"]="Fort",     ["en"]="Strong" },
+
         // ── Hotel search ──────────────────────────────────────────────
         ["hotel_title"]      = new(){ ["nl"]="Hotels zoeken",      ["fr"]="Rechercher des hôtels", ["en"]="Find Hotels" },
         ["hotel_subtitle"]   = new(){ ["nl"]="Vlakbij het stadion",["fr"]="Près du stade",         ["en"]="Near the Stadium" },

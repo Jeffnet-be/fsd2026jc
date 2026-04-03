@@ -10,27 +10,50 @@
         <small style="color:#FFD700">@Tr.T("login_subtitle")</small>
     </div>
     <div class="card-body p-4">
-        <div asp-validation-summary="All" class="alert alert-danger py-2 small"></div>
+
+        @* Only render the error box when ModelState actually has errors *@
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Values.Any(v => v.Errors.Count > 0))
+        {
+            <div class="alert alert-danger py-2 small">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@error.ErrorMessage</div>
+                }
+            </div>
+        }
+
         <form asp-action="Login" method="post">
             @Html.AntiForgeryToken()
             <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
             <div class="mb-3">
                 <label class="form-label fw-semibold">@Tr.T("login_email")</label>
-                <input asp-for="Email" class="form-control" placeholder="jan@example.com" autocomplete="username" />
+                <input asp-for="Email" class="form-control"
+                       placeholder="jan@example.com"
+                       autocomplete="username" />
                 <span asp-validation-for="Email" class="text-danger small"></span>
             </div>
+
             <div class="mb-2">
                 <label class="form-label fw-semibold">@Tr.T("login_password")</label>
-                <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                <input asp-for="Password" class="form-control"
+                       autocomplete="current-password" />
                 <span asp-validation-for="Password" class="text-danger small"></span>
             </div>
+
             <div class="mb-3 text-end">
-                <a asp-action="ForgotPassword" class="small text-muted">@Tr.T("forgot_title")?</a>
+                <a asp-action="ForgotPassword" class="small text-muted">
+                    @Tr.T("forgot_title")?
+                </a>
             </div>
+
             <div class="mb-4 form-check">
                 <input asp-for="RememberMe" class="form-check-input" />
-                <label asp-for="RememberMe" class="form-check-label">@Tr.T("login_remember")</label>
+                <label asp-for="RememberMe" class="form-check-label">
+                    @Tr.T("login_remember")
+                </label>
             </div>
+
             <button type="submit" class="btn w-100 fw-bold py-2"
                     style="background:#FFD700;color:#001489;border:none;border-radius:8px">
                 @Tr.T("login_btn")
@@ -45,4 +68,5 @@
 </div>
 </div>
 </div>
+
 @section Scripts { <partial name="_ValidationScriptsPartial" /> }
