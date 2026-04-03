@@ -24,9 +24,9 @@ public static class SeedData
         b.Entity<Club>().HasData(
             new Club { Id = 1, Name = "Real Madrid",        Country = "Spain",   BadgeUrl = "https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg",                     PrimaryColor = "#FEBE10" },
             new Club { Id = 2, Name = "Manchester City",     Country = "England", BadgeUrl = "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg",             PrimaryColor = "#6CABDD" },
-            new Club { Id = 3, Name = "FC Bayern München",   Country = "Germany", BadgeUrl = "https://upload.wikimedia.org/wikipedia/commons/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282002%E2%80%932017%29.svg", PrimaryColor = "#DC052D" },
+            new Club { Id = 3, Name = "FC Bayern München",   Country = "Germany", BadgeUrl = "https://upload.wikimedia.org/wikipedia/commons/8/8d/FC_Bayern_M%C3%BCnchen_logo_%282024%29.svg", PrimaryColor = "#DC052D" },
             new Club { Id = 4, Name = "Paris Saint-Germain", Country = "France",  BadgeUrl = "https://upload.wikimedia.org/wikipedia/en/a/a7/Paris_Saint-Germain_F.C..svg",             PrimaryColor = "#004170" },
-            new Club { Id = 5, Name = "Club Brugge",         Country = "Belgium", BadgeUrl = "https://upload.wikimedia.org/wikipedia/en/5/5f/Club_Brugge_KV_logo.svg",                  PrimaryColor = "#002FA7" },
+            new Club { Id = 5, Name = "Club Brugge",         Country = "Belgium", BadgeUrl = "https://upload.wikimedia.org/wikipedia/en/d/d0/Club_Brugge_KV_logo.svg",                  PrimaryColor = "#002FA7" },
             new Club { Id = 6, Name = "FC Barcelona",        Country = "Spain",   BadgeUrl = "https://upload.wikimedia.org/wikipedia/en/4/47/FC_Barcelona_%28crest%29.svg",              PrimaryColor = "#A50044" }
         );
     }
