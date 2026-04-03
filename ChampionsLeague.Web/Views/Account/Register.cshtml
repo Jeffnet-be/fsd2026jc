@@ -22,15 +22,18 @@
             </div>
         }
 
-        @* Password requirements — always visible to guide the user before submitting *@
-        <div class="alert alert-light border small mb-4 py-2 px-3" style="border-radius:8px">
-            <div class="fw-semibold mb-1" style="color:#001489">
+        @* Password requirements — always visible before submitting *@
+        <div class="border rounded-3 p-3 mb-4" style="background:#f8f9ff">
+            <div class="fw-semibold mb-2 small" style="color:#001489">
                 <i class="bi bi-shield-lock me-1"></i>@Tr.T("reg_pwd_requirements_title")
             </div>
-            <ul class="mb-0 ps-3">
-                <li>@Tr.T("reg_pwd_req_length")</li>
-                <li>@Tr.T("reg_pwd_req_digit")</li>
-                <li>@Tr.T("reg_pwd_req_match")</li>
+            <ul class="mb-0 ps-3 small" style="line-height:2">
+                <li id="req-length" ><i class="bi bi-circle me-1 text-muted"></i>@Tr.T("reg_pwd_req_length")</li>
+                <li id="req-digit"  ><i class="bi bi-circle me-1 text-muted"></i>@Tr.T("reg_pwd_req_digit")</li>
+                <li id="req-upper"  ><i class="bi bi-circle me-1 text-muted"></i>@Tr.T("reg_pwd_req_upper")</li>
+                <li id="req-lower"  ><i class="bi bi-circle me-1 text-muted"></i>@Tr.T("reg_pwd_req_lower")</li>
+                <li id="req-special"><i class="bi bi-circle me-1 text-muted"></i>@Tr.T("reg_pwd_req_special")</li>
+                <li id="req-match"  ><i class="bi bi-circle me-1 text-muted"></i>@Tr.T("reg_pwd_req_match")</li>
             </ul>
         </div>
 
@@ -40,14 +43,12 @@
             <div class="row g-3 mb-3">
                 <div class="col-6">
                     <label class="form-label fw-semibold">@Tr.T("reg_firstname")</label>
-                    <input asp-for="FirstName" class="form-control"
-                           placeholder="Jan" />
+                    <input asp-for="FirstName" class="form-control" placeholder="Jan" />
                     <span asp-validation-for="FirstName" class="text-danger small"></span>
                 </div>
                 <div class="col-6">
                     <label class="form-label fw-semibold">@Tr.T("reg_lastname")</label>
-                    <input asp-for="LastName" class="form-control"
-                           placeholder="Peeters" />
+                    <input asp-for="LastName" class="form-control" placeholder="Peeters" />
                     <span asp-validation-for="LastName" class="text-danger small"></span>
                 </div>
             </div>
@@ -55,7 +56,7 @@
             <div class="mb-3">
                 <label class="form-label fw-semibold">@Tr.T("reg_email")</label>
                 <input asp-for="Email" class="form-control"
-                       placeholder="jan.peeters@example.com"
+                       placeholder="jan.peeters@@example.com"
                        autocomplete="email" />
                 <span asp-validation-for="Email" class="text-danger small"></span>
             </div>
@@ -65,21 +66,20 @@
                 <div class="input-group">
                     <input asp-for="Password" class="form-control"
                            id="pwd-input"
-                           placeholder="Min. 8 tekens, incl. 1 cijfer"
+                           placeholder="bijv. Voetbal@2025!!"
                            autocomplete="new-password" />
                     <button class="btn btn-outline-secondary" type="button"
-                            onclick="togglePwd('pwd-input', this)"
-                            title="Show/hide password">
+                            onclick="togglePwd('pwd-input', this)">
                         <i class="bi bi-eye"></i>
                     </button>
                 </div>
                 <span asp-validation-for="Password" class="text-danger small"></span>
 
-                @* Live strength indicator *@
+                <!-- Strength bar -->
                 <div class="mt-2">
-                    <div class="progress" style="height:5px;border-radius:4px">
+                    <div class="progress" style="height:6px;border-radius:4px;background:#e9ecef">
                         <div id="pwd-strength-bar" class="progress-bar"
-                             style="width:0%;transition:width .3s,background .3s"></div>
+                             style="width:0%;transition:width .3s,background .3s;border-radius:4px"></div>
                     </div>
                     <small id="pwd-strength-label" class="text-muted"></small>
                 </div>
@@ -93,8 +93,7 @@
                            placeholder="Herhaal uw wachtwoord"
                            autocomplete="new-password" />
                     <button class="btn btn-outline-secondary" type="button"
-                            onclick="togglePwd('confirm-input', this)"
-                            title="Show/hide password">
+                            onclick="togglePwd('confirm-input', this)">
                         <i class="bi bi-eye"></i>
                     </button>
                 </div>
@@ -119,45 +118,63 @@
 @section Scripts {
 <partial name="_ValidationScriptsPartial" />
 <script>
-// ── Show/hide password toggle ─────────────────────────────────────────
-function togglePwd(inputId, btn) {
-    var input = document.getElementById(inputId);
+function togglePwd(id, btn) {
+    var input = document.getElementById(id);
     var icon  = btn.querySelector('i');
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.className = 'bi bi-eye-slash';
+    input.type     = input.type === 'password' ? 'text' : 'password';
+    icon.className = input.type === 'text' ? 'bi bi-eye-slash' : 'bi bi-eye';
+}
+
+function setReq(id, met) {
+    var li = document.getElementById(id);
+    var i  = li.querySelector('i');
+    if (met) {
+        i.className    = 'bi bi-check-circle-fill me-1 text-success';
+        li.style.color = '#198754';
     } else {
-        input.type = 'password';
-        icon.className = 'bi bi-eye';
+        i.className    = 'bi bi-circle me-1 text-muted';
+        li.style.color = '';
     }
 }
 
-// ── Password strength meter ───────────────────────────────────────────
 document.getElementById('pwd-input').addEventListener('input', function () {
     var pwd = this.value;
-    var score = 0;
-    if (pwd.length >= 8)  score++;
-    if (pwd.length >= 12) score++;
-    if (/[0-9]/.test(pwd)) score++;
-    if (/[A-Z]/.test(pwd)) score++;
-    if (/[^A-Za-z0-9]/.test(pwd)) score++;
 
-    var bar   = document.getElementById('pwd-strength-bar');
-    var label = document.getElementById('pwd-strength-label');
+    var hasLength  = pwd.length >= 12;
+    var hasDigit   = /[0-9]/.test(pwd);
+    var hasUpper   = /[A-Z]/.test(pwd);
+    var hasLower   = /[a-z]/.test(pwd);
+    var hasSpecial = /[^A-Za-z0-9]/.test(pwd);
+    var hasMatch   = pwd.length > 0 && pwd === document.getElementById('confirm-input').value;
 
+    setReq('req-length',  hasLength);
+    setReq('req-digit',   hasDigit);
+    setReq('req-upper',   hasUpper);
+    setReq('req-lower',   hasLower);
+    setReq('req-special', hasSpecial);
+    setReq('req-match',   hasMatch);
+
+    // Strength = how many of the 5 rules are met
+    var score = [hasLength, hasDigit, hasUpper, hasLower, hasSpecial].filter(Boolean).length;
     var levels = [
-        { w:'0%',   bg:'',          text:'' },
-        { w:'25%',  bg:'#e74c3c',   text:'@Tr.T("reg_pwd_weak")' },
-        { w:'50%',  bg:'#f39c12',   text:'@Tr.T("reg_pwd_fair")' },
-        { w:'75%',  bg:'#3498db',   text:'@Tr.T("reg_pwd_good")' },
-        { w:'100%', bg:'#27ae60',   text:'@Tr.T("reg_pwd_strong")' },
+        { w:'0%',   bg:'',        text:'' },
+        { w:'20%',  bg:'#e74c3c', text:'@Tr.T("reg_pwd_weak")' },
+        { w:'40%',  bg:'#e67e22', text:'@Tr.T("reg_pwd_weak")' },
+        { w:'60%',  bg:'#f39c12', text:'@Tr.T("reg_pwd_fair")' },
+        { w:'80%',  bg:'#3498db', text:'@Tr.T("reg_pwd_good")' },
+        { w:'100%', bg:'#27ae60', text:'@Tr.T("reg_pwd_strong")' },
     ];
+    var bar = document.getElementById('pwd-strength-bar');
+    var lbl = document.getElementById('pwd-strength-label');
+    bar.style.width      = levels[score].w;
+    bar.style.background = levels[score].bg;
+    lbl.textContent      = levels[score].text;
+    lbl.style.color      = levels[score].bg;
+});
 
-    var lvl = Math.min(score, 4);
-    bar.style.width      = levels[lvl].w;
-    bar.style.background = levels[lvl].bg;
-    label.textContent    = levels[lvl].text;
-    label.style.color    = levels[lvl].bg;
+document.getElementById('confirm-input').addEventListener('input', function () {
+    var pwd = document.getElementById('pwd-input').value;
+    setReq('req-match', this.value.length > 0 && this.value === pwd);
 });
 </script>
 }

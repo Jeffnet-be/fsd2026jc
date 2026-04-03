@@ -7,7 +7,11 @@
                  style="width:68px;height:68px">
                 <img src="@Model.BadgeUrl" alt="@Model.Name"
                      style="width:52px;height:52px;object-fit:contain"
-                     onerror="this.parentElement.innerHTML='<span style=font-size:1.8rem;font-weight:700>@Model.Name[0]</span>'" />
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                <span style="display:none;width:52px;height:52px;align-items:center;justify-content:center;
+                             font-size:1.6rem;font-weight:700;color:@Model.PrimaryColor">
+                    @Model.Name[0]
+                </span>
             </div>
             <h5 class="fw-bold mb-0 px-3"
                 style="color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.5)">

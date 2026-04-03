@@ -203,9 +203,14 @@ public class TranslationService
             ["en"]="You can now log in with your new password." },
 
         // ── Register — password requirements & strength ───────────────
-        ["reg_pwd_requirements_title"] = new(){ ["nl"]="Wachtwoordvereisten",   ["fr"]="Exigences du mot de passe", ["en"]="Password requirements" },
-        ["reg_pwd_req_length"]         = new(){ ["nl"]="Minimaal 8 tekens",     ["fr"]="Minimum 8 caractères",      ["en"]="At least 8 characters" },
-        ["reg_pwd_req_digit"]          = new(){ ["nl"]="Minimaal 1 cijfer (0-9)",["fr"]="Au moins 1 chiffre (0-9)", ["en"]="At least 1 digit (0-9)" },
+        // Identity config: RequiredLength=8, RequireDigit=true,
+        // RequireUppercase=true, RequireLowercase=true, RequireNonAlphanumeric=true
+        ["reg_pwd_requirements_title"] = new(){ ["nl"]="Wachtwoordvereisten",         ["fr"]="Exigences du mot de passe",          ["en"]="Password requirements" },
+        ["reg_pwd_req_length"]         = new(){ ["nl"]="Minimaal 12 tekens",          ["fr"]="Minimum 12 caractères",              ["en"]="At least 12 characters" },
+        ["reg_pwd_req_digit"]          = new(){ ["nl"]="Minimaal 1 cijfer (0–9)",     ["fr"]="Au moins 1 chiffre (0–9)",           ["en"]="At least 1 digit (0–9)" },
+        ["reg_pwd_req_upper"]          = new(){ ["nl"]="Minimaal 1 hoofdletter (A–Z)",["fr"]="Au moins 1 majuscule (A–Z)",         ["en"]="At least 1 uppercase letter (A–Z)" },
+        ["reg_pwd_req_lower"]          = new(){ ["nl"]="Minimaal 1 kleine letter (a–z)",["fr"]="Au moins 1 minuscule (a–z)",       ["en"]="At least 1 lowercase letter (a–z)" },
+        ["reg_pwd_req_special"]        = new(){ ["nl"]="Minimaal 1 speciaal teken (!@#$...)",["fr"]="Au moins 1 caractère spécial (!@#$...)",["en"]="At least 1 special character (!@#$...)" },
         ["reg_pwd_req_match"]          = new(){ ["nl"]="Beide wachtwoorden moeten overeenkomen", ["fr"]="Les deux mots de passe doivent correspondre", ["en"]="Both passwords must match" },
         ["reg_pwd_weak"]               = new(){ ["nl"]="Zwak",     ["fr"]="Faible",   ["en"]="Weak" },
         ["reg_pwd_fair"]               = new(){ ["nl"]="Matig",    ["fr"]="Moyen",    ["en"]="Fair" },

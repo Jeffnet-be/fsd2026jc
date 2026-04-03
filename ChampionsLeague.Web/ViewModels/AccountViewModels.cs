@@ -25,7 +25,7 @@ public class RegisterVM
 
     [Required]
     [DataType(DataType.Password)]
-    [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters.")]
+    [StringLength(100, MinimumLength = 12, ErrorMessage = "Password must be at least 12 characters.")]
     public string Password { get; set; } = string.Empty;
 
     [Required]
@@ -81,7 +81,7 @@ public class ResetPasswordVM
 
     [Required]
     [DataType(DataType.Password)]
-    [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters.")]
+    [StringLength(100, MinimumLength = 12, ErrorMessage = "Password must be at least 12 characters.")]
     public string Password { get; set; } = string.Empty;
 
     [Required]
