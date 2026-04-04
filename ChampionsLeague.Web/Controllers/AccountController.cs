@@ -68,7 +68,28 @@ public class AccountController : Controller
         }
 
         foreach (var error in result.Errors)
-            ModelState.AddModelError(string.Empty, error.Description);
+        {
+            // Identity uses "Username" internally (= email). Replace with a clear,
+            // user-friendly message that never mentions the word "username".
+            var message = error.Code switch
+            {
+                "DuplicateUserName" or "DuplicateEmail"
+                    => $"An account with the email address '{model.Email}' already exists. " +
+                        "Please log in or use a different email address.",
+                "PasswordTooShort"
+                    => "Password must be at least 12 characters.",
+                "PasswordRequiresDigit"
+                    => "Password must contain at least one digit (0–9).",
+                "PasswordRequiresUpper"
+                    => "Password must contain at least one uppercase letter (A–Z).",
+                "PasswordRequiresLower"
+                    => "Password must contain at least one lowercase letter (a–z).",
+                "PasswordRequiresNonAlphanumeric"
+                    => "Password must contain at least one special character (!@#$...).",
+                _ => error.Description
+            };
+            ModelState.AddModelError(string.Empty, message);
+        }
 
         return View(model);
     }
