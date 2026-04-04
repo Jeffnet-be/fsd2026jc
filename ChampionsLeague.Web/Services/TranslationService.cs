@@ -241,9 +241,21 @@ public class TranslationService
         ["season_price"]        = new(){ ["nl"]="Seizoensprijs",                ["fr"]="Prix saison",                ["en"]="Season price" },
         ["season_buy_btn"]      = new(){ ["nl"]="Kopen",                        ["fr"]="Acheter",                    ["en"]="Buy" },
         ["season_info"]         = new(){
-            ["nl"]="Abonnementen zijn enkel beschikbaar voor de start van de competitie. Een abonnementplaats kan niet als los ticket worden verkocht.",
-            ["fr"]="Les abonnements ne sont disponibles qu avant le debut de la competition. Un siege d abonnement ne peut pas etre vendu comme billet individuel.",
-            ["en"]="Season tickets are only available before the competition starts. A season seat cannot be sold as a single ticket." },
+            ["nl"]="U kunt nu een seizoensabonnement kopen. Abonnementen zijn enkel beschikbaar voor de start van de competitie (22 april 2026). Een abonnementplaats kan daarna niet meer als los ticket verkocht worden.",
+            ["fr"]="Vous pouvez acheter un abonnement maintenant. Les abonnements ne sont disponibles qu avant le debut de la competition (22 avril 2026).",
+            ["en"]="You can purchase a season ticket now. Season tickets are only available before the competition starts (22 April 2026). A reserved seat cannot be sold as a single ticket after that." },
+        ["season_success"]      = new(){
+            ["nl"]="Seizoensabonnement gekocht! Uw stoelnummer is",
+            ["fr"]="Abonnement acheté! Votre numéro de siège est",
+            ["en"]="Season ticket purchased! Your seat number is" },
+        ["season_err_started"]  = new(){
+            ["nl"]="Seizoensabonnementen zijn niet meer beschikbaar — de competitie is gestart.",
+            ["fr"]="Les abonnements ne sont plus disponibles — la compétition a commencé.",
+            ["en"]="Season tickets are no longer available — the competition has started." },
+        ["season_err_full"]     = new(){
+            ["nl"]="Geen abonnementsplaatsen meer beschikbaar in dit vak.",
+            ["fr"]="Plus de places d abonnement disponibles dans ce secteur.",
+            ["en"]="No more season ticket seats available in this sector." },
         ["season_closed_title"] = new(){ ["nl"]="Abonnementsverkoop gesloten",  ["fr"]="Vente d abonnements fermee", ["en"]="Season ticket sales closed" },
         ["season_closed_text"]  = new(){
             ["nl"]="De competitie is gestart. Abonnementen zijn niet meer beschikbaar. Koop losse tickets via de wedstrijdkalender.",

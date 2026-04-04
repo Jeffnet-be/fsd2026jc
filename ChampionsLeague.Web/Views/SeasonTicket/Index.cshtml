@@ -15,6 +15,7 @@
 
 <div class="container pb-5">
 
+@* Only show after a purchase action *@
 @if (TempData["Success"] is string s)
 {
     <div class="alert alert-success alert-dismissible fade show">
@@ -43,8 +44,11 @@
 }
 else if (Model != null)
 {
-    <div class="alert alert-info mb-4">
-        <i class="bi bi-info-circle me-2"></i>@Tr.T("season_info")
+    @* Informational note — styled blue/info, not red/danger *@
+    <div class="d-flex align-items-start gap-2 p-3 mb-4 rounded-3 border"
+         style="background:#e8f4fd;border-color:#b8daff!important">
+        <i class="bi bi-info-circle-fill mt-1" style="color:#0d6efd;font-size:1.1rem"></i>
+        <span class="small" style="color:#084298">@Tr.T("season_info")</span>
     </div>
 
     <div class="row row-cols-1 row-cols-md-2 g-4">
@@ -53,6 +57,9 @@ else if (Model != null)
             <div class="col">
                 <div class="card border-0 shadow-sm h-100" style="border-radius:14px;overflow:hidden">
                     <div class="text-center py-3" style="background:@club.PrimaryColor">
+                        <img src="@club.BadgeUrl" alt="@club.Name"
+                             style="height:40px;width:40px;object-fit:contain;margin-bottom:6px"
+                             onerror="this.style.display='none'" /><br/>
                         <h5 class="fw-bold mb-0 text-white" style="text-shadow:0 1px 3px rgba(0,0,0,.4)">
                             @club.Name
                         </h5>
@@ -70,7 +77,7 @@ else if (Model != null)
                             <tbody>
                                 @foreach (var sector in (club.Stadium?.Sectors ?? Enumerable.Empty<ChampionsLeague.Domain.Entities.Sector>()))
                                 {
-                                    var seasonPrice = sector.BasePrice * 10; // 10 matches × base price
+                                    var seasonPrice = sector.BasePrice * 10;
                                     <tr>
                                         <td class="small">@Tr.TranslateSector(sector.Name)</td>
                                         <td class="text-end fw-bold" style="color:@club.PrimaryColor">
