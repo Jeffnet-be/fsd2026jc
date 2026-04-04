@@ -130,7 +130,9 @@ public class TicketService : ITicketService
         await _orders.SaveChangesAsync();
 
         // ── Send voucher email ────────────────────────────────────────
-        _ = SendVoucherEmailAsync(req.UserId, createdTickets, match);
+        // Awaited properly — fire-and-forget (_ = ...) is unsafe on Azure
+        // because the task can be garbage collected before completing.
+        await SendVoucherEmailAsync(req.UserId, createdTickets, match);
 
         return new PurchaseResult(true, null, createdTickets);
     }
