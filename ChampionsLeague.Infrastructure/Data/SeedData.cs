@@ -102,7 +102,7 @@ public static class SeedData
         var d1 = new DateTime(2026, 4, 22, 20, 45, 0, DateTimeKind.Utc); // Matchday 1 — OPEN
         var d2 = new DateTime(2026, 4, 29, 20, 45, 0, DateTimeKind.Utc); // Matchday 2 — OPEN
         var d3 = new DateTime(2026, 5, 13, 20, 45, 0, DateTimeKind.Utc); // Matchday 3 — CLOSED
-        var qf = new DateTime(2026, 6, 3,  20, 45, 0, DateTimeKind.Utc); // Quarter-Finals
+        var qf = new DateTime(2026, 6, 17, 20, 45, 0, DateTimeKind.Utc); // Quarter-Finals
         var sf = new DateTime(2026, 7, 8,  20, 45, 0, DateTimeKind.Utc); // Semi-Final
         var fi = new DateTime(2026, 8, 12, 20, 45, 0, DateTimeKind.Utc); // Final
         b.Entity<Match>().HasData(
