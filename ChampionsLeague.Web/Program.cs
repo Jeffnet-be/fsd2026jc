@@ -97,7 +97,7 @@ builder.Services.AddScoped<ISeasonTicketRepository, SeasonTicketRepository>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ChampionsLeague.Web.Services.TranslationService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
-builder.Services.AddSingleton<IEmailService, EmailService>();
+builder.Services.AddScoped<IEmailService, EmailService>(); // MailKit — reads Email:* from config
 
 // ── Hotel API ─────────────────────────────────────────────────────────
 builder.Services.AddHttpClient<IHotelApiService, HotelApiService>(client =>

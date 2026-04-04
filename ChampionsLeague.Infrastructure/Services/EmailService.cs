@@ -1,34 +1,71 @@
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using MimeKit;
 
 namespace ChampionsLeague.Infrastructure.Services;
 
-/// <summary>
-/// Contract for the e-mail service. Keeping this as an interface means the
-/// implementation can be swapped (e.g., MailKit, SendGrid) without touching callers.
-/// </summary>
+/// <summary>Contract for the email service.</summary>
 public interface IEmailService
 {
-    /// <summary>Sends an HTML e-mail to the given address.</summary>
     Task SendAsync(string to, string subject, string htmlBody);
 }
 
 /// <summary>
-/// Stub e-mail service: writes a formatted message to the .NET logger instead of
-/// sending a real e-mail. This is the correct pattern for demo/development mode.
-/// Replace the body of SendAsync with MailKit or SendGrid for production.
+/// Real email implementation using MailKit + SMTP (Brevo/SendGrid/Gmail).
+/// Falls back to console logging if SMTP is not configured so the app
+/// never crashes in development or when credentials are missing.
 /// </summary>
 public class EmailService : IEmailService
 {
-    private readonly ILogger<EmailService> _logger;
+    private readonly IConfiguration            _config;
+    private readonly ILogger<EmailService>     _logger;
 
-    public EmailService(ILogger<EmailService> logger) => _logger = logger;
-
-    /// <inheritdoc/>
-    public Task SendAsync(string to, string subject, string htmlBody)
+    public EmailService(IConfiguration config, ILogger<EmailService> logger)
     {
-        _logger.LogInformation(
-            "📧 [EMAIL STUB] To: {To} | Subject: {Subject}\n{Body}",
-            to, subject, htmlBody);
-        return Task.CompletedTask;
+        _config = config;
+        _logger = logger;
+    }
+
+    public async Task SendAsync(string to, string subject, string htmlBody)
+    {
+        var host     = _config["Email:SmtpHost"];
+        var port     = _config.GetValue<int>("Email:SmtpPort");
+        var user     = _config["Email:SmtpUser"];
+        var pass     = _config["Email:SmtpPass"];
+        var fromAddr = _config["Email:FromAddress"];
+        var fromName = _config["Email:FromName"] ?? "CL Tickets";
+
+        // If SMTP not configured, log to console and return (dev mode)
+        if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(user) || string.IsNullOrEmpty(pass))
+        {
+            _logger.LogInformation(
+                "📧 [EMAIL - SMTP not configured] To: {To}\nSubject: {Subject}\n{Body}",
+                to, subject, htmlBody);
+            return;
+        }
+
+        try
+        {
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(fromName, fromAddr ?? user));
+            message.To.Add(MailboxAddress.Parse(to));
+            message.Subject = subject;
+            message.Body    = new BodyBuilder { HtmlBody = htmlBody }.ToMessageBody();
+
+            using var smtp = new SmtpClient();
+            await smtp.ConnectAsync(host, port, SecureSocketOptions.StartTls);
+            await smtp.AuthenticateAsync(user, pass);
+            await smtp.SendAsync(message);
+            await smtp.DisconnectAsync(true);
+
+            _logger.LogInformation("📧 Email sent to {To}: {Subject}", to, subject);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "📧 Failed to send email to {To}: {Subject}", to, subject);
+            // Don't rethrow — a failed email should never crash a ticket purchase
+        }
     }
 }
