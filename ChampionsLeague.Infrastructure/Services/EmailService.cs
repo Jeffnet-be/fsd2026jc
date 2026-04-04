@@ -1,4 +1,5 @@
 using MailKit.Net.Smtp;
+using Microsoft.Extensions.Configuration;
 using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -31,7 +32,8 @@ public class EmailService : IEmailService
     public async Task SendAsync(string to, string subject, string htmlBody)
     {
         var host     = _config["Email:SmtpHost"];
-        var port     = _config.GetValue<int>("Email:SmtpPort");
+        _ = int.TryParse(_config["Email:SmtpPort"], out var port);
+        if (port == 0) port = 587; // default Brevo SMTP port
         var user     = _config["Email:SmtpUser"];
         var pass     = _config["Email:SmtpPass"];
         var fromAddr = _config["Email:FromAddress"];
