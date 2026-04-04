@@ -3,6 +3,7 @@ using ChampionsLeague.Domain.Entities;
 using ChampionsLeague.Domain.Interfaces;
 using ChampionsLeague.Infrastructure.Services;
 using ChampionsLeague.Services;
+using ChampionsLeague.Web.Services;
 using ChampionsLeague.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -22,6 +23,8 @@ public class AccountController : Controller
     private readonly ITicketRepository             _tickets;
     private readonly ITicketService                _ticketService;
     private readonly IEmailService                 _email;
+    private readonly IMatchRepository              _matches;
+    private readonly TranslationService            _tr;
     private readonly IMapper                       _mapper;
 
     public AccountController(
@@ -30,6 +33,8 @@ public class AccountController : Controller
         ITicketRepository              tickets,
         ITicketService                 ticketService,
         IEmailService                  email,
+        IMatchRepository               matches,
+        TranslationService             tr,
         IMapper                        mapper)
     {
         _userManager   = userManager;
@@ -37,6 +42,8 @@ public class AccountController : Controller
         _tickets       = tickets;
         _ticketService = ticketService;
         _email         = email;
+        _matches       = matches;
+        _tr            = tr;
         _mapper        = mapper;
     }
 
@@ -213,10 +220,6 @@ public class AccountController : Controller
 
     // ── Cancel ticket ─────────────────────────────────────────────────────
 
-    /// <summary>
-    /// POST /Account/CancelTicket — cancels a single ticket.
-    /// Free cancellation enforced up to 7 days before match in TicketService.CancelAsync.
-    /// </summary>
     [HttpPost, ValidateAntiForgeryToken, Authorize]
     public async Task<IActionResult> CancelTicket(int ticketId)
     {
@@ -224,10 +227,65 @@ public class AccountController : Controller
         var result = await _ticketService.CancelAsync(ticketId, userId);
 
         if (result.Success)
-            TempData["Success"] = "Ticket cancelled successfully.";
+            TempData["Success"] = _tr.T("tickets_cancel_success");
         else
             TempData["Error"] = result.ErrorMessage;
 
+        return RedirectToAction(nameof(MyTickets));
+    }
+
+    // ── Resend voucher email ──────────────────────────────────────────
+
+    /// <summary>
+    /// POST /Account/ResendVoucher — resends the voucher email for a single ticket.
+    /// Only allowed for the ticket owner, and only for Paid (non-cancelled) tickets.
+    /// </summary>
+    [HttpPost, ValidateAntiForgeryToken, Authorize]
+    public async Task<IActionResult> ResendVoucher(int ticketId)
+    {
+        var userId  = _userManager.GetUserId(User)!;
+        var user    = await _userManager.FindByIdAsync(userId);
+        var tickets = await _tickets.GetUserTicketsAsync(userId);
+        var ticket  = tickets.FirstOrDefault(t => t.Id == ticketId);
+
+        if (ticket is null || user is null)
+        {
+            TempData["Error"] = _tr.T("voucher_resend_error");
+            return RedirectToAction(nameof(MyTickets));
+        }
+
+        if (ticket.Status == TicketStatus.Cancelled)
+        {
+            TempData["Error"] = _tr.T("voucher_resend_cancelled");
+            return RedirectToAction(nameof(MyTickets));
+        }
+
+        var allMatches  = await _matches.GetAllWithClubsAsync();
+        var match       = allMatches.FirstOrDefault(m => m.Id == ticket.MatchId);
+        var matchDesc   = match is not null
+            ? $"{match.HomeClub?.Name} vs {match.AwayClub?.Name}"
+            : "Unknown match";
+        var matchDate   = match?.MatchDate.ToString("dd MMMM yyyy") ?? "";
+
+        await _email.SendAsync(
+            to      : user.Email!,
+            subject : $"{_tr.T("voucher_resend_subject")} — {matchDesc}",
+            htmlBody: $@"
+<p>Hello {user.FirstName},</p>
+<p>{_tr.T("voucher_resend_intro")} <strong>{matchDesc}</strong> ({matchDate}):</p>
+<table style='border-collapse:collapse;font-family:Arial,sans-serif'>
+  <tr><td style='padding:6px 16px 6px 0;color:#666'>{_tr.T("tickets_col_sector")}:</td>
+      <td style='padding:6px 0;font-weight:bold'>{ticket.Sector?.Name ?? ""}</td></tr>
+  <tr><td style='padding:6px 16px 6px 0;color:#666'>{_tr.T("tickets_col_seat")}:</td>
+      <td style='padding:6px 0;font-weight:bold'>{ticket.SeatNumber}</td></tr>
+  <tr><td style='padding:6px 16px 6px 0;color:#666'>{_tr.T("tickets_col_voucher")}:</td>
+      <td style='padding:6px 0;font-family:monospace;font-size:14px;font-weight:bold;color:#001489'>{ticket.VoucherId:D}</td></tr>
+</table>
+<p>{_tr.T("voucher_resend_footer")}</p>
+<p>CL Tickets Portal</p>"
+        );
+
+        TempData["Success"] = _tr.T("voucher_resend_success");
         return RedirectToAction(nameof(MyTickets));
     }
 }

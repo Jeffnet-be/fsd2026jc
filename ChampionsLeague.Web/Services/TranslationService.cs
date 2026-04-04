@@ -217,6 +217,37 @@ public class TranslationService
         ["reg_pwd_good"]               = new(){ ["nl"]="Goed",     ["fr"]="Bon",      ["en"]="Good" },
         ["reg_pwd_strong"]             = new(){ ["nl"]="Sterk",    ["fr"]="Fort",     ["en"]="Strong" },
 
+
+        // ── Voucher resend ────────────────────────────────────────────
+        ["voucher_resend_btn"]       = new(){ ["nl"]="Voucher opnieuw sturen",    ["fr"]="Renvoyer le bon",         ["en"]="Resend voucher" },
+        ["voucher_resend_subject"]   = new(){ ["nl"]="Uw voucher",                ["fr"]="Votre bon",               ["en"]="Your voucher" },
+        ["voucher_resend_intro"]     = new(){ ["nl"]="Hierbij uw vouchergegevens voor",
+                                              ["fr"]="Voici les détails de votre bon pour",
+                                              ["en"]="Here are your voucher details for" },
+        ["voucher_resend_footer"]    = new(){ ["nl"]="Toon deze vouchercode aan de ingang van het stadion op wedstrijddag.",
+                                              ["fr"]="Présentez ce bon à l entrée du stade le jour du match.",
+                                              ["en"]="Present this voucher code at the stadium entrance on match day." },
+        ["voucher_resend_success"]   = new(){ ["nl"]="Voucher opnieuw verstuurd naar uw e-mailadres.",
+                                              ["fr"]="Bon renvoyé à votre adresse e-mail.",
+                                              ["en"]="Voucher resent to your email address." },
+        ["voucher_resend_error"]     = new(){ ["nl"]="Ticket niet gevonden.",     ["fr"]="Billet introuvable.",     ["en"]="Ticket not found." },
+        ["voucher_resend_cancelled"] = new(){ ["nl"]="Geannuleerde tickets hebben geen geldige voucher.",
+                                              ["fr"]="Les billets annulés n ont pas de bon valide.",
+                                              ["en"]="Cancelled tickets do not have a valid voucher." },
+        ["tickets_cancel_success"]   = new(){ ["nl"]="Ticket succesvol geannuleerd.",
+                                              ["fr"]="Billet annulé avec succès.",
+                                              ["en"]="Ticket cancelled successfully." },
+        // ── Season ticket email ───────────────────────────────────────
+        ["season_email_subject"]     = new(){ ["nl"]="Uw seizoensabonnement — CL Tickets",
+                                              ["fr"]="Votre abonnement saison — CL Tickets",
+                                              ["en"]="Your season ticket — CL Tickets" },
+        ["season_email_intro"]       = new(){ ["nl"]="Bedankt voor uw aankoop! Hieronder vindt u de details van uw seizoensabonnement.",
+                                              ["fr"]="Merci pour votre achat! Voici les détails de votre abonnement saison.",
+                                              ["en"]="Thank you for your purchase! Below are the details of your season ticket." },
+        ["season_email_footer"]      = new(){ ["nl"]="Uw seizoensabonnement geeft u toegang tot alle thuiswedstrijden van uw club. Bewaar dit e-mailbericht als bewijs van aankoop.",
+                                              ["fr"]="Votre abonnement vous donne accès à tous les matchs à domicile de votre club.",
+                                              ["en"]="Your season ticket gives you access to all home matches of your club. Keep this email as proof of purchase." },
+
         // ── Hotel search ──────────────────────────────────────────────
         ["hotel_title"]      = new(){ ["nl"]="Hotels zoeken",      ["fr"]="Rechercher des hôtels", ["en"]="Find Hotels" },
         ["hotel_subtitle"]   = new(){ ["nl"]="Vlakbij het stadion",["fr"]="Près du stade",         ["en"]="Near the Stadium" },

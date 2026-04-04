@@ -57,28 +57,51 @@ else
                             <span class="badge bg-@bc">@t.Status</span>
                         </td>
                         <td>
-                            <code class="small">@t.VoucherId.ToString("D")[..8]…</code>
-                            <button class="btn btn-link btn-sm p-0 ms-1"
-                                    onclick="navigator.clipboard.writeText('@t.VoucherId.ToString("D")')"
-                                    title="Copy full code">📋</button>
+                            @if (t.Status != "Cancelled")
+                            {
+                                <code class="small">@t.VoucherId.ToString("D")[..8]…</code>
+                                <button class="btn btn-link btn-sm p-0 ms-1"
+                                        onclick="navigator.clipboard.writeText('@t.VoucherId.ToString("D")')"
+                                        title="@Tr.T("tickets_col_voucher")">📋</button>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">—</span>
+                            }
                         </td>
                         <td>
-                            @if (t.IsCancellable && t.Status == "Paid")
-                            {
-                                <form asp-action="CancelTicket" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="ticketId" value="@t.Id" />
-                                    <button type="submit"
-                                            class="btn btn-outline-danger btn-sm"
-                                            onclick="return confirm('@Tr.T("tickets_cancel_confirm")')">
-                                        @Tr.T("tickets_cancel_btn")
-                                    </button>
-                                </form>
-                            }
-                            else if (t.Status == "Paid")
-                            {
-                                <small class="text-muted">@Tr.T("tickets_not_cancellable")</small>
-                            }
+                            <div class="d-flex flex-column gap-1">
+                                @* Cancel button *@
+                                @if (t.IsCancellable && t.Status == "Paid")
+                                {
+                                    <form asp-action="CancelTicket" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="ticketId" value="@t.Id" />
+                                        <button type="submit"
+                                                class="btn btn-outline-danger btn-sm w-100"
+                                                onclick="return confirm('@Tr.T("tickets_cancel_confirm")')">
+                                            @Tr.T("tickets_cancel_btn")
+                                        </button>
+                                    </form>
+                                }
+                                else if (t.Status == "Paid")
+                                {
+                                    <small class="text-muted">@Tr.T("tickets_not_cancellable")</small>
+                                }
+
+                                @* Resend voucher button — only for Paid tickets *@
+                                @if (t.Status == "Paid")
+                                {
+                                    <form asp-action="ResendVoucher" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="ticketId" value="@t.Id" />
+                                        <button type="submit"
+                                                class="btn btn-outline-secondary btn-sm w-100">
+                                            📧 @Tr.T("voucher_resend_btn")
+                                        </button>
+                                    </form>
+                                }
+                            </div>
                         </td>
                     </tr>
                 }
@@ -94,7 +117,7 @@ $(function(){
     $('#ticketTable').DataTable({
         order:[[1,'desc']],
         pageLength:10,
-        language:{ search:'', searchPlaceholder:'Search...' }
+        language:{ search:'', searchPlaceholder:'@Tr.T("match_col_date")...' }
     });
 });
 </script>

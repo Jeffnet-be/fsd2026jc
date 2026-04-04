@@ -189,18 +189,49 @@ public class TicketService : ITicketService
         var realEmail = user?.Email ?? $"{userId}@unknown.com";
         var firstName = user?.FirstName ?? "Supporter";
 
-        var lines = string.Join("<br/>", tickets.Select(t =>
-            $"&bull; Seat <strong>{t.SeatNumber}</strong> &mdash; " +
-            $"Voucher: <code>{t.VoucherId:D}</code>"));
+        // Detect current language from thread culture (same mechanism as TranslationService)
+        var lang = System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName;
+        if (lang is not ("nl" or "fr" or "en")) lang = "nl";
+
+        var (subject, intro, seatLabel, voucherLabel, footer) = lang switch
+        {
+            "fr" => (
+                $"Vos billets — {match.HomeClub?.Name} vs {match.AwayClub?.Name}",
+                $"Merci pour votre achat! Vos billets pour <strong>{match.HomeClub?.Name} vs {match.AwayClub?.Name}</strong> le {match.MatchDate:dd MMMM yyyy} sont confirmés.",
+                "Siège", "Bon", "Présentez ce bon à l'entrée du stade le jour du match."
+            ),
+            "en" => (
+                $"Your tickets — {match.HomeClub?.Name} vs {match.AwayClub?.Name}",
+                $"Thank you for your purchase! Your tickets for <strong>{match.HomeClub?.Name} vs {match.AwayClub?.Name}</strong> on {match.MatchDate:dd MMMM yyyy} are confirmed.",
+                "Seat", "Voucher", "Present your voucher code at the stadium entrance on match day."
+            ),
+            _ => (
+                $"Uw tickets — {match.HomeClub?.Name} vs {match.AwayClub?.Name}",
+                $"Bedankt voor uw aankoop! Uw tickets voor <strong>{match.HomeClub?.Name} vs {match.AwayClub?.Name}</strong> op {match.MatchDate:dd MMMM yyyy} zijn bevestigd.",
+                "Zitplaats", "Voucher", "Toon uw vouchercode aan de ingang van het stadion op wedstrijddag."
+            )
+        };
+
+        var rows = string.Join("
+", tickets.Select(t => $@"
+  <tr>
+    <td style='padding:8px 16px 8px 0;color:#666'>{seatLabel}:</td>
+    <td style='padding:8px 0;font-weight:bold'>{t.SeatNumber}</td>
+  </tr>
+  <tr>
+    <td style='padding:8px 16px 8px 0;color:#666'>{voucherLabel}:</td>
+    <td style='padding:8px 0;font-family:monospace;font-size:14px;font-weight:bold;color:#001489'>{t.VoucherId:D}</td>
+  </tr>"));
 
         await _email.SendAsync(
             to      : realEmail,
-            subject : $"Your tickets: {match.HomeClub?.Name} vs {match.AwayClub?.Name}",
+            subject : subject,
             htmlBody: $@"<p>Hello {firstName},</p>
-<p>Your tickets for <strong>{match.HomeClub?.Name} vs {match.AwayClub?.Name}</strong>
-on {match.MatchDate:dd MMMM yyyy} are confirmed.</p>
-<p>{lines}</p>
-<p>Present your voucher code at the stadium gate on match day.</p>
+<p>{intro}</p>
+<table style='border-collapse:collapse;font-family:Arial,sans-serif'>
+  {rows}
+</table>
+<p>{footer}</p>
 <p>CL Tickets Portal</p>"
         );
     }
