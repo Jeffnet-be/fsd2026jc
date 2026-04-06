@@ -59,6 +59,43 @@ else
         </table>
     </div>
 
+    @* ── Season ticket rows ─────────────────────────────────────────── *@
+    @if (Model.SeasonItems.Any())
+    {
+        <div class="card border-0 shadow-sm mb-3" style="border-radius:14px;overflow:hidden">
+            <div class="card-header fw-bold" style="background:#001489;color:#FFD700">
+                📅 @Tr.T("cart_season_title")
+            </div>
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>@Tr.T("cart_col_match")</th>
+                        <th>@Tr.T("tickets_col_sector")</th>
+                        <th class="text-end">@Tr.T("cart_col_subtotal")</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.SeasonItems)
+                    {
+                        <tr>
+                            <td class="fw-bold">@item.ClubName<small class="text-muted d-block fw-normal">@item.StadiumName</small></td>
+                            <td><small class="text-muted">@Tr.TranslateSector(item.SectorName)</small></td>
+                            <td class="text-end fw-bold">€ @item.TotalPrice.ToString("0.00")</td>
+                            <td>
+                                <form asp-controller="Cart" asp-action="RemoveSeason" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="sectorId" value="@item.SectorId" />
+                                    <button class="btn btn-outline-danger btn-sm" title="Remove">✕</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <form asp-controller="Cart" asp-action="Clear" method="post">
             @Html.AntiForgeryToken()

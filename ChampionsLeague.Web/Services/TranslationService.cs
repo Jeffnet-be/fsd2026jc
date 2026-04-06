@@ -248,6 +248,24 @@ public class TranslationService
                                               ["fr"]="Votre abonnement vous donne accès à tous les matchs à domicile de votre club.",
                                               ["en"]="Your season ticket gives you access to all home matches of your club. Keep this email as proof of purchase." },
 
+
+        ["season_added_to_cart"]        = new(){ ["nl"]="Seizoensabonnement toegevoegd aan winkelwagen.",
+                                                   ["fr"]="Abonnement ajouté au panier.",
+                                                   ["en"]="Season ticket added to cart." },
+        ["season_err_already_in_cart"]  = new(){ ["nl"]="Dit vak zit al in uw winkelwagen.",
+                                                   ["fr"]="Ce secteur est déjà dans votre panier.",
+                                                   ["en"]="This sector is already in your cart." },
+        ["season_buy_btn"]              = new(){ ["nl"]="Voeg toe aan winkelwagen",
+                                                   ["fr"]="Ajouter au panier",
+                                                   ["en"]="Add to cart" },
+        ["checkout_confirmed_msg"]      = new(){ ["nl"]="Uw bestelling is bevestigd! Controleer uw inbox voor uw vouchers.",
+                                                  ["fr"]="Votre commande est confirmée! Vérifiez votre boîte de réception.",
+                                                  ["en"]="Your order is confirmed! Check your inbox for your vouchers." },
+        ["cart_col_type"]               = new(){ ["nl"]="Type",            ["fr"]="Type",            ["en"]="Type" },
+        ["cart_type_ticket"]            = new(){ ["nl"]="🎟️ Ticket",       ["fr"]="🎟️ Billet",       ["en"]="🎟️ Ticket" },
+        ["cart_type_season"]            = new(){ ["nl"]="📅 Abonnement",   ["fr"]="📅 Abonnement",   ["en"]="📅 Season ticket" },
+        ["cart_season_title"]           = new(){ ["nl"]="Seizoensabonnementen", ["fr"]="Abonnements saison", ["en"]="Season tickets" },
+
         // ── Hotel search ──────────────────────────────────────────────
         ["hotel_title"]      = new(){ ["nl"]="Hotels zoeken",      ["fr"]="Rechercher des hôtels", ["en"]="Find Hotels" },
         ["hotel_subtitle"]   = new(){ ["nl"]="Vlakbij het stadion",["fr"]="Près du stade",         ["en"]="Near the Stadium" },

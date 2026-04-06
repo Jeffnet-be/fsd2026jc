@@ -2,9 +2,11 @@ using ChampionsLeague.Domain.Entities;
 using ChampionsLeague.Domain.Interfaces;
 using ChampionsLeague.Infrastructure.Services;
 using ChampionsLeague.Web.Services;
+using ChampionsLeague.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace ChampionsLeague.Web.Controllers;
 
@@ -16,6 +18,11 @@ public class SeasonTicketController : Controller
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly TranslationService          _tr;
     private readonly IEmailService               _email;
+
+    private const string CartSessionKey = "CART";
+
+    private static readonly DateTime CompetitionStart =
+        new DateTime(2026, 4, 22, 0, 0, 0, DateTimeKind.Utc);
 
     public SeasonTicketController(
         IClubRepository              clubs,
@@ -31,8 +38,6 @@ public class SeasonTicketController : Controller
         _email         = email;
     }
 
-    private static readonly DateTime CompetitionStart = new DateTime(2026, 4, 22, 0, 0, 0, DateTimeKind.Utc);
-
     public async Task<IActionResult> Index()
     {
         if (DateTime.UtcNow >= CompetitionStart)
@@ -40,13 +45,17 @@ public class SeasonTicketController : Controller
             ViewBag.Closed = true;
             return View();
         }
-
         var clubs = await _clubs.GetAllWithStadiumsAsync();
         return View(clubs);
     }
 
+    /// <summary>
+    /// Adds a season ticket to the cart — does NOT save to DB yet.
+    /// The actual seat number is assigned and saved during checkout,
+    /// preventing seat numbers from incrementing on repeated clicks.
+    /// </summary>
     [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> Purchase(int sectorId, decimal totalPrice)
+    public async Task<IActionResult> AddToCart(int sectorId, decimal totalPrice)
     {
         if (DateTime.UtcNow >= CompetitionStart)
         {
@@ -54,31 +63,60 @@ public class SeasonTicketController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        var user     = await _userManager.GetUserAsync(User)!;
-        var userId   = user!.Id;
-        var reserved = (await _seasonTickets.GetSeasonReservedSeatsAsync(sectorId)).ToHashSet();
-        var nextSeat = Enumerable.Range(1, 1000).FirstOrDefault(s => !reserved.Contains(s));
+        // Find sector and club info for display in the cart
+        var clubs      = await _clubs.GetAllWithStadiumsAsync();
+        var club       = clubs.FirstOrDefault(c =>
+            c.Stadium?.Sectors.Any(s => s.Id == sectorId) == true);
+        var sector     = club?.Stadium?.Sectors.FirstOrDefault(s => s.Id == sectorId);
 
-        if (nextSeat == 0)
+        if (sector is null || club is null)
         {
-            TempData["Error"] = _tr.T("season_err_full");
+            TempData["Error"] = "Sector not found.";
             return RedirectToAction(nameof(Index));
         }
 
-        // Find the sector name for the email
-        var clubs     = await _clubs.GetAllWithStadiumsAsync();
-        var sector    = clubs.SelectMany(c => c.Stadium?.Sectors ?? Enumerable.Empty<Sector>())
-                             .FirstOrDefault(s => s.Id == sectorId);
-        var sectorName = sector?.Name ?? "Unknown sector";
-        var stadiumName = clubs.FirstOrDefault(c =>
-            c.Stadium?.Sectors.Any(s => s.Id == sectorId) == true)?.Stadium?.Name ?? "";
+        // Check if already in cart (one season ticket per sector per person)
+        var cart = GetCart();
+        if (cart.SeasonItems.Any(i => i.SectorId == sectorId))
+        {
+            TempData["Error"] = _tr.T("season_err_already_in_cart");
+            return RedirectToAction(nameof(Index));
+        }
+
+        cart.SeasonItems.Add(new SeasonCartItemVM
+        {
+            SectorId    = sectorId,
+            SectorName  = sector.Name,
+            StadiumName = club.Stadium?.Name ?? "",
+            ClubName    = club.Name,
+            TotalPrice  = totalPrice
+        });
+
+        SaveCart(cart);
+        TempData["Success"] = _tr.T("season_added_to_cart");
+        return RedirectToAction(nameof(Index));
+    }
+
+    /// <summary>
+    /// Called by CheckoutController after payment is confirmed.
+    /// Assigns the actual seat number and saves the season ticket to DB.
+    /// Sends confirmation email only after successful save.
+    /// </summary>
+    public async Task<(bool Success, string? Error, int SeatNumber)> FinalizeSeasonTicketAsync(
+        string userId, SeasonCartItemVM item)
+    {
+        var reserved = (await _seasonTickets.GetSeasonReservedSeatsAsync(item.SectorId)).ToHashSet();
+        var nextSeat = Enumerable.Range(1, 1000).FirstOrDefault(s => !reserved.Contains(s));
+
+        if (nextSeat == 0)
+            return (false, _tr.T("season_err_full"), 0);
 
         var seasonTicket = new SeasonTicket
         {
             UserId      = userId,
-            SectorId    = sectorId,
+            SectorId    = item.SectorId,
             SeatNumber  = nextSeat,
-            TotalPrice  = totalPrice,
+            TotalPrice  = item.TotalPrice,
             PurchasedAt = DateTime.UtcNow,
             IsActive    = true
         };
@@ -86,28 +124,16 @@ public class SeasonTicketController : Controller
         await _seasonTickets.AddAsync(seasonTicket);
         await _seasonTickets.SaveChangesAsync();
 
-        // ── Send season ticket confirmation email ─────────────────────
-        await _email.SendAsync(
-            to      : user.Email!,
-            subject : _tr.T("season_email_subject"),
-            htmlBody: $@"
-<p>Hello {user.FirstName},</p>
-<p>{_tr.T("season_email_intro")}</p>
-<table style='border-collapse:collapse;font-family:Arial,sans-serif'>
-  <tr><td style='padding:6px 16px 6px 0;color:#666'>{_tr.T("tickets_col_sector")}:</td>
-      <td style='padding:6px 0;font-weight:bold'>{sectorName}</td></tr>
-  <tr><td style='padding:6px 16px 6px 0;color:#666'>{_tr.T("tickets_col_seat")}:</td>
-      <td style='padding:6px 0;font-weight:bold'>{nextSeat}</td></tr>
-  <tr><td style='padding:6px 16px 6px 0;color:#666'>{_tr.T("season_price")}:</td>
-      <td style='padding:6px 0;font-weight:bold'>€ {totalPrice:0.00}</td></tr>
-  <tr><td style='padding:6px 16px 6px 0;color:#666'>{_tr.T("match_col_stadium")}:</td>
-      <td style='padding:6px 0;font-weight:bold'>{stadiumName}</td></tr>
-</table>
-<p>{_tr.T("season_email_footer")}</p>
-<p>CL Tickets Portal</p>"
-        );
-
-        TempData["Success"] = $"{_tr.T("season_success")} {nextSeat}.";
-        return RedirectToAction(nameof(Index));
+        return (true, null, nextSeat);
     }
+
+    private CartVM GetCart()
+    {
+        var json = HttpContext.Session.GetString(CartSessionKey);
+        if (string.IsNullOrEmpty(json)) return new CartVM();
+        return JsonSerializer.Deserialize<CartVM>(json) ?? new CartVM();
+    }
+
+    private void SaveCart(CartVM cart)
+        => HttpContext.Session.SetString(CartSessionKey, JsonSerializer.Serialize(cart));
 }

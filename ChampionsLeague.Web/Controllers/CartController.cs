@@ -68,7 +68,18 @@ public class CartController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    /// <summary>Empties the entire cart.</summary>
+    /// <summary>Removes a season ticket item from the cart.</summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult RemoveSeason(int sectorId)
+    {
+        var cart = GetCart();
+        cart.SeasonItems.RemoveAll(i => i.SectorId == sectorId);
+        SaveCart(cart);
+        return RedirectToAction(nameof(Index));
+    }
+
+    /// <summary>Empties the entire cart including season items.</summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult Clear()

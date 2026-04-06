@@ -40,6 +40,34 @@
     </table>
 </div>
 
+@if (Model.SeasonItems.Any())
+{
+    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;overflow:hidden">
+        <div class="card-header fw-bold" style="background:#001489;color:#FFD700">
+            📅 @Tr.T("cart_season_title")
+        </div>
+        <table class="table mb-0 align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>@Tr.T("cart_col_match")</th>
+                    <th>@Tr.T("tickets_col_sector")</th>
+                    <th class="text-end">@Tr.T("cart_col_subtotal")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.SeasonItems)
+                {
+                    <tr>
+                        <td class="fw-bold">@item.ClubName<small class="text-muted d-block fw-normal">@item.StadiumName</small></td>
+                        <td><small class="text-muted">@Tr.TranslateSector(item.SectorName)</small></td>
+                        <td class="text-end fw-bold">€ @item.TotalPrice.ToString("0.00")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
 <div class="alert alert-info">
     <i class="bi bi-credit-card me-2"></i>@Tr.T("checkout_payment_note")
 </div>

@@ -84,7 +84,7 @@ else if (Model != null)
                                             € @seasonPrice.ToString("0.00")
                                         </td>
                                         <td>
-                                            <form asp-action="Purchase" method="post">
+                                            <form asp-action="AddToCart" method="post">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="sectorId"   value="@sector.Id" />
                                                 <input type="hidden" name="totalPrice" value="@seasonPrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)" />

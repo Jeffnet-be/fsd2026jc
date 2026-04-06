@@ -6,9 +6,20 @@ namespace ChampionsLeague.Web.ViewModels;
 /// </summary>
 public class CartVM
 {
-    public List<CartItemVM> Items { get; set; } = new();
-    public decimal Total => Items.Sum(i => i.Subtotal);
-    public int     Count => Items.Sum(i => i.Quantity);
+    public List<CartItemVM>       Items       { get; set; } = new();
+    public List<SeasonCartItemVM> SeasonItems { get; set; } = new();
+    public decimal Total => Items.Sum(i => i.Subtotal) + SeasonItems.Sum(i => i.TotalPrice);
+    public int     Count => Items.Sum(i => i.Quantity) + SeasonItems.Count;
+}
+
+/// <summary>One season ticket item in the cart.</summary>
+public class SeasonCartItemVM
+{
+    public int     SectorId    { get; set; }
+    public string  SectorName  { get; set; } = string.Empty;
+    public string  StadiumName { get; set; } = string.Empty;
+    public string  ClubName    { get; set; } = string.Empty;
+    public decimal TotalPrice  { get; set; }
 }
 
 /// <summary>One line in the cart — one match + sector combination.</summary>
