@@ -4,7 +4,8 @@
 <div class="container py-4">
 <h1 class="fw-bold mb-4" style="color:#001489">🛒 @Tr.T("cart_title")</h1>
 
-@if (!Model.Items.Any())
+@* Empty state — checks BOTH regular and season items *@
+@if (!Model.Items.Any() && !Model.SeasonItems.Any())
 {
     <div class="alert alert-info d-flex align-items-center gap-3">
         <span style="font-size:2rem">🛒</span>
@@ -15,54 +16,51 @@
 }
 else
 {
-    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;overflow:hidden">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th>@Tr.T("cart_col_match")</th>
-                    <th>@Tr.T("cart_col_date")</th>
-                    <th>@Tr.T("cart_col_sector")</th>
-                    <th class="text-center">@Tr.T("cart_col_qty")</th>
-                    <th class="text-end">@Tr.T("cart_col_unit")</th>
-                    <th class="text-end">@Tr.T("cart_col_subtotal")</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.Items)
-                {
+    @* ── Regular match tickets ─────────────────────────────────────── *@
+    @if (Model.Items.Any())
+    {
+        <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;overflow:hidden">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
                     <tr>
-                        <td class="fw-bold">@item.MatchDescription</td>
-                        <td>@item.MatchDate.ToString("dd/MM/yyyy")</td>
-                        <td><small class="text-muted">@Tr.TranslateSector(item.SectorName)</small></td>
-                        <td class="text-center">@item.Quantity</td>
-                        <td class="text-end">€ @item.UnitPrice.ToString("0.00")</td>
-                        <td class="text-end fw-bold">€ @item.Subtotal.ToString("0.00")</td>
-                        <td>
-                            <form asp-controller="Cart" asp-action="Remove" method="post">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="matchId"  value="@item.MatchId" />
-                                <input type="hidden" name="sectorId" value="@item.SectorId" />
-                                <button class="btn btn-outline-danger btn-sm" title="Remove">✕</button>
-                            </form>
-                        </td>
+                        <th>@Tr.T("cart_col_match")</th>
+                        <th>@Tr.T("cart_col_date")</th>
+                        <th>@Tr.T("cart_col_sector")</th>
+                        <th class="text-center">@Tr.T("cart_col_qty")</th>
+                        <th class="text-end">@Tr.T("cart_col_unit")</th>
+                        <th class="text-end">@Tr.T("cart_col_subtotal")</th>
+                        <th></th>
                     </tr>
-                }
-            </tbody>
-            <tfoot>
-                <tr class="table-light">
-                    <td colspan="5" class="text-end fw-bold fs-5">@Tr.T("cart_total")</td>
-                    <td class="text-end fw-bold fs-5 text-success">€ @Model.Total.ToString("0.00")</td>
-                    <td></td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td class="fw-bold">@item.MatchDescription</td>
+                            <td>@item.MatchDate.ToString("dd/MM/yyyy")</td>
+                            <td><small class="text-muted">@Tr.TranslateSector(item.SectorName)</small></td>
+                            <td class="text-center">@item.Quantity</td>
+                            <td class="text-end">€ @item.UnitPrice.ToString("0.00")</td>
+                            <td class="text-end fw-bold">€ @item.Subtotal.ToString("0.00")</td>
+                            <td>
+                                <form asp-controller="Cart" asp-action="Remove" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="matchId"  value="@item.MatchId" />
+                                    <input type="hidden" name="sectorId" value="@item.SectorId" />
+                                    <button class="btn btn-outline-danger btn-sm" title="Remove">✕</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 
-    @* ── Season ticket rows ─────────────────────────────────────────── *@
+    @* ── Season tickets — shown regardless of whether regular tickets exist *@
     @if (Model.SeasonItems.Any())
     {
-        <div class="card border-0 shadow-sm mb-3" style="border-radius:14px;overflow:hidden">
+        <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;overflow:hidden">
             <div class="card-header fw-bold" style="background:#001489;color:#FFD700">
                 📅 @Tr.T("cart_season_title")
             </div>
@@ -79,7 +77,9 @@ else
                     @foreach (var item in Model.SeasonItems)
                     {
                         <tr>
-                            <td class="fw-bold">@item.ClubName<small class="text-muted d-block fw-normal">@item.StadiumName</small></td>
+                            <td class="fw-bold">@item.ClubName
+                                <small class="text-muted d-block fw-normal">@item.StadiumName</small>
+                            </td>
                             <td><small class="text-muted">@Tr.TranslateSector(item.SectorName)</small></td>
                             <td class="text-end fw-bold">€ @item.TotalPrice.ToString("0.00")</td>
                             <td>
@@ -95,6 +95,14 @@ else
             </table>
         </div>
     }
+
+    @* ── Total + action buttons ────────────────────────────────────── *@
+    <div class="card border-0 shadow-sm mb-4 px-4 py-3" style="border-radius:14px">
+        <div class="d-flex justify-content-between align-items-center">
+            <span class="fw-bold fs-5">@Tr.T("cart_total")</span>
+            <span class="fw-bold fs-5 text-success">€ @Model.Total.ToString("0.00")</span>
+        </div>
+    </div>
 
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <form asp-controller="Cart" asp-action="Clear" method="post">
