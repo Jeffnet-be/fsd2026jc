@@ -1,43 +1,36 @@
+using AutoMapper;
 using ChampionsLeague.Domain.Entities;
 using ChampionsLeague.Domain.Interfaces;
-using ChampionsLeague.Infrastructure.Services;
-using ChampionsLeague.Web.Services;
-using ChampionsLeague.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace ChampionsLeague.Web.Controllers;
 
-[Authorize]
+/// <summary>
+/// Season ticket purchase — business rule: can only be bought before competition start.
+/// An abonnement-seat cannot then be sold as a single ticket (enforced in TicketService).
+/// </summary>
 public class SeasonTicketController : Controller
 {
-    private readonly IClubRepository             _clubs;
-    private readonly ISeasonTicketRepository     _seasonTickets;
+    private readonly IClubRepository          _clubs;
+    private readonly ISeasonTicketRepository  _seasonTickets;
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly TranslationService          _tr;
-    private readonly IEmailService               _email;
-
-    private const string CartSessionKey = "CART";
-
-    private static readonly DateTime CompetitionStart =
-        new DateTime(2026, 4, 22, 0, 0, 0, DateTimeKind.Utc);
 
     public SeasonTicketController(
-        IClubRepository              clubs,
-        ISeasonTicketRepository      seasonTickets,
-        UserManager<ApplicationUser> userManager,
-        TranslationService           tr,
-        IEmailService                email)
+        IClubRepository         clubs,
+        ISeasonTicketRepository seasonTickets,
+        UserManager<ApplicationUser> userManager)
     {
         _clubs         = clubs;
         _seasonTickets = seasonTickets;
         _userManager   = userManager;
-        _tr            = tr;
-        _email         = email;
     }
 
+    // Competition start date — season tickets only available before this date
+    private static readonly DateTime CompetitionStart = new DateTime(2025, 9, 17);
+
+    /// <summary>GET /SeasonTicket — shows available clubs/sectors for season ticket purchase.</summary>
     public async Task<IActionResult> Index()
     {
         if (DateTime.UtcNow >= CompetitionStart)
@@ -45,78 +38,40 @@ public class SeasonTicketController : Controller
             ViewBag.Closed = true;
             return View();
         }
+
         var clubs = await _clubs.GetAllWithStadiumsAsync();
         return View(clubs);
     }
 
-    /// <summary>
-    /// Adds a season ticket to the cart — does NOT save to DB yet.
-    /// The actual seat number is assigned and saved during checkout,
-    /// preventing seat numbers from incrementing on repeated clicks.
-    /// </summary>
+    /// <summary>POST /SeasonTicket/Purchase — purchases a season ticket for a sector.</summary>
     [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddToCart(int sectorId, decimal totalPrice)
+    [Authorize]
+    public async Task<IActionResult> Purchase(int sectorId, decimal totalPrice)
     {
         if (DateTime.UtcNow >= CompetitionStart)
         {
-            TempData["Error"] = _tr.T("season_err_started");
+            TempData["Error"] = "Season tickets can no longer be purchased — the competition has started.";
             return RedirectToAction(nameof(Index));
         }
 
-        // Find sector and club info for display in the cart
-        var clubs      = await _clubs.GetAllWithStadiumsAsync();
-        var club       = clubs.FirstOrDefault(c =>
-            c.Stadium?.Sectors.Any(s => s.Id == sectorId) == true);
-        var sector     = club?.Stadium?.Sectors.FirstOrDefault(s => s.Id == sectorId);
+        var userId = _userManager.GetUserId(User)!;
 
-        if (sector is null || club is null)
-        {
-            TempData["Error"] = "Sector not found.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        // Check if already in cart (one season ticket per sector per person)
-        var cart = GetCart();
-        if (cart.SeasonItems.Any(i => i.SectorId == sectorId))
-        {
-            TempData["Error"] = _tr.T("season_err_already_in_cart");
-            return RedirectToAction(nameof(Index));
-        }
-
-        cart.SeasonItems.Add(new SeasonCartItemVM
-        {
-            SectorId    = sectorId,
-            SectorName  = sector.Name,
-            StadiumName = club.Stadium?.Name ?? "",
-            ClubName    = club.Name,
-            TotalPrice  = totalPrice
-        });
-
-        SaveCart(cart);
-        TempData["Success"] = _tr.T("season_added_to_cart");
-        return RedirectToAction(nameof(Index));
-    }
-
-    /// <summary>
-    /// Called by CheckoutController after payment is confirmed.
-    /// Assigns the actual seat number and saves the season ticket to DB.
-    /// Sends confirmation email only after successful save.
-    /// </summary>
-    public async Task<(bool Success, string? Error, int SeatNumber)> FinalizeSeasonTicketAsync(
-        string userId, SeasonCartItemVM item)
-    {
-        var reserved = (await _seasonTickets.GetSeasonReservedSeatsAsync(item.SectorId)).ToHashSet();
+        // Find next available seat in this sector (simple sequential allocation)
+        var reserved = (await _seasonTickets.GetSeasonReservedSeatsAsync(sectorId)).ToHashSet();
         var nextSeat = Enumerable.Range(1, 1000).FirstOrDefault(s => !reserved.Contains(s));
 
         if (nextSeat == 0)
-            return (false, _tr.T("season_err_full"), 0);
+        {
+            TempData["Error"] = "No more season ticket seats available in this sector.";
+            return RedirectToAction(nameof(Index));
+        }
 
         var seasonTicket = new SeasonTicket
         {
             UserId      = userId,
-            SectorId    = item.SectorId,
+            SectorId    = sectorId,
             SeatNumber  = nextSeat,
-            TotalPrice  = item.TotalPrice,
+            TotalPrice  = totalPrice,
             PurchasedAt = DateTime.UtcNow,
             IsActive    = true
         };
@@ -124,16 +79,7 @@ public class SeasonTicketController : Controller
         await _seasonTickets.AddAsync(seasonTicket);
         await _seasonTickets.SaveChangesAsync();
 
-        return (true, null, nextSeat);
+        TempData["Success"] = $"Season ticket purchased! Your seat number is {nextSeat}.";
+        return RedirectToAction(nameof(Index));
     }
-
-    private CartVM GetCart()
-    {
-        var json = HttpContext.Session.GetString(CartSessionKey);
-        if (string.IsNullOrEmpty(json)) return new CartVM();
-        return JsonSerializer.Deserialize<CartVM>(json) ?? new CartVM();
-    }
-
-    private void SaveCart(CartVM cart)
-        => HttpContext.Session.SetString(CartSessionKey, JsonSerializer.Serialize(cart));
 }

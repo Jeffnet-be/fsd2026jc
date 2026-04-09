@@ -1,4 +1,18 @@
 <!DOCTYPE html>
+@{
+    // Read cart count from session on every page render
+    // This keeps the badge in sync even after POST+redirect (season tickets, cancel etc.)
+    var _cartJson = Context.Session.GetString("CART");
+    var _cartCount = 0;
+    if (!string.IsNullOrEmpty(_cartJson))
+    {
+        try {
+            var _cart = System.Text.Json.JsonSerializer
+                .Deserialize<ChampionsLeague.Web.ViewModels.CartVM>(_cartJson);
+            _cartCount = _cart?.Count ?? 0;
+        } catch { }
+    }
+}
 <html lang="@Tr.Culture">
 <head>
     <meta charset="utf-8" />
@@ -113,7 +127,7 @@
                         <i class="bi bi-cart3 fs-5 text-white"></i>
                         <span class="position-absolute top-0 start-100 translate-middle
                                      badge rounded-pill bg-warning text-dark"
-                              id="cart-badge" style="font-size:.65rem">0</span>
+                              id="cart-badge" style="font-size:.65rem">@(_cartCount > 0 ? _cartCount.ToString() : "")</span>
                     </a>
                 </li>
                 @if (User.Identity?.IsAuthenticated == true)
