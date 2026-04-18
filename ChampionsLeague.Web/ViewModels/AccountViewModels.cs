@@ -90,3 +90,14 @@ public class ResetPasswordVM
     [Display(Name = "Confirm password")]
     public string ConfirmPassword { get; set; } = string.Empty;
 }
+
+/// <summary>Viewmodel for the SeasonTicketHistory section </summary>
+public class SeasonTicketHistoryVM
+{
+    public int Id { get; set; }
+    public string SectorName { get; set; } = "";
+    public int SeatNumber { get; set; }
+    public decimal TotalPrice { get; set; }
+    public DateTime PurchasedAt { get; set; }
+    public bool IsActive { get; set; }
+}

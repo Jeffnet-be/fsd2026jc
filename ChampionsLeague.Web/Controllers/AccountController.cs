@@ -26,6 +26,8 @@ public class AccountController : Controller
     private readonly IMatchRepository              _matches;
     private readonly TranslationService            _tr;
     private readonly IMapper                       _mapper;
+    private readonly ISeasonTicketRepository       _seasonTickets;
+
 
     public AccountController(
         UserManager<ApplicationUser>   userManager,
@@ -35,7 +37,8 @@ public class AccountController : Controller
         IEmailService                  email,
         IMatchRepository               matches,
         TranslationService             tr,
-        IMapper                        mapper)
+        IMapper                        mapper,
+        ISeasonTicketRepository        seasonTickets)
     {
         _userManager   = userManager;
         _signInManager = signInManager;
@@ -45,6 +48,7 @@ public class AccountController : Controller
         _matches       = matches;
         _tr            = tr;
         _mapper        = mapper;
+        _seasonTickets = seasonTickets;
     }
 
     // ── Registration ──────────────────────────────────────────────────────
@@ -212,9 +216,23 @@ public class AccountController : Controller
     [Authorize]
     public async Task<IActionResult> MyTickets()
     {
-        var userId  = _userManager.GetUserId(User)!;
-        var tickets = await _tickets.GetUserTicketHistoryAsync(userId); // full history incl. cancelled
-        var vms     = _mapper.Map<IEnumerable<TicketHistoryItemVM>>(tickets);
+        var userId = _userManager.GetUserId(User)!;
+        var tickets = await _tickets.GetUserTicketHistoryAsync(userId);
+        var seasonTickets = await _seasonTickets.GetUserSeasonTicketsAsync(userId);
+
+        var vms = _mapper.Map<IEnumerable<TicketHistoryItemVM>>(tickets);
+
+        var seasonVms = seasonTickets.Select(st => new SeasonTicketHistoryVM
+        {
+            Id = st.Id,
+            SectorName = st.Sector?.Name ?? "",
+            SeatNumber = st.SeatNumber,
+            TotalPrice = st.TotalPrice,
+            PurchasedAt = st.PurchasedAt,
+            IsActive = st.IsActive
+        });
+
+        ViewBag.SeasonTickets = seasonVms;
         return View(vms);
     }
 

@@ -109,6 +109,40 @@ else
         </table>
     </div>
 }
+    @if (ViewBag.SeasonTickets is IEnumerable<ChampionsLeague.Web.ViewModels.SeasonTicketHistoryVM> seasonTickets
+         && seasonTickets.Any())
+    {
+        <h2 class="fw-bold mt-5 mb-3" style="color:#001489">📅 Season Tickets</h2>
+        <div class="card border-0 shadow-sm" style="border-radius:14px;overflow:hidden">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>@Tr.T("tickets_col_sector")</th>
+                        <th class="text-center">@Tr.T("tickets_col_seat")</th>
+                        <th class="text-end">@Tr.T("tickets_col_price")</th>
+                        <th>Purchased</th>
+                        <th class="text-center">@Tr.T("tickets_col_status")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var st in seasonTickets)
+                    {
+                        <tr>
+                            <td><small class="text-muted">@Tr.TranslateSector(st.SectorName)</small></td>
+                            <td class="text-center">@st.SeatNumber</td>
+                            <td class="text-end">€ @st.TotalPrice.ToString("0.00")</td>
+                            <td>@st.PurchasedAt.ToString("dd/MM/yyyy")</td>
+                            <td class="text-center">
+                                <span class="badge bg-@(st.IsActive ? "success" : "secondary")">
+                                    @(st.IsActive ? "Active" : "Cancelled")
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
 
 @section Scripts {
