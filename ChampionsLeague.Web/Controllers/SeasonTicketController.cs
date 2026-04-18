@@ -44,9 +44,14 @@ public class SeasonTicketController : Controller
     /// Adds the season ticket to the SESSION CART only.
     /// No DB write happens here — seat assignment happens at checkout.
     /// </summary>
-    [HttpPost, ValidateAntiForgeryToken, Authorize]
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Purchase(int sectorId, string totalPrice)
     {
+        // Manual auth check — redirects to login with returnUrl pointing to Index, not Purchase
+        if (!User.Identity?.IsAuthenticated ?? true)
+            return RedirectToAction("Login", "Account",
+                new { returnUrl = Url.Action("Index", "SeasonTicket") });
+
         var userId = _userManager.GetUserId(User)!;
         decimal price = decimal.Parse(
        totalPrice,
