@@ -157,6 +157,11 @@ public class TranslationService
             ["fr"]="Êtes-vous sûr de vouloir annuler ce billet?",
             ["en"]="Are you sure you want to cancel this ticket? This cannot be undone." },
         ["tickets_not_cancellable"]= new(){ ["nl"]="Niet meer annuleerbaar", ["fr"]="Non annulable", ["en"]="Not cancellable" },
+        ["season_tickets_title"] = new() { ["nl"] = "Seizoensabonnementen", ["fr"] = "Abonnements", ["en"] = "Season Tickets" },
+        ["season_col_club"] = new() { ["nl"] = "Club", ["fr"] = "Club", ["en"] = "Club" },
+        ["season_col_purchased"] = new() { ["nl"] = "Aankoopdatum", ["fr"] = "Date d'achat", ["en"] = "Purchase Date" },
+        ["season_status_active"] = new() { ["nl"] = "Actief", ["fr"] = "Actif", ["en"] = "Active" },
+        ["season_status_cancelled"] = new() { ["nl"] = "Geannuleerd", ["fr"] = "Annulé", ["en"] = "Cancelled" },
 
         // ── Login ─────────────────────────────────────────────────────
         ["login_title"]        = new(){ ["nl"]="Inloggen",         ["fr"]="Connexion",      ["en"]="Login" },
