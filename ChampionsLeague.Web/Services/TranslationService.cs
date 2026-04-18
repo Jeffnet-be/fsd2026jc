@@ -165,6 +165,7 @@ public class TranslationService
         ["ticket_status_paid"] = new() { ["nl"] = "Betaald", ["fr"] = "Payé", ["en"] = "Paid" },
         ["ticket_status_cancelled"] = new() { ["nl"] = "Geannuleerd", ["fr"] = "Annulé", ["en"] = "Cancelled" },
         ["ticket_status_pending"] = new() { ["nl"] = "In behandeling", ["fr"] = "En attente", ["en"] = "Pending" },
+        ["tickets_regular_title"] = new() { ["nl"] = "Losse tickets", ["fr"] = "Billets individuels", ["en"] = "Individual Tickets" },
 
         // ── Login ─────────────────────────────────────────────────────
         ["login_title"]        = new(){ ["nl"]="Inloggen",         ["fr"]="Connexion",      ["en"]="Login" },

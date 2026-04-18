@@ -20,7 +20,7 @@
     }
 
     @* ── Regular match tickets ─────────────────────────────────────────── *@
-    <h2 class="fw-bold mb-3" style="color:#001489">🎟️ @Tr.T("tickets_title")</h2>
+    <h2 class="fw-bold mb-3" style="color:#001489">🎟️ @Tr.T("tickets_regular_title")</h2>
     @if (!Model.Any())
     {
         <div class="alert alert-info d-flex align-items-center gap-3">
@@ -137,11 +137,11 @@
             <table id="seasonTable" class="table table-hover table-striped align-middle mb-0">
                 <thead class="table-dark">
                     <tr>
+                        <th>@Tr.T("season_col_purchased")</th>
                         <th>@Tr.T("season_col_club")</th>
                         <th>@Tr.T("tickets_col_sector")</th>
                         <th class="text-center">@Tr.T("tickets_col_seat")</th>
                         <th class="text-end">@Tr.T("tickets_col_price")</th>
-                        <th>@Tr.T("season_col_purchased")</th>
                         <th class="text-center">@Tr.T("tickets_col_status")</th>
                         <th></th>
                     </tr>
@@ -150,6 +150,10 @@
                     @foreach (var st in seasonTickets)
                     {
                         <tr>
+                            <td data-order="@st.PurchasedAt.Ticks">
+                                @st.PurchasedAt.ToString("dd/MM/yyyy")
+                                <small class="text-muted d-block">@st.PurchasedAt.ToString("HH:mm") UTC</small>
+                            </td>
                             <td class="fw-bold">
                                 @st.ClubName
                                 <small class="text-muted d-block fw-normal">@st.StadiumName</small>
@@ -157,10 +161,6 @@
                             <td><small class="text-muted">@Tr.TranslateSector(st.SectorName)</small></td>
                             <td class="text-center">@st.SeatNumber</td>
                             <td class="text-end">€ @st.TotalPrice.ToString("0.00")</td>
-                            <td data-order="@st.PurchasedAt.Ticks">
-                                @st.PurchasedAt.ToString("dd/MM/yyyy")
-                                <small class="text-muted d-block">@st.PurchasedAt.ToString("HH:mm") UTC</small>
-                            </td>
                             <td class="text-center">
                                 @{
                                     var sbc = st.IsActive ? "success" : "secondary";
@@ -225,7 +225,7 @@
                 language:{ search:'', searchPlaceholder:'@Tr.T("match_col_date")...' }
             });
             $('#seasonTable').DataTable({
-                order:[[4,'desc']], pageLength:10,
+                order:[[4,'desc']], pageLength:10,  // ← change 4 to 0 here
                 language:{ search:'', searchPlaceholder:'Search...' }
             });
         });
