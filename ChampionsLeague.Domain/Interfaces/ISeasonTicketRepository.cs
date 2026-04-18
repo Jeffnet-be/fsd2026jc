@@ -13,4 +13,7 @@ public interface ISeasonTicketRepository : IRepository<SeasonTicket>
     /// These seats must be excluded from single-game ticket sales to prevent overbooking.
     /// </summary>
     Task<IEnumerable<int>> GetSeasonReservedSeatsAsync(int sectorId);
+
+    /// <summary>Returns ALL season tickets for a user including cancelled ones.</summary>
+    Task<IEnumerable<SeasonTicket>> GetAllUserSeasonTicketsAsync(string userId);
 }

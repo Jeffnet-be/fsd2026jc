@@ -24,4 +24,11 @@ public class SeasonTicketRepository : BaseRepository<SeasonTicket>, ISeasonTicke
             .Where(st => st.SectorId == sectorId && st.IsActive)
             .Select(st => st.SeatNumber)
             .ToListAsync();
+    /// <summary>Returns ALL season tickets for a user including cancelled ones.</summary>
+    public async Task<IEnumerable<SeasonTicket>> GetAllUserSeasonTicketsAsync(string userId)
+    => await _set
+        .Where(st => st.UserId == userId)
+        .Include(st => st.Sector).ThenInclude(s => s.Stadium).ThenInclude(s => s.Club)
+        .AsNoTracking()
+        .ToListAsync();
 }

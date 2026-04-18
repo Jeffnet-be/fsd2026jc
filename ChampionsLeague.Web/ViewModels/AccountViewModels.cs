@@ -95,7 +95,9 @@ public class ResetPasswordVM
 public class SeasonTicketHistoryVM
 {
     public int Id { get; set; }
-    public string SectorName { get; set; } = "";
+    public string ClubName { get; set; } = string.Empty;
+    public string StadiumName { get; set; } = string.Empty;
+    public string SectorName { get; set; } = string.Empty;
     public int SeatNumber { get; set; }
     public decimal TotalPrice { get; set; }
     public DateTime PurchasedAt { get; set; }

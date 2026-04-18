@@ -218,13 +218,15 @@ public class AccountController : Controller
     {
         var userId = _userManager.GetUserId(User)!;
         var tickets = await _tickets.GetUserTicketHistoryAsync(userId);
-        var seasonTickets = await _seasonTickets.GetUserSeasonTicketsAsync(userId);
+        var seasonTickets = await _seasonTickets.GetAllUserSeasonTicketsAsync(userId);
 
         var vms = _mapper.Map<IEnumerable<TicketHistoryItemVM>>(tickets);
 
         var seasonVms = seasonTickets.Select(st => new SeasonTicketHistoryVM
         {
             Id = st.Id,
+            ClubName = st.Sector?.Stadium?.Club?.Name ?? "",
+            StadiumName = st.Sector?.Stadium?.Name ?? "",
             SectorName = st.Sector?.Name ?? "",
             SeatNumber = st.SeatNumber,
             TotalPrice = st.TotalPrice,
@@ -236,7 +238,7 @@ public class AccountController : Controller
         return View(vms);
     }
 
-    // ── Cancel ticket ─────────────────────────────────────────────────────
+    // ── Cancel regular ticket ─────────────────────────────────────────────────────
 
     [HttpPost, ValidateAntiForgeryToken, Authorize]
     public async Task<IActionResult> CancelTicket(int ticketId)
@@ -252,7 +254,7 @@ public class AccountController : Controller
         return RedirectToAction(nameof(MyTickets));
     }
 
-    // ── Resend voucher email ──────────────────────────────────────────
+    // ── Resend voucher email regular ticket ──────────────────────────────────────────
 
     /// <summary>
     /// POST /Account/ResendVoucher — resends the voucher email for a single ticket.
@@ -304,6 +306,74 @@ public class AccountController : Controller
         );
 
         TempData["Success"] = _tr.T("voucher_resend_success");
+        return RedirectToAction(nameof(MyTickets));
+    }
+    [HttpPost, ValidateAntiForgeryToken, Authorize]
+
+    // ── Cancel season ticket ─────────────────────────────────────────────────────
+    public async Task<IActionResult> CancelSeasonTicket(int seasonTicketId)
+    {
+        var userId = _userManager.GetUserId(User)!;
+        var tickets = await _seasonTickets.GetAllUserSeasonTicketsAsync(userId);
+        var ticket = tickets.FirstOrDefault(t => t.Id == seasonTicketId);
+
+        if (ticket is null)
+        {
+            TempData["Error"] = "Season ticket not found.";
+            return RedirectToAction(nameof(MyTickets));
+        }
+
+        ticket.IsActive = false;
+        await _seasonTickets.SaveChangesAsync();
+
+        TempData["Success"] = "Season ticket cancelled successfully.";
+        return RedirectToAction(nameof(MyTickets));
+    }
+
+    [HttpPost, ValidateAntiForgeryToken, Authorize]
+
+    // ── Resend voucher email season ticket ──────────────────────────────────────────
+
+    /// <summary>
+    /// POST /Account/ResendSeasonVoucher — resends the voucher email for a single season ticket.
+    /// Only allowed for the ticket owner, and only for active season tickets.
+    /// </summary>
+    public async Task<IActionResult> ResendSeasonVoucher(int seasonTicketId)
+    {
+        var userId = _userManager.GetUserId(User)!;
+        var user = await _userManager.FindByIdAsync(userId);
+        var tickets = await _seasonTickets.GetUserSeasonTicketsAsync(userId);
+        var ticket = tickets.FirstOrDefault(t => t.Id == seasonTicketId);
+
+        if (ticket is null || user is null)
+        {
+            TempData["Error"] = "Season ticket not found.";
+            return RedirectToAction(nameof(MyTickets));
+        }
+
+        await _email.SendAsync(
+            to: user.Email!,
+            subject: $"Your Season Ticket — {ticket.Sector?.Stadium?.Club?.Name}",
+            htmlBody: $@"
+<p>Hello {user.FirstName},</p>
+<p>Here are the details of your season ticket:</p>
+<table style='border-collapse:collapse;font-family:Arial,sans-serif'>
+  <tr><td style='padding:6px 16px 6px 0;color:#666'>Club:</td>
+      <td style='padding:6px 0;font-weight:bold'>{ticket.Sector?.Stadium?.Club?.Name}</td></tr>
+  <tr><td style='padding:6px 16px 6px 0;color:#666'>Stadium:</td>
+      <td style='padding:6px 0;font-weight:bold'>{ticket.Sector?.Stadium?.Name}</td></tr>
+  <tr><td style='padding:6px 16px 6px 0;color:#666'>Sector:</td>
+      <td style='padding:6px 0;font-weight:bold'>{ticket.Sector?.Name}</td></tr>
+  <tr><td style='padding:6px 16px 6px 0;color:#666'>Seat:</td>
+      <td style='padding:6px 0;font-weight:bold'>{ticket.SeatNumber}</td></tr>
+  <tr><td style='padding:6px 16px 6px 0;color:#666'>Total Price:</td>
+      <td style='padding:6px 0;font-weight:bold'>€ {ticket.TotalPrice:0.00}</td></tr>
+</table>
+<p>This ticket is valid for all home matches of the season.</p>
+<p>CL Tickets Portal</p>"
+        );
+
+        TempData["Success"] = "Season ticket voucher resent to your email.";
         return RedirectToAction(nameof(MyTickets));
     }
 }

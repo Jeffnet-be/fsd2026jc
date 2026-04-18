@@ -24,4 +24,5 @@ public interface ITicketRepository : IRepository<Ticket>
     /// Used to enforce the max-4-tickets-per-person-per-match rule across multiple orders.
     /// </summary>
     Task<int> GetUserTicketCountForMatchAsync(string userId, int matchId);
+
 }
