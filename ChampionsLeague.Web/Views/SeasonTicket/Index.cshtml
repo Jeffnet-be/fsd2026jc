@@ -70,7 +70,7 @@ else if (Model != null)
                             <tbody>
                                 @foreach (var sector in (club.Stadium?.Sectors ?? Enumerable.Empty<ChampionsLeague.Domain.Entities.Sector>()))
                                 {
-                                    var seasonPrice = sector.BasePrice * 10; // 10 home matches × base price
+                                        var seasonPrice = sector.BasePrice * 9; // 10 home matches × base price - 1 home match free = 9 × base price
                                     <tr>
                                         <td class="small">@Tr.TranslateSector(sector.Name)</td>
                                         <td class="text-end">
