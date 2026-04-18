@@ -10,7 +10,6 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Needed so TicketService can inject UserManager<ApplicationUser> to get real email -->
-    <PackageReference Include="AutoMapper" Version="16.1.1" />
     <PackageReference Include="MailKit" Version="4.16.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
   </ItemGroup>

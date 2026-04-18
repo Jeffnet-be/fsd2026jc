@@ -1,9 +1,11 @@
+using AutoMapper;
 using ChampionsLeague.Domain.Entities;
 using ChampionsLeague.Domain.Interfaces;
 using ChampionsLeague.Infrastructure.Data;
 using ChampionsLeague.Infrastructure.Repositories;
 using ChampionsLeague.Infrastructure.Services;
 using ChampionsLeague.Services;
+using ChampionsLeague.Web.AutoMapper;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
@@ -51,8 +53,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // ── AutoMapper 13 ────────────────────────────────────────────────────
-builder.Services.AddAutoMapper(
-    typeof(ChampionsLeague.Web.AutoMapper.AutoMapperProfile).Assembly);
+builder.Services.AddAutoMapper(typeof(Program));
 
 // ── EF Core ───────────────────────────────────────────────────────────
 builder.Services.AddDbContext<AppDbContext>(options =>
