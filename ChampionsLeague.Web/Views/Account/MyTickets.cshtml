@@ -150,13 +150,13 @@
                     @foreach (var st in seasonTickets)
                     {
                         <tr>
-                            <td data-order="@st.PurchasedAt.Ticks">
-                                @st.PurchasedAt.ToString("dd/MM/yyyy")
-                                <small class="text-muted d-block">@st.PurchasedAt.ToString("HH:mm") UTC</small>
-                            </td>
                             <td class="fw-bold">
                                 @st.ClubName
                                 <small class="text-muted d-block fw-normal">@st.StadiumName</small>
+                            </td>
+                            <td data-order="@st.PurchasedAt.Ticks">
+                                @st.PurchasedAt.ToString("dd/MM/yyyy")
+                                <small class="text-muted d-block">@st.PurchasedAt.ToString("HH:mm") UTC</small>
                             </td>
                             <td><small class="text-muted">@Tr.TranslateSector(st.SectorName)</small></td>
                             <td class="text-center">@st.SeatNumber</td>
