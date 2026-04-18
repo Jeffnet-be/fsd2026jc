@@ -58,9 +58,20 @@
                             <td class="text-end">€ @t.PricePaid.ToString("0.00")</td>
                             <td class="text-center">
                                 @{
-                                    var bc = t.Status switch { "Paid" => "success", "Cancelled" => "secondary", _ => "warning text-dark" };
+                                    var bc = t.Status switch
+                                    {
+                                        "Paid" => "success",
+                                        "Cancelled" => "secondary",
+                                        _ => "warning text-dark"
+                                    };
+                                    var statusLabel = t.Status switch
+                                    {
+                                        "Paid" => Tr.T("ticket_status_paid"),
+                                        "Cancelled" => Tr.T("ticket_status_cancelled"),
+                                        _ => Tr.T("ticket_status_pending")
+                                    };
                                 }
-                                <span class="badge bg-@bc">@t.Status</span>
+                                <span class="badge bg-@bc">@statusLabel</span>
                             </td>
                             <td>
                                 @if (t.Status != "Cancelled")
@@ -74,7 +85,6 @@
                                 }
                                 else
                                 {
-
                                     <span class="text-muted small">—</span>
                                 }
                             </td>
@@ -85,7 +95,8 @@
                                         <form asp-action="CancelTicket" method="post">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="ticketId" value="@t.Id" />
-                                            <button type="submit" class="btn btn-outline-danger btn-sm w-100"
+                                            <button type="submit"
+                                                    class="btn btn-outline-danger btn-sm w-100"
                                                     onclick="return confirm('@Tr.T("tickets_cancel_confirm")')">
                                                 @Tr.T("tickets_cancel_btn")
                                             </button>
@@ -120,7 +131,7 @@
     </h2>
 
     @if (ViewBag.SeasonTickets is IEnumerable<ChampionsLeague.Web.ViewModels.SeasonTicketHistoryVM> seasonTickets
-         && seasonTickets.Any())
+             && seasonTickets.Any())
     {
         <div class="card border-0 shadow-sm" style="border-radius:14px;overflow:hidden">
             <table id="seasonTable" class="table table-hover table-striped align-middle mb-0">
@@ -154,8 +165,8 @@
                                 @{
                                     var sbc = st.IsActive ? "success" : "secondary";
                                     var sLabel = st.IsActive
-                                        ? Tr.T("season_status_active")
-                                        : Tr.T("season_status_cancelled");
+                                        ? Tr.T("ticket_status_paid")
+                                        : Tr.T("ticket_status_cancelled");
                                 }
                                 <span class="badge bg-@sbc">@sLabel</span>
                             </td>
@@ -204,6 +215,7 @@
             </div>
         </div>
     }
+</div>
 
 @section Scripts {
     <script>
