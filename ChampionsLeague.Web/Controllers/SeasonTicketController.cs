@@ -47,6 +47,7 @@ public class SeasonTicketController : Controller
     [HttpPost, ValidateAntiForgeryToken, Authorize]
     public async Task<IActionResult> Purchase(int sectorId, string totalPrice)
     {
+        var userId = _userManager.GetUserId(User)!;
         decimal price = decimal.Parse(
        totalPrice,
        System.Globalization.NumberStyles.Any,
@@ -72,10 +73,18 @@ public class SeasonTicketController : Controller
         // Load existing cart from session
         var cart = GetCart();
 
-        // Prevent duplicate season ticket for same sector
-        if (cart.SeasonItems.Any(i => i.SectorId == sectorId))
+        // Count existing season tickets for this club in DB + cart combined - Max of 4 per sector per user
+        // Get all sectorIds that belong to this club
+        var sectorIdsForClub = club.Stadium?.Sectors.Select(s => s.Id).ToHashSet() ?? new HashSet<int>();
+
+        // Count existing season tickets for this CLUB in DB + cart combined
+        var existingInDb = await _seasonTickets.GetUserSeasonTicketsAsync(userId);
+        var countInDb = existingInDb.Count(t => sectorIdsForClub.Contains(t.SectorId) && t.IsActive);
+        var countInCart = cart.SeasonItems.Count(i => sectorIdsForClub.Contains(i.SectorId));
+
+        if (countInDb + countInCart >= 4)
         {
-            TempData["Error"] = "You already have a season ticket for this sector in your cart.";
+            TempData["Error"] = $"You can only purchase a maximum of 4 season tickets for {club.Name}.";
             return RedirectToAction(nameof(Index));
         }
 
