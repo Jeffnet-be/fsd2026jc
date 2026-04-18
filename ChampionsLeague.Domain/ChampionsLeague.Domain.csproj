@@ -9,6 +9,8 @@
       ApplicationUser inherits from IdentityUser, so Domain needs this package.
       We reference only the abstractions — no EF Core or web dependencies here.
     -->
+    <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <PackageReference Include="MailKit" Version="4.16.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
   </ItemGroup>
 </Project>
