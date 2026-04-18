@@ -115,7 +115,10 @@
     }
 
     @* ── Season tickets ────────────────────────────────────────────────── *@
-    <h2 class="fw-bold mb-3 mt-4" style="color:#001489">📅 Season Tickets</h2>
+    <h2 class="fw-bold mb-3 mt-5" style="color:#001489">
+        📅 @Tr.T("season_tickets_title")
+    </h2>
+
     @if (ViewBag.SeasonTickets is IEnumerable<ChampionsLeague.Web.ViewModels.SeasonTicketHistoryVM> seasonTickets
          && seasonTickets.Any())
     {
@@ -123,11 +126,11 @@
             <table id="seasonTable" class="table table-hover table-striped align-middle mb-0">
                 <thead class="table-dark">
                     <tr>
-                        <th>Club</th>
+                        <th>@Tr.T("season_col_club")</th>
                         <th>@Tr.T("tickets_col_sector")</th>
                         <th class="text-center">@Tr.T("tickets_col_seat")</th>
                         <th class="text-end">@Tr.T("tickets_col_price")</th>
-                        <th>Purchased</th>
+                        <th>@Tr.T("season_col_purchased")</th>
                         <th class="text-center">@Tr.T("tickets_col_status")</th>
                         <th></th>
                     </tr>
@@ -143,11 +146,18 @@
                             <td><small class="text-muted">@Tr.TranslateSector(st.SectorName)</small></td>
                             <td class="text-center">@st.SeatNumber</td>
                             <td class="text-end">€ @st.TotalPrice.ToString("0.00")</td>
-                            <td>@st.PurchasedAt.ToString("dd/MM/yyyy")</td>
+                            <td data-order="@st.PurchasedAt.Ticks">
+                                @st.PurchasedAt.ToString("dd/MM/yyyy")
+                                <small class="text-muted d-block">@st.PurchasedAt.ToString("HH:mm") UTC</small>
+                            </td>
                             <td class="text-center">
-                                <span class="badge bg-@(st.IsActive ? "success" : "secondary")">
-                                    @(st.IsActive ? "Active" : "Cancelled")
-                                </span>
+                                @{
+                                    var sbc = st.IsActive ? "success" : "secondary";
+                                    var sLabel = st.IsActive
+                                        ? Tr.T("season_status_active")
+                                        : Tr.T("season_status_cancelled");
+                                }
+                                <span class="badge bg-@sbc">@sLabel</span>
                             </td>
                             <td>
                                 <div class="d-flex flex-column gap-1">
@@ -156,9 +166,10 @@
                                         <form asp-action="CancelSeasonTicket" method="post">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="seasonTicketId" value="@st.Id" />
-                                            <button type="submit" class="btn btn-outline-danger btn-sm w-100"
-                                                    onclick="return confirm('Are you sure you want to cancel this season ticket?')">
-                                                ❌ @Tr.T("tickets_cancel_btn")
+                                            <button type="submit"
+                                                    class="btn btn-outline-danger btn-sm w-100"
+                                                    onclick="return confirm('@Tr.T("tickets_cancel_confirm")')">
+                                                @Tr.T("tickets_cancel_btn")
                                             </button>
                                         </form>
                                         <form asp-action="ResendSeasonVoucher" method="post">
@@ -168,6 +179,10 @@
                                                 📧 @Tr.T("voucher_resend_btn")
                                             </button>
                                         </form>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-muted">@Tr.T("tickets_not_cancellable")</small>
                                     }
                                 </div>
                             </td>
@@ -182,12 +197,13 @@
         <div class="alert alert-info d-flex align-items-center gap-3">
             <span style="font-size:2rem">📅</span>
             <div>
-                You have no season tickets yet.
-                <a asp-controller="SeasonTicket" asp-action="Index" class="alert-link ms-1">Browse season tickets</a>
+                @Tr.T("tickets_empty")
+                <a asp-controller="SeasonTicket" asp-action="Index" class="alert-link ms-1">
+                    @Tr.T("season_title")
+                </a>
             </div>
         </div>
     }
-</div>
 
 @section Scripts {
     <script>

@@ -308,18 +308,26 @@ public class AccountController : Controller
         TempData["Success"] = _tr.T("voucher_resend_success");
         return RedirectToAction(nameof(MyTickets));
     }
-    [HttpPost, ValidateAntiForgeryToken, Authorize]
+
 
     // ── Cancel season ticket ─────────────────────────────────────────────────────
+    [HttpPost, ValidateAntiForgeryToken, Authorize]
     public async Task<IActionResult> CancelSeasonTicket(int seasonTicketId)
     {
         var userId = _userManager.GetUserId(User)!;
-        var tickets = await _seasonTickets.GetAllUserSeasonTicketsAsync(userId);
-        var ticket = tickets.FirstOrDefault(t => t.Id == seasonTicketId);
 
-        if (ticket is null)
+        // Fetch WITH tracking (no AsNoTracking) so EF Core detects the change
+        var ticket = await _seasonTickets.GetByIdAsync(seasonTicketId);
+
+        if (ticket is null || ticket.UserId != userId)
         {
             TempData["Error"] = "Season ticket not found.";
+            return RedirectToAction(nameof(MyTickets));
+        }
+
+        if (!ticket.IsActive)
+        {
+            TempData["Error"] = "This season ticket is already cancelled.";
             return RedirectToAction(nameof(MyTickets));
         }
 
@@ -330,14 +338,13 @@ public class AccountController : Controller
         return RedirectToAction(nameof(MyTickets));
     }
 
-    [HttpPost, ValidateAntiForgeryToken, Authorize]
-
     // ── Resend voucher email season ticket ──────────────────────────────────────────
 
     /// <summary>
     /// POST /Account/ResendSeasonVoucher — resends the voucher email for a single season ticket.
     /// Only allowed for the ticket owner, and only for active season tickets.
     /// </summary>
+    [HttpPost, ValidateAntiForgeryToken, Authorize]
     public async Task<IActionResult> ResendSeasonVoucher(int seasonTicketId)
     {
         var userId = _userManager.GetUserId(User)!;
