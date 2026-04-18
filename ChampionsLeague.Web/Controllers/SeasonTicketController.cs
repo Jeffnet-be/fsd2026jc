@@ -47,6 +47,8 @@ public class SeasonTicketController : Controller
     [HttpPost, ValidateAntiForgeryToken, Authorize]
     public async Task<IActionResult> Purchase(int sectorId, decimal totalPrice)
     {
+        decimal price = Convert.ToDecimal(totalPrice, System.Globalization.CultureInfo.InvariantCulture);
+
         if (DateTime.UtcNow >= CompetitionStart)
         {
             TempData["Error"] = "Season tickets can no longer be purchased — the competition has started.";
@@ -81,7 +83,7 @@ public class SeasonTicketController : Controller
             SectorName = sector.Name,
             ClubName = club.Name,
             StadiumName = club.Stadium?.Name ?? "",
-            TotalPrice = totalPrice
+            TotalPrice = price
         });
 
         SaveCart(cart);
