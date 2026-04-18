@@ -77,7 +77,6 @@ ChampionsLeague.sln
     ├── ViewModels/                  DTOs between controllers and views
     ├── AutoMapper/                  AutoMapperProfile — all entity→VM mappings
     ├── Views/                       Razor .cshtml files + _Layout + partials
-    ├── Resources/                   .resx files for NL / FR / EN localisation
     └── wwwroot/                     CSS, JS, static assets
 ```
 
