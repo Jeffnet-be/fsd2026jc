@@ -142,7 +142,7 @@ public class TicketService : ITicketService
 
     public async Task<CancelResult> CancelAsync(int ticketId, string userId)
     {
-        var ticket = await _tickets.GetByIdAsync(ticketId);
+        var ticket = await _tickets.GetByIdTrackedAsync(ticketId);
         if (ticket is null)
             return new CancelResult(false, "Ticket not found.");
 
@@ -161,7 +161,6 @@ public class TicketService : ITicketService
                 "Free cancellation is only available up to 7 days before kick-off.");
 
         ticket.Status = TicketStatus.Cancelled;
-        _tickets.Update(ticket);
         await _tickets.SaveChangesAsync();
 
         return new CancelResult(true);

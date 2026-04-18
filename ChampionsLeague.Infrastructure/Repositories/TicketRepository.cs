@@ -58,4 +58,6 @@ public class TicketRepository : BaseRepository<Ticket>, ITicketRepository
                      && t.MatchId                == matchId
                      && t.Status                 != TicketStatus.Cancelled)
             .CountAsync();
+    public async Task<Ticket?> GetByIdTrackedAsync(int id)
+        => await _set.FirstOrDefaultAsync(t => t.Id == id);
 }

@@ -25,4 +25,5 @@ public interface ITicketRepository : IRepository<Ticket>
     /// </summary>
     Task<int> GetUserTicketCountForMatchAsync(string userId, int matchId);
 
+    Task<Ticket?> GetByIdTrackedAsync(int id);
 }
