@@ -28,7 +28,7 @@ public class SeasonTicketController : Controller
     }
 
     // Competition start date — season tickets only available before this date
-    private static readonly DateTime CompetitionStart = new DateTime(2025, 9, 17);
+    private static readonly DateTime CompetitionStart = new DateTime(2026, 4, 25);
 
     /// <summary>GET /SeasonTicket — shows available clubs/sectors for season ticket purchase.</summary>
     public async Task<IActionResult> Index()
