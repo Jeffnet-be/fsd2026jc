@@ -45,9 +45,12 @@ public class SeasonTicketController : Controller
     /// No DB write happens here — seat assignment happens at checkout.
     /// </summary>
     [HttpPost, ValidateAntiForgeryToken, Authorize]
-    public async Task<IActionResult> Purchase(int sectorId, decimal totalPrice)
+    public async Task<IActionResult> Purchase(int sectorId, string totalPrice)
     {
-        decimal price = Convert.ToDecimal(totalPrice, System.Globalization.CultureInfo.InvariantCulture);
+        decimal price = decimal.Parse(
+       totalPrice,
+       System.Globalization.NumberStyles.Any,
+       System.Globalization.CultureInfo.InvariantCulture);
 
         if (DateTime.UtcNow >= CompetitionStart)
         {
