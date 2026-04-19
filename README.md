@@ -1,137 +1,126 @@
 # Champions League Ticket Portal
-## Full Stack Development — VIVES Hogeschool
 
-### Prerequisites
-- Visual Studio 2022 / 2026 (with ASP.NET workload)
-- .NET 9 SDK
-- SQL Server 2022 Express or LocalDB
-- Node / npm (optional — only if you want to manage client libs manually)
+> Full Stack Development — VIVES Hogeschool | Toegepaste Informatica | 2025–2026  
+> Student: **Jeffrey Clauwaert**
 
 ---
 
-### Quick Start (5 steps)
+## Live applicatie
 
-**1. Clone / unzip the project**
-```
-Unzip ChampionsLeague.zip to a local folder (avoid long paths on Windows).
-```
+| Omgeving | URL |
+|----------|-----|
+| Website | https://fsd2026jc-gmb0dkhag5h7h2ck.westeurope-01.azurewebsites.net |
+| Swagger API | https://fsd2026jc-gmb0dkhag5h7h2ck.westeurope-01.azurewebsites.net/swagger |
+---
 
-**2. Open the solution**
-```
-Open ChampionsLeague.sln in Visual Studio.
-```
+## Projectbeschrijving
 
-**3. Check the connection string** (`ChampionsLeague.Web/appsettings.json`)
-```json
-"DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=ChampionsLeagueDb;Trusted_Connection=True;..."
-```
-Change `(localdb)\\mssqllocaldb` to your SQL Server instance name if needed (e.g. `.\SQL22_VIVES`).
+Een centrale portaalsite voor de online verkoop van voetbaltickets en seizoensabonnementen voor Champions League-wedstrijden. Gebruikers kunnen tickets kopen voor wedstrijden van 6 deelnemende clubs, een seizoensabonnement aanschaffen, hotels zoeken nabij het stadion en hun aankoophistoriek raadplegen.
 
-**4. Run migrations (only needed if you prefer CLI over auto-migrate)**
-
-The app calls `db.Database.Migrate()` on startup automatically.
-To run manually from the Package Manager Console:
-```powershell
-# Set ChampionsLeague.Web as the startup project first
-Add-Migration InitialCreate -Project ChampionsLeague.Infrastructure -StartupProject ChampionsLeague.Web
-Update-Database -Project ChampionsLeague.Infrastructure -StartupProject ChampionsLeague.Web
-```
-
-Or with the .NET CLI:
-```bash
-dotnet ef migrations add InitialCreate \
-  --project ChampionsLeague.Infrastructure \
-  --startup-project ChampionsLeague.Web
-
-dotnet ef database update \
-  --project ChampionsLeague.Infrastructure \
-  --startup-project ChampionsLeague.Web
-```
-
-**5. Run the project**
-```
-Press F5 (Debug) or Ctrl+F5 (Run without debug) in Visual Studio.
-The browser opens at https://localhost:5001
-```
+### Deelnemende clubs
+- Real Madrid
+- Manchester City
+- FC Bayern München
+- Paris Saint-Germain
+- Club Brugge
+- FC Barcelona
 
 ---
 
-### Project Structure
+## Architectuur
 
-```
+De oplossing is opgesplitst in 3 Visual Studio-projecten volgens het lagenmodel:
 ChampionsLeague.sln
-├── ChampionsLeague.Domain/          No external dependencies — pure C# entities + interfaces
-│   ├── Entities/                    ApplicationUser, Club, Stadium, Sector, Match, Ticket, Order, ...
-│   └── Interfaces/                  IRepository<T>, IMatchRepository, ITicketRepository, ...
-│
-├── ChampionsLeague.Infrastructure/  EF Core implementation
-│   ├── Data/                        AppDbContext, SeedData (6 clubs, 48 sectors, 13 matches)
-│   ├── Repositories/                BaseRepository<T> + 5 concrete implementations
-│   └── Services/                    EmailService (stub), HotelApiService (mock)
-│
-├── ChampionsLeague.Services/        Business logic — all rules enforced here
-│   └── TicketService.cs             PurchaseAsync, CancelAsync, GetAvailableSeatsAsync
-│
-└── ChampionsLeague.Web/             ASP.NET Core MVC presentation layer
-    ├── Controllers/                 Home, Matches, Cart, Checkout, Account, Hotel
-    ├── ViewModels/                  DTOs between controllers and views
-    ├── AutoMapper/                  AutoMapperProfile — all entity→VM mappings
-    ├── Views/                       Razor .cshtml files + _Layout + partials
-    └── wwwroot/                     CSS, JS, static assets
+├── ChampionsLeague.Domain/         ← Entiteiten & interfaces (geen externe dependencies)
+├── ChampionsLeague.Infrastructure/ ← EF Core, repositories, e-mail, hotel API
+├── ChampionsLeague.Services/       ← Businesslogica (TicketService)
+└── ChampionsLeague.Web/            ← ASP.NET Core MVC, controllers, views, AutoMapper
+
+---
+
+## Technologieën
+
+| Technologie | Gebruik |
+|-------------|---------|
+| ASP.NET Core MVC (.NET 9) | Webframework |
+| Entity Framework Core 9 | ORM — Code-First met migraties |
+| Azure SQL Server | Productiedatabase |
+| ASP.NET Core Identity | Authenticatie & autorisatie |
+| AutoMapper 12 | Entity → ViewModel mapping |
+| MailKit | E-mail voor vouchers en wachtwoord reset |
+| Swashbuckle / Swagger | API documentatie |
+| Bootstrap 5 + DataTables | Frontend |
+| GitHub Actions | CI/CD naar Azure App Service |
+
+---
+
+## Database verbinden via SSMS
+
+| Instelling | Waarde |
+|-----------|--------|
+| Server name | fsd2026jc.database.windows.net |
+| Authentication | SQL Server Authentication |
+| Login | *Te verkrijgen op aanvraag* |
+| Database | *Te verkrijgen op aanvraag* |
+| Encrypt | Mandatory |
+| Trust server certificate | True |
+
+> Uw IP-adres moet toegevoegd worden aan de Azure firewall:  
+> Tot en met 25/04/2026 staat de database open voor alle inkomende verbindingen.
+> Na deze datum krijgt u enkel toegang na aanvraag.
+
+---
+
+## Lokaal draaien
+
+```bash
+# 1. Clone het project
+git clone https://github.com/Jeffnet-be/fsd2026jc.git
+
+# 2. Open ChampionsLeague.sln in Visual Studio 2022+
+
+# 3. Controleer de connection string in:
+#    ChampionsLeague.Web/appsettings.json
+
+# 4. Druk op F5 — migraties worden automatisch uitgevoerd bij opstarten
 ```
 
 ---
 
-### Curriculum Alignment
+## Business rules
 
-| Curriculum Concept               | Location |
-|----------------------------------|----------|
-| EF Core / DbContext / DbSet      | `Infrastructure/Data/AppDbContext.cs` |
-| Code-First migrations + Fluent API | `AppDbContext.OnModelCreating()` |
-| Repository pattern               | `Domain/Interfaces/` + `Infrastructure/Repositories/` |
-| Dependency Injection             | `Web/Program.cs` — all `builder.Services.Add*` calls |
-| AutoMapper                       | `Web/AutoMapper/AutoMapperProfile.cs` |
-| LINQ queries                     | All `*Repository.cs` files |
-| Data Annotations + Validation    | `Web/ViewModels/AccountViewModels.cs`, `HotelViewModels.cs` |
-| Partial Views                    | `Views/Shared/_ClubCard.cshtml`, `_CartSummary.cshtml` |
-| jQuery DataTables                | `Views/Matches/Index.cshtml`, `Views/Account/MyTickets.cshtml` |
-| AJAX / Unobtrusive               | `Views/Matches/Detail.cshtml` — AddToCart AJAX call |
-| ASP.NET Core Identity            | `ApplicationUser`, `Program.cs` Identity config, `AccountController` |
-| Localisation (NL/FR/EN)         | `Resources/*.resx`, `Program.cs` localisation middleware |
-| HttpClient (external API)        | `Infrastructure/Services/HotelApiService.cs` |
-| Session (shopping cart)          | `CartController.cs` + `Program.cs` AddSession |
-| Multilayer architecture          | 4-project solution with strict dependency direction |
-| Service layer                    | `Services/TicketService.cs` |
-| ViewModel / Model separation     | All `ViewModels/*.cs` files |
+- Tickets kunnen gekocht worden vanaf **1 maand vóór de wedstrijd**
+- Maximum **4 tickets** per persoon per wedstrijd
+- Geen tickets voor **twee wedstrijden op dezelfde dag**
+- Abonnementen enkel beschikbaar **vóór de competitiestart** (25 april 2026)
+- Een abonnementsplaats kan **niet als los ticket** verkocht worden
+- **Gratis annulatie** mogelijk tot 1 week vóór de wedstrijd
+- Per ticket wordt een **voucher** gegenereerd en per e-mail verstuurd
 
 ---
 
-### Business Rules Implemented
-
-| Rule | Enforcement location |
-|------|---------------------|
-| Tickets on sale 1 month before match | `Match.IsSaleOpen` (computed) + `TicketService.PurchaseAsync` |
-| Max 4 tickets per person per match | `CartController.AddToCart` (UX) + `TicketService.PurchaseAsync` (authoritative) |
-| No two matches on same day | `OrderRepository.UserHasMatchOnDayAsync` + `TicketService.PurchaseAsync` |
-| Season seats blocked for single tickets | `SeasonTicketRepository.GetSeasonReservedSeatsAsync` in `TicketService` |
-| No overbooking | Seat enumeration in `TicketService` + UNIQUE index on VoucherId |
-| Free cancellation ≤ 7 days before match | `Match.IsCancellable` (computed) + `TicketService.CancelAsync` |
-| Season tickets only before competition | Enforced by business rule in `SeasonTicketRepository` (buy-flow not shown in UI, reserved for extension) |
+## Projectstructuur
+ChampionsLeague.Domain/
+├── Entities/          ← Club, Stadium, Sector, Match, Order, Ticket, SeasonTicket
+└── Interfaces/        ← IClubRepository, IMatchRepository, IOrderRepository, ...
+ChampionsLeague.Infrastructure/
+├── Data/              ← AppDbContext, SeedData
+├── Repositories/      ← BaseRepository<T>, ClubRepository, MatchRepository, ...
+└── Services/          ← EmailService, HotelApiService
+ChampionsLeague.Services/
+└── TicketService.cs   ← PurchaseAsync, CancelAsync, businessregels
+ChampionsLeague.Web/
+├── Controllers/       ← Home, Account, Cart, Checkout, SeasonTicket, Hotel
+├── ViewModels/        ← CartVM, MatchViewModels, TicketHistoryItemVM, ...
+├── Views/             ← Razor views per controller
+├── AutoMapper/        ← AutoMapperProfile.cs
+├── Services/          ← TranslationService (NL/FR/EN)
+└── Resources/         ← Lokalisatiebestanden
 
 ---
 
-### Test Users (created at first run)
+## CI/CD
 
-No seed users are created automatically. Register via `/Account/Register`.
-The first registered user gets the "User" role automatically.
+Elke push naar de `main`-branch triggert automatisch een GitHub Actions workflow die het project bouwt en deployt naar Azure App Service.
 
----
-
-### Extending the Project
-
-- **Real email**: Replace `EmailService.SendAsync` stub with MailKit SMTP call
-- **Real payment**: Add Stripe/Mollie checkout before `OrderStatus.Paid`
-- **PDF vouchers**: Add QuestPDF to generate printable A4 voucher with QR code
-- **Admin panel**: Add `[Authorize(Roles="Admin")]` controllers for club/match management
-- **SignalR**: Push live seat-availability updates to the match detail page
-- **Azure**: Deploy DB to Azure SQL, web app to Azure App Service via GitHub Actions
+Zie `.github/workflows/azure-deploy.yml` voor de configuratie.
