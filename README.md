@@ -30,13 +30,13 @@ Een centrale portaalsite voor de online verkoop van voetbaltickets en seizoensab
 ## Architectuur
 
 De oplossing is opgesplitst in 4 Visual Studio-projecten volgens het lagenmodel:
+```
 ChampionsLeague.sln
 ├── ChampionsLeague.Domain/         ← Entiteiten & interfaces (geen externe dependencies)
 ├── ChampionsLeague.Infrastructure/ ← EF Core, repositories, e-mail, hotel API
 ├── ChampionsLeague.Services/       ← Businesslogica (TicketService)
 └── ChampionsLeague.Web/            ← ASP.NET Core MVC, controllers, views, AutoMapper
-
----
+```
 
 ## Technologieën
 
@@ -100,6 +100,8 @@ git clone https://github.com/Jeffnet-be/fsd2026jc.git
 ---
 
 ## Projectstructuur
+
+```
 ChampionsLeague.Domain/
 ├── Entities/          ← Club, Stadium, Sector, Match, Order, Ticket, SeasonTicket
 └── Interfaces/        ← IClubRepository, IMatchRepository, IOrderRepository, ...
@@ -116,6 +118,7 @@ ChampionsLeague.Web/
 ├── AutoMapper/        ← AutoMapperProfile.cs
 ├── Services/          ← TranslationService (NL/FR/EN)
 └── Resources/         ← Lokalisatiebestanden
+```
 
 ---
 
