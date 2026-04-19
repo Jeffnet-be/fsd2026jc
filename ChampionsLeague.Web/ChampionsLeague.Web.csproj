@@ -4,7 +4,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>ChampionsLeague.Web</RootNamespace>
-  </PropertyGroup>
+	  <NoWarn>NU1903</NoWarn>
+</PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ChampionsLeague.Domain\ChampionsLeague.Domain.csproj" />
     <ProjectReference Include="..\ChampionsLeague.Infrastructure\ChampionsLeague.Infrastructure.csproj" />

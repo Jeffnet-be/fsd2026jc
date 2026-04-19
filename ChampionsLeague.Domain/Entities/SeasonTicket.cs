@@ -27,4 +27,7 @@ public class SeasonTicket
 
     /// <summary>Set to false when the season ends or the subscription is cancelled.</summary>
     public bool IsActive { get; set; } = true;
+
+    /// <summary>Unique voucher code e-mailed to the buyer as proof of purchase.</summary>
+    public Guid VoucherId { get; set; } = Guid.NewGuid();
 }

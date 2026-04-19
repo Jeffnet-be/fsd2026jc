@@ -102,4 +102,5 @@ public class SeasonTicketHistoryVM
     public decimal TotalPrice { get; set; }
     public DateTime PurchasedAt { get; set; }
     public bool IsActive { get; set; }
+    public Guid VoucherId { get; set; }
 }

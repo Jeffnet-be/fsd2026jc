@@ -231,7 +231,8 @@ public class AccountController : Controller
             SeatNumber = st.SeatNumber,
             TotalPrice = st.TotalPrice,
             PurchasedAt = st.PurchasedAt,
-            IsActive = st.IsActive
+            IsActive = st.IsActive,
+            VoucherId = st.VoucherId
         });
 
         ViewBag.SeasonTickets = seasonVms;

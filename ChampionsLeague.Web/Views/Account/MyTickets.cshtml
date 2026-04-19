@@ -171,6 +171,21 @@
                                 <span class="badge bg-@sbc">@sLabel</span>
                             </td>
                             <td>
+                                @if (st.IsActive)
+                                {
+                                    <code class="small">@st.VoucherId.ToString("D")[..8]…</code>
+                                    <button class="btn btn-link btn-sm p-0 ms-1"
+                                            onclick="navigator.clipboard.writeText('@st.VoucherId.ToString("D")')"
+                                            title="@Tr.T("tickets_col_voucher")">
+                                        📋
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">—</span>
+                                }
+                            </td>
+                            <td>
                                 <div class="d-flex flex-column gap-1">
                                     @if (st.IsActive)
                                     {
