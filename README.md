@@ -29,7 +29,7 @@ Een centrale portaalsite voor de online verkoop van voetbaltickets en seizoensab
 
 ## Architectuur
 
-De oplossing is opgesplitst in 3 Visual Studio-projecten volgens het lagenmodel:
+De oplossing is opgesplitst in 4 Visual Studio-projecten volgens het lagenmodel:
 ChampionsLeague.sln
 ├── ChampionsLeague.Domain/         ← Entiteiten & interfaces (geen externe dependencies)
 ├── ChampionsLeague.Infrastructure/ ← EF Core, repositories, e-mail, hotel API
