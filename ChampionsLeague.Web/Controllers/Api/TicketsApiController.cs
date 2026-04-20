@@ -120,6 +120,7 @@ public class TicketsApiController : ControllerBase
     /// Requires authentication.
     /// </summary>
     [HttpPost("purchase")]
+    [ValidateAntiForgeryToken]
     [Authorize]
     [ProducesResponseType(typeof(object), 200)]
     [ProducesResponseType(typeof(object), 400)]
@@ -151,6 +152,7 @@ public class TicketsApiController : ControllerBase
     /// Requires authentication — you can only cancel your own tickets.
     /// </summary>
     [HttpPost("cancel/{ticketId:int}")]
+    [ValidateAntiForgeryToken]
     [Authorize]
     [ProducesResponseType(typeof(object), 200)]
     [ProducesResponseType(typeof(object), 400)]

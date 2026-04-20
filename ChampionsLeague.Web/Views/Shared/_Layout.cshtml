@@ -98,29 +98,36 @@
                         🌐 @Tr.T("nav_language")
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
+                        @{
+                        // Defined once — reused by all three language links
+                        // StartsWith("/") check prevents Open Redirect attacks
+                        var returnUrl = Context.Request.Path.ToString();
+                        if (!returnUrl.StartsWith("/")) returnUrl = "/";
+                        }
+
                         <li>
                             <a class="dropdown-item @(Tr.Culture == "nl" ? "fw-bold" : "")"
                                asp-controller="Culture" asp-action="Set"
                                asp-route-culture="nl"
-                               asp-route-returnUrl="@Context.Request.Path">
-                                🇧🇪 Nederlands
+                               asp-route-returnUrl="@returnUrl">
+                               NL Nederlands
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item @(Tr.Culture == "fr" ? "fw-bold" : "")"
-                               asp-controller="Culture" asp-action="Set"
-                               asp-route-culture="fr"
-                               asp-route-returnUrl="@Context.Request.Path">
-                                🇫🇷 Français
-                            </a>
+                             <a class="dropdown-item @(Tr.Culture == "fr" ? "fw-bold" : "")"
+                                asp-controller="Culture" asp-action="Set"
+                                asp-route-culture="fr"
+                                asp-route-returnUrl="@returnUrl">
+                                FR Français
+                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item @(Tr.Culture == "en" ? "fw-bold" : "")"
-                               asp-controller="Culture" asp-action="Set"
-                               asp-route-culture="en"
-                               asp-route-returnUrl="@Context.Request.Path">
-                                🇬🇧 English
-                            </a>
+                             <a class="dropdown-item @(Tr.Culture == "en" ? "fw-bold" : "")"
+                                 asp-controller="Culture" asp-action="Set"
+                                 asp-route-culture="en"
+                                 asp-route-returnUrl="@returnUrl">
+                                GB English
+                             </a>
                         </li>
                     </ul>
                 </li>

@@ -37,8 +37,10 @@ public class HotelApiService : IHotelApiService
     {
         try
         {
+            var safeCity = city?.Replace("\n", "").Replace("\r", "").Replace("\t", "") ?? "";
+
             _logger.LogInformation(
-                "Hotel search: {City} | {In:d} – {Out:d}", city, checkIn, checkOut);
+                "Hotel search: {City} | {In:d} – {Out:d}", safeCity, checkIn, checkOut);
 
             // In production, uncomment and point at a real endpoint:
             // var url = $"v1/hotels?city={Uri.EscapeDataString(city)}&checkIn={checkIn:yyyy-MM-dd}&checkOut={checkOut:yyyy-MM-dd}";

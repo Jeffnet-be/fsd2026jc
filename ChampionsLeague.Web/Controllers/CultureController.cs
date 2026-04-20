@@ -33,7 +33,8 @@ public class CultureController : Controller
                 Expires  = DateTimeOffset.UtcNow.AddYears(1),
                 HttpOnly = false,   // must be readable by browser for some frameworks
                 IsEssential = true, // don't require consent banner
-                SameSite = SameSiteMode.Lax
+                SameSite = SameSiteMode.Lax,
+                Secure = true
             }
         );
 

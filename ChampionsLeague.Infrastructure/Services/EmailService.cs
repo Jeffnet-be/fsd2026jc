@@ -30,6 +30,13 @@ public class EmailService : IEmailService
 
     public async Task SendAsync(string to, string subject, string htmlBody)
     {
+        // The ?? "" guarantees a non-null string
+        string safeTo = to?.Replace("\n", "").Replace("\r", "") ?? "";
+        string safeSubject = subject?.Replace("\n", "").Replace("\r", "") ?? "";
+
+        // The ?? "" already handles it — but if you're passing safeTo to MailboxAddress.Parse:
+        MailboxAddress.Parse(safeTo);  // safeTo is never null because of ?? ""
+
         var host     = _config["Email:SmtpHost"];
         _ = int.TryParse(_config["Email:SmtpPort"], out var port);
         if (port == 0) port = 587; // default Brevo SMTP port
@@ -41,9 +48,7 @@ public class EmailService : IEmailService
         // If SMTP not configured, log to console and return (dev mode)
         if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(user) || string.IsNullOrEmpty(pass))
         {
-            _logger.LogInformation(
-                "📧 [EMAIL - SMTP not configured] To: {To}\nSubject: {Subject}\n{Body}",
-                to, subject, htmlBody);
+            _logger.LogInformation("📧 Email sent to {To}: {Subject}", safeTo, safeSubject);
             return;
         }
 
@@ -51,8 +56,8 @@ public class EmailService : IEmailService
         {
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(fromName, fromAddr ?? user));
-            message.To.Add(MailboxAddress.Parse(to));
-            message.Subject = subject;
+            message.To.Add(MailboxAddress.Parse(safeTo));
+            message.Subject = safeSubject;
             message.Body    = new BodyBuilder { HtmlBody = htmlBody }.ToMessageBody();
 
             using var smtp = new SmtpClient();
@@ -61,11 +66,11 @@ public class EmailService : IEmailService
             await smtp.SendAsync(message);
             await smtp.DisconnectAsync(true);
 
-            _logger.LogInformation("📧 Email sent to {To}: {Subject}", to, subject);
+            _logger.LogInformation("📧 Email sent to {To}: {Subject}", safeTo, safeSubject);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "📧 Failed to send email to {To}: {Subject}", to, subject);
+            _logger.LogError(ex, "📧 Failed to send email to {To}: {Subject}", safeTo, safeSubject);
             // Don't rethrow — a failed email should never crash a ticket purchase
         }
     }

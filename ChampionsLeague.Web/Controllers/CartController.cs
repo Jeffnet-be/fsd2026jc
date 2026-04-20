@@ -27,6 +27,7 @@ public class CartController : Controller
     /// Returns a PartialView (_CartSummary) that the JavaScript uses to update the badge.
     /// </summary>
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult AddToCart([FromBody] CartItemVM item)
     {
         if (item is null)
