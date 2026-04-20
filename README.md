@@ -11,6 +11,7 @@
 |----------|-----|
 | Website | https://fsd2026jc-gmb0dkhag5h7h2ck.westeurope-01.azurewebsites.net |
 | Swagger API | https://fsd2026jc-gmb0dkhag5h7h2ck.westeurope-01.azurewebsites.net/swagger |
+| broncode (GitHub) | https://github.com/Jeffnet-be/fsd2026jc |
 ---
 
 ## Projectbeschrijving
