@@ -104,7 +104,6 @@
                         var returnUrl = Context.Request.Path.ToString();
                         if (!returnUrl.StartsWith("/")) returnUrl = "/";
                         }
-
                         <li>
                             <a class="dropdown-item @(Tr.Culture == "nl" ? "fw-bold" : "")"
                                asp-controller="Culture" asp-action="Set"
