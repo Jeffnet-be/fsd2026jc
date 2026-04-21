@@ -1,87 +1,111 @@
 @model ChampionsLeague.Web.ViewModels.CartVM
-@{ ViewData["Title"] = Tr.T("checkout_review_title"); }
+@{
+    ViewData["Title"] = Tr.T("checkout_review_title");
+}
 
 <div class="container py-4">
-<h1 class="fw-bold mb-4" style="color:#001489">📋 @Tr.T("checkout_review_title")</h1>
+    <h1 class="fw-bold mb-4" style="color:#001489">📋 @Tr.T("checkout_review_title")</h1>
 
-@if (TempData["Errors"] is string rawErrors)
-{
-    foreach (var err in rawErrors.Split('|', StringSplitOptions.RemoveEmptyEntries))
-    { <div class="alert alert-danger">@err</div> }
-}
+    @if (TempData["Errors"] is string rawErrors)
+    {
+        foreach (var err in rawErrors.Split('|', StringSplitOptions.RemoveEmptyEntries))
+        {
+            <div class="alert alert-danger">@err</div>
+        }
+    }
 
-<div class="card border-0 shadow-sm mb-4" style="border-radius:14px;overflow:hidden">
-    <table class="table table-hover mb-0 align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th>@Tr.T("checkout_col_match")</th>
-                <th>@Tr.T("checkout_col_sector")</th>
-                <th class="text-center">@Tr.T("checkout_col_qty")</th>
-                <th class="text-end">@Tr.T("checkout_col_subtotal")</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.Items)
-            {
-                <tr>
-                    <td class="fw-bold">@item.MatchDescription<br/><small class="text-muted fw-normal">@item.MatchDate.ToString("dd/MM/yyyy HH:mm")</small></td>
-                    <td><small class="text-muted">@Tr.TranslateSector(item.SectorName)</small></td>
-                    <td class="text-center">@item.Quantity</td>
-                    <td class="text-end fw-bold">€ @item.Subtotal.ToString("0.00")</td>
-                </tr>
-            }
-        </tbody>
-        <tfoot>
-            <tr class="table-light fw-bold">
-                <td colspan="3" class="text-end fs-5">@Tr.T("checkout_grand_total")</td>
-                <td class="text-end fs-5 text-success">€ @Model.Total.ToString("0.00")</td>
-            </tr>
-        </tfoot>
-    </table>
-</div>
-
-@if (Model.SeasonItems.Any())
-{
-    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;overflow:hidden">
-        <div class="card-header fw-bold" style="background:#001489;color:#FFD700">
-            📅 @Tr.T("cart_season_title")
-        </div>
-        <table class="table mb-0 align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>@Tr.T("cart_col_match")</th>
-                    <th>@Tr.T("tickets_col_sector")</th>
-                    <th class="text-end">@Tr.T("cart_col_subtotal")</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.SeasonItems)
-                {
+    @* Regular tickets — only show if there are any *@
+    @if (Model.Items.Any())
+    {
+        <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;overflow:hidden">
+            <div class="card-header fw-bold" style="background:#001489;color:#FFD700">
+                🎟️ @Tr.T("checkout_col_match")
+            </div>
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-dark">
                     <tr>
-                        <td class="fw-bold">@item.ClubName<small class="text-muted d-block fw-normal">@item.StadiumName</small></td>
-                        <td><small class="text-muted">@Tr.TranslateSector(item.SectorName)</small></td>
-                        <td class="text-end fw-bold">€ @item.TotalPrice.ToString("0.00")</td>
+                        <th>@Tr.T("checkout_col_match")</th>
+                        <th>@Tr.T("checkout_col_sector")</th>
+                        <th class="text-center">@Tr.T("checkout_col_qty")</th>
+                        <th class="text-end">@Tr.T("checkout_col_subtotal")</th>
                     </tr>
-                }
-            </tbody>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td class="fw-bold">
+                                @item.MatchDescription<br />
+                                <small class="text-muted fw-normal">@item.MatchDate.ToString("dd/MM/yyyy HH:mm")</small>
+                            </td>
+                            <td><small class="text-muted">@Tr.TranslateSector(item.SectorName)</small></td>
+                            <td class="text-center">@item.Quantity</td>
+                            <td class="text-end fw-bold">€ @item.Subtotal.ToString("0.00")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @* Season tickets — only show if there are any *@
+    @if (Model.SeasonItems.Any())
+    {
+        <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;overflow:hidden">
+            <div class="card-header fw-bold" style="background:#001489;color:#FFD700">
+                📅 @Tr.T("cart_season_title")
+            </div>
+            <table class="table mb-0 align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>@Tr.T("cart_col_match")</th>
+                        <th>@Tr.T("tickets_col_sector")</th>
+                        <th class="text-end">@Tr.T("cart_col_subtotal")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.SeasonItems)
+                    {
+                        <tr>
+                            <td class="fw-bold">
+                                @item.ClubName
+                                <small class="text-muted d-block fw-normal">@item.StadiumName</small>
+                            </td>
+                            <td><small class="text-muted">@Tr.TranslateSector(item.SectorName)</small></td>
+                            <td class="text-end fw-bold">€ @item.TotalPrice.ToString("0.00")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @* Grand total — always visible, spans both sections *@
+    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;overflow:hidden">
+        <table class="table mb-0">
+            <tfoot>
+                <tr class="table-light fw-bold">
+                    <td class="text-end fs-5">@Tr.T("checkout_grand_total")</td>
+                    <td class="text-end fs-5 text-success" style="width:160px">€ @Model.Total.ToString("0.00")</td>
+                </tr>
+            </tfoot>
         </table>
     </div>
-}
 
-<div class="alert alert-info">
-    <i class="bi bi-credit-card me-2"></i>@Tr.T("checkout_payment_note")
-</div>
+    <div class="alert alert-info">
+        <i class="bi bi-credit-card me-2"></i>@Tr.T("checkout_payment_note")
+    </div>
 
-<div class="d-flex gap-2 justify-content-end flex-wrap">
-    <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-secondary">
-        ← @Tr.T("checkout_back_cart")
-    </a>
-    <form asp-action="Confirm" method="post">
-        @Html.AntiForgeryToken()
-        <button type="submit" class="btn btn-lg fw-bold text-dark"
-                style="background:#FFD700;border:none;border-radius:8px">
-            ✅ @Tr.T("checkout_confirm")
-        </button>
-    </form>
-</div>
+    <div class="d-flex gap-2 justify-content-end flex-wrap">
+        <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-secondary">
+            ← @Tr.T("checkout_back_cart")
+        </a>
+        <form asp-action="Confirm" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-lg fw-bold text-dark"
+                    style="background:#FFD700;border:none;border-radius:8px">
+                ✅ @Tr.T("checkout_confirm")
+            </button>
+        </form>
+    </div>
 </div>
