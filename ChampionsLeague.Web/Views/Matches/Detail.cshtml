@@ -106,37 +106,42 @@ else
 }
 </div>
 
+@Html.AntiForgeryToken()
+
 @section Scripts {
-<script>
-$(function () {
-    $('.add-to-cart-btn').on('click', function () {
-        var btn = $(this), sel = btn.closest('.d-flex').find('.qty-select');
-        var item = {
-            matchId: parseInt(sel.data('matchid')),
-            matchDescription: sel.data('matchdesc'),
-            matchDate: sel.data('matchdate'),
-            sectorId: parseInt(sel.data('sectorid')),
-            sectorName: sel.data('sectorname'),
-            quantity: parseInt(sel.val()),
-            unitPrice: parseFloat(sel.data('price'))
-        };
-        btn.prop('disabled', true).text('...');
-        $.ajax({
-            url:'/Cart/AddToCart', method:'POST', contentType:'application/json',
-            data: JSON.stringify(item),
-            success: function(html) {
-                var count = $(html).filter('#cart-count').text() || $(html).find('#cart-count').text();
-                $('#cart-badge').text(count);
-                $('#purchase-feedback').html('<div class="alert alert-success alert-dismissible fade show">✅ @Tr.T("detail_added") <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
-                btn.prop('disabled', false).html('🛒 @Tr.T("detail_add_cart")');
-            },
-            error: function(xhr) {
-                var msg = (xhr.responseJSON && xhr.responseJSON.error) ? xhr.responseJSON.error : 'Error. Please try again.';
-                $('#purchase-feedback').html('<div class="alert alert-danger">' + msg + '</div>');
-                btn.prop('disabled', false).html('🛒 @Tr.T("detail_add_cart")');
-            }
+    <script>
+        $(function () {
+            $('.add-to-cart-btn').on('click', function () {
+                var btn = $(this), sel = btn.closest('.d-flex').find('.qty-select');
+                var item = {
+                    matchId:          parseInt(sel.data('matchid')),
+                    matchDescription: sel.data('matchdesc'),
+                    matchDate:        sel.data('matchdate'),
+                    sectorId:         parseInt(sel.data('sectorid')),
+                    sectorName:       sel.data('sectorname'),
+                    quantity:         parseInt(sel.val()),
+                    unitPrice:        parseFloat(sel.data('price'))
+                };
+                btn.prop('disabled', true).text('...');
+                $.ajax({
+                    url: '/Cart/AddToCart', method: 'POST', contentType: 'application/json',
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    data: JSON.stringify(item),
+                    success: function(html) {
+                        var count = $(html).filter('#cart-count').text() || $(html).find('#cart-count').text();
+                        $('#cart-badge').text(count);
+                        $('#purchase-feedback').html('<div class="alert alert-success alert-dismissible fade show">✅ @Tr.T("detail_added") <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                        btn.prop('disabled', false).html('🛒 @Tr.T("detail_add_cart")');
+                    },
+                    error: function(xhr) {
+                        var msg = (xhr.responseJSON && xhr.responseJSON.error) ? xhr.responseJSON.error : 'Error. Please try again.';
+                        $('#purchase-feedback').html('<div class="alert alert-danger">' + msg + '</div>');
+                        btn.prop('disabled', false).html('🛒 @Tr.T("detail_add_cart")');
+                    }
+                });
+            });
         });
-    });
-});
-</script>
+    </script>
 }
