@@ -99,11 +99,14 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         @{
-                        // Defined once — reused by all three language links
-                        // StartsWith("/") check prevents Open Redirect attacks
-                        var returnUrl = Context.Request.Path.ToString();
-                        if (!returnUrl.StartsWith("/")) returnUrl = "/";
-                        }
+                            // Defined once — reused by all three language links
+                            // StartsWith("/") check prevents Open Redirect attacks
+                            // Sanitise returnUrl: encode for XSS safety + validate for Open Redirect safety
+                            var rawPath = Context.Request.Path.ToString();
+                            var returnUrl = rawPath.StartsWith("/")
+                            ? Uri.EscapeDataString(rawPath)
+                            : "/";
+                        }       
                         <li>
                             <a class="dropdown-item @(Tr.Culture == "nl" ? "fw-bold" : "")"
                                asp-controller="Culture" asp-action="Set"
