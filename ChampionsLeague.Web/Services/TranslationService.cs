@@ -157,7 +157,7 @@ public class TranslationService
             ["fr"]="Êtes-vous sûr de vouloir annuler ce billet?",
             ["en"]="Are you sure you want to cancel this ticket? This cannot be undone." },
         ["tickets_not_cancellable"]= new(){ ["nl"]="Niet meer annuleerbaar", ["fr"]="Non annulable", ["en"]="Not cancellable" },
-        ["season_tickets_title"] = new() { ["nl"] = "Seizoensabonnementen", ["fr"] = "Abonnements", ["en"] = "Season Tickets" },
+        ["season_tickets_title"] = new() { ["nl"] = "Abonnementen", ["fr"] = "Abonnements", ["en"] = "Season Tickets" },
         ["season_col_club"] = new() { ["nl"] = "Club", ["fr"] = "Club", ["en"] = "Club" },
         ["season_col_purchased"] = new() { ["nl"] = "Aankoopdatum", ["fr"] = "Date d'achat", ["en"] = "Purchase Date" },
         ["season_status_active"] = new() { ["nl"] = "Actief", ["fr"] = "Actif", ["en"] = "Active" },
@@ -247,18 +247,18 @@ public class TranslationService
                                               ["fr"]="Billet annulé avec succès.",
                                               ["en"]="Ticket cancelled successfully." },
         // ── Season ticket email ───────────────────────────────────────
-        ["season_email_subject"]     = new(){ ["nl"]="Uw seizoensabonnement — CL Tickets",
-                                              ["fr"]="Votre abonnement saison — CL Tickets",
+        ["season_email_subject"]     = new(){ ["nl"]="Uw abonnement — CL Tickets",
+                                              ["fr"]="Votre abonnement— CL Tickets",
                                               ["en"]="Your season ticket — CL Tickets" },
-        ["season_email_intro"]       = new(){ ["nl"]="Bedankt voor uw aankoop! Hieronder vindt u de details van uw seizoensabonnement.",
-                                              ["fr"]="Merci pour votre achat! Voici les détails de votre abonnement saison.",
+        ["season_email_intro"]       = new(){ ["nl"]="Bedankt voor uw aankoop! Hieronder vindt u de details van uw abonnement.",
+                                              ["fr"]="Merci pour votre achat! Voici les détails de votre abonnement.",
                                               ["en"]="Thank you for your purchase! Below are the details of your season ticket." },
-        ["season_email_footer"]      = new(){ ["nl"]="Uw seizoensabonnement geeft u toegang tot alle thuiswedstrijden van uw club. Bewaar dit e-mailbericht als bewijs van aankoop.",
+        ["season_email_footer"]      = new(){ ["nl"]="Uw abonnement geeft u toegang tot alle thuiswedstrijden van uw club. Bewaar dit e-mailbericht als bewijs van aankoop.",
                                               ["fr"]="Votre abonnement vous donne accès à tous les matchs à domicile de votre club.",
                                               ["en"]="Your season ticket gives you access to all home matches of your club. Keep this email as proof of purchase." },
 
 
-        ["season_added_to_cart"]        = new(){ ["nl"]="Seizoensabonnement toegevoegd aan winkelwagen.",
+        ["season_added_to_cart"]        = new(){ ["nl"]="Abonnement toegevoegd aan winkelwagen.",
                                                    ["fr"]="Abonnement ajouté au panier.",
                                                    ["en"]="Season ticket added to cart." },
         ["season_err_already_in_cart"]  = new(){ ["nl"]="Dit vak zit al in uw winkelwagen.",
@@ -273,7 +273,7 @@ public class TranslationService
         ["cart_col_type"]               = new(){ ["nl"]="Type",            ["fr"]="Type",            ["en"]="Type" },
         ["cart_type_ticket"]            = new(){ ["nl"]="🎟️ Ticket",       ["fr"]="🎟️ Billet",       ["en"]="🎟️ Ticket" },
         ["cart_type_season"]            = new(){ ["nl"]="📅 Abonnement",   ["fr"]="📅 Abonnement",   ["en"]="📅 Season ticket" },
-        ["cart_season_title"]           = new(){ ["nl"]="Seizoensabonnementen", ["fr"]="Abonnements saison", ["en"]="Season tickets" },
+        ["cart_season_title"]           = new(){ ["nl"]="Abonnementen", ["fr"]="Abonnements", ["en"]="Season tickets" },
 
         // ── Hotel search ──────────────────────────────────────────────
         ["hotel_title"]      = new(){ ["nl"]="Hotels zoeken",      ["fr"]="Rechercher des hôtels", ["en"]="Find Hotels" },
@@ -291,7 +291,7 @@ public class TranslationService
             ["en"]="No hotels found. Try a different city or dates." },
 
         // ── Season Tickets ────────────────────────────────────────────
-        ["season_title"]        = new(){ ["nl"]="Seizoensabonnementen",         ["fr"]="Abonnements saison",         ["en"]="Season Tickets" },
+        ["season_title"]        = new(){ ["nl"]="Abonnementen",         ["fr"]="Abonnements",         ["en"]="Season Tickets" },
         ["season_subtitle"]     = new(){
             ["nl"]="Koop een abonnement voor alle thuiswedstrijden",
             ["fr"]="Achetez un abonnement pour tous les matchs a domicile",
@@ -299,15 +299,15 @@ public class TranslationService
         ["season_price"]        = new(){ ["nl"]="Seizoensprijs",                ["fr"]="Prix saison",                ["en"]="Season price" },
         ["season_buy_btn"]      = new(){ ["nl"]="Kopen",                        ["fr"]="Acheter",                    ["en"]="Buy" },
         ["season_info"]         = new(){
-            ["nl"]="U kunt nu een seizoensabonnement kopen. Abonnementen zijn enkel beschikbaar voor de start van de competitie (22 april 2026). Een abonnementplaats kan daarna niet meer als los ticket verkocht worden.",
+            ["nl"]="U kunt nu een abonnement kopen. Abonnementen zijn enkel beschikbaar voor de start van de competitie (22 april 2026). Een abonnementplaats kan daarna niet meer als los ticket verkocht worden.",
             ["fr"]="Vous pouvez acheter un abonnement maintenant. Les abonnements ne sont disponibles qu avant le debut de la competition (22 avril 2026).",
             ["en"]="You can purchase a season ticket now. Season tickets are only available before the competition starts (22 April 2026). A reserved seat cannot be sold as a single ticket after that." },
         ["season_success"]      = new(){
-            ["nl"]="Seizoensabonnement gekocht! Uw stoelnummer is",
+            ["nl"]="Abonnement gekocht! Uw stoelnummer is",
             ["fr"]="Abonnement acheté! Votre numéro de siège est",
             ["en"]="Season ticket purchased! Your seat number is" },
         ["season_err_started"]  = new(){
-            ["nl"]="Seizoensabonnementen zijn niet meer beschikbaar — de competitie is gestart.",
+            ["nl"]="Abonnementen zijn niet meer beschikbaar — de competitie is gestart.",
             ["fr"]="Les abonnements ne sont plus disponibles — la compétition a commencé.",
             ["en"]="Season tickets are no longer available — the competition has started." },
         ["season_err_full"]     = new(){
