@@ -20,7 +20,7 @@ builder.Services.AddControllersWithViews()
     .AddViewLocalization()
     .AddDataAnnotationsLocalization();
 
-// ── Swagger / OpenAPI (curriculum section 4) ──────────────────────────
+// ── Swagger / OpenAPI ──────────────────────────
 // Swagger UI available at /swagger — documents all API endpoints.
 // Use Postman to call /api/tickets, /api/matches etc.
 builder.Services.AddEndpointsApiExplorer();
@@ -168,7 +168,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// Swagger — available in all environments so jury can test on Azure
+// Swagger — available in all environments for testing during development and staging. Disable in production if desired.
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {

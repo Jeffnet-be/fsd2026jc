@@ -7,7 +7,6 @@ namespace ChampionsLeague.Infrastructure.Repositories;
 /// <summary>
 /// Generic repository implementation wrapping EF Core DbContext.
 /// All concrete repositories inherit this class to avoid repeating CRUD boilerplate.
-/// The Repository pattern is discussed alongside DbContext in course section 10.3.
 /// DbContext is injected with Scoped lifetime (one instance per HTTP request).
 /// </summary>
 /// <typeparam name="T">Domain entity type.</typeparam>

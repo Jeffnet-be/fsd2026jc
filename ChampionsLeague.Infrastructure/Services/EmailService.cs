@@ -13,7 +13,7 @@ public interface IEmailService
 }
 
 /// <summary>
-/// Real email implementation using MailKit + SMTP (Brevo/SendGrid/Gmail).
+/// Real email implementation using MailKit + SMTP (Brevo).
 /// Falls back to console logging if SMTP is not configured so the app
 /// never crashes in development or when credentials are missing.
 /// </summary>

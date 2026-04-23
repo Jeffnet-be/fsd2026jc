@@ -5,7 +5,6 @@ namespace ChampionsLeague.Web.ViewModels;
 /// <summary>
 /// Registration form ViewModel.
 /// Data Annotations drive both server-side (ModelState) and client-side validation.
-/// Curriculum section 8.1 covers all attributes used here.
 /// </summary>
 public class RegisterVM
 {

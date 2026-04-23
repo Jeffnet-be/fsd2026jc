@@ -7,13 +7,12 @@ namespace ChampionsLeague.Infrastructure.Data;
 /// <summary>
 /// Central EF Core DbContext. Inherits from IdentityDbContext so ASP.NET Core Identity
 /// tables (AspNetUsers, AspNetRoles, etc.) are automatically included in the same database.
-/// This is the single "session with the database" described in chapter 10 of the course notes.
 /// </summary>
 public class AppDbContext : IdentityDbContext<ApplicationUser>
 {
     /// <param name="options">
     /// Injected by the DI container — contains the connection string and provider.
-    /// This is Constructor Injection (DI type 1 from curriculum section 6.16).
+    /// This is Constructor Injection.
     /// </param>
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -29,8 +28,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
 
     /// <summary>
     /// Fluent API configuration: table constraints, relationships, and seed data.
-    /// Fluent API is preferred over DataAnnotations for complex mappings
-    /// (course section 10.1.1 — Key Concepts in EF Core).
+    /// Fluent API is preferred over DataAnnotations for complex mappings.
     /// </summary>
     protected override void OnModelCreating(ModelBuilder builder)
     {

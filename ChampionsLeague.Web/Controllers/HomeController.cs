@@ -16,7 +16,7 @@ public class HomeController : Controller
     private readonly IMapper         _mapper;
 
     /// <summary>
-    /// Dependencies injected by the DI container (Constructor Injection — curriculum section 6.16).
+    /// Dependencies injected by the DI container.
     /// </summary>
     public HomeController(IClubRepository clubs, IMapper mapper)
     {

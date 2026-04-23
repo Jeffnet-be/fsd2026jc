@@ -12,7 +12,6 @@ namespace ChampionsLeague.Web.Controllers.Api;
 /// <summary>
 /// REST API for the Champions League Ticket Portal.
 /// Used with Swagger UI (/swagger) and Postman for testing.
-/// Curriculum section 4: Swagger en Postman voor API-testing.
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]

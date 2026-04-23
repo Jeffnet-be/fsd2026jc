@@ -14,7 +14,7 @@ public class Club
     /// <summary>Country the club is based in.</summary>
     public string Country { get; set; } = string.Empty;
 
-    /// <summary>Relative path to the club badge under wwwroot/images/clubs/.</summary>
+    /// <summary>Path to the club badge</summary>
     public string BadgeUrl { get; set; } = string.Empty;
 
     /// <summary>Primary hex colour used for UI theming.</summary>

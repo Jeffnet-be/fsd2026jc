@@ -7,7 +7,7 @@ namespace ChampionsLeague.Infrastructure.Repositories;
 
 /// <summary>
 /// Concrete Match repository. All LINQ queries demonstrate the strongly-typed
-/// IQueryable approach taught in section 10.1.1 of the curriculum.
+/// IQueryable approach.
 /// AsNoTracking() is used on read-only queries for better performance.
 /// </summary>
 public class MatchRepository : BaseRepository<Match>, IMatchRepository

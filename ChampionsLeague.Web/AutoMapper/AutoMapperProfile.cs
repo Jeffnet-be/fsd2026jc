@@ -6,8 +6,7 @@ namespace ChampionsLeague.Web.AutoMapper;
 
 /// <summary>
 /// AutoMapper profile — defines all entity → ViewModel mappings in one place.
-/// Inheriting from Profile and calling CreateMap() in the constructor is the
-/// standard pattern shown in section 10.4 of the curriculum.
+/// Inheriting from Profile and calling CreateMap() in the constructor.
 /// AutoMapper is registered in Program.cs via AddAutoMapper(typeof(Program)),
 /// which scans the assembly for all Profile subclasses automatically.
 /// </summary>

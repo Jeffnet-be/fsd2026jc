@@ -212,7 +212,7 @@ public class TranslationService
             ["en"]="You can now log in with your new password." },
 
         // ── Register — password requirements & strength ───────────────
-        // Identity config: RequiredLength=8, RequireDigit=true,
+        // Identity config: RequiredLength=12, RequireDigit=true,
         // RequireUppercase=true, RequireLowercase=true, RequireNonAlphanumeric=true
         ["reg_pwd_requirements_title"] = new(){ ["nl"]="Wachtwoordvereisten",         ["fr"]="Exigences du mot de passe",          ["en"]="Password requirements" },
         ["reg_pwd_req_length"]         = new(){ ["nl"]="Minimaal 12 tekens",          ["fr"]="Minimum 12 caractères",              ["en"]="At least 12 characters" },

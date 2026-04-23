@@ -92,16 +92,16 @@ public static class SeedData
 
     // ── Matches — sample group stage + knockout fixtures ───────────────
     // Dates are set in the near future relative to April 2026:
-    // - Matchday 1 (Apr 22): sale OPEN  — within 1 month window
-    // - Matchday 2 (Apr 29): sale OPEN  — within 1 month window
-    // - Matchday 3 (May 13): sale CLOSED — more than 1 month away
+    // - Matchday 1 (Apr 25): sale OPEN  — within 1 month window
+    // - Matchday 2 (May 10): sale OPEN  — within 1 month window
+    // - Matchday 3 (May 26): sale CLOSED — more than 1 month away
     // - Knockouts: sale CLOSED
     // This correctly demonstrates the "1 month before" business rule.
     private static void SeedMatches(ModelBuilder b)
     {
-        var d1 = new DateTime(2026, 4, 22, 20, 45, 0, DateTimeKind.Utc); // Matchday 1 — OPEN
-        var d2 = new DateTime(2026, 4, 29, 20, 45, 0, DateTimeKind.Utc); // Matchday 2 — OPEN
-        var d3 = new DateTime(2026, 5, 13, 20, 45, 0, DateTimeKind.Utc); // Matchday 3 — CLOSED
+        var d1 = new DateTime(2026, 4, 25, 20, 45, 0, DateTimeKind.Utc); // Matchday 1 — OPEN
+        var d2 = new DateTime(2026, 5, 10, 20, 45, 0, DateTimeKind.Utc); // Matchday 2 — OPEN
+        var d3 = new DateTime(2026, 5, 26, 20, 45, 0, DateTimeKind.Utc); // Matchday 3 — CLOSED
         var qf = new DateTime(2026, 6, 17, 20, 45, 0, DateTimeKind.Utc); // Quarter-Finals
         var sf = new DateTime(2026, 7, 8,  20, 45, 0, DateTimeKind.Utc); // Semi-Final
         var fi = new DateTime(2026, 8, 12, 20, 45, 0, DateTimeKind.Utc); // Final
