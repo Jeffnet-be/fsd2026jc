@@ -1,4 +1,6 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace ChampionsLeague.Infrastructure.Services;
 
@@ -18,20 +20,19 @@ public record HotelResult(string Name, string Address, decimal PricePerNight, st
 /// <summary>
 /// Typed HttpClient implementation for the hotel-search REST API.
 /// HttpClient is injected via the typed-client pattern registered in Program.cs.
-/// If the real API is unavailable, returns mock data so the demo still works.
 /// </summary>
 public class HotelApiService : IHotelApiService
 {
     private readonly HttpClient             _http;
     private readonly ILogger<HotelApiService> _logger;
+    private readonly IConfiguration _config;
 
-    public HotelApiService(HttpClient http, ILogger<HotelApiService> logger)
+    public HotelApiService(HttpClient http, ILogger<HotelApiService> logger, IConfiguration config)
     {
-        _http   = http;
+        _http = http;
         _logger = logger;
+        _config = config;
     }
-
-    /// <inheritdoc/>
     public async Task<IEnumerable<HotelResult>> SearchAsync(
         string city, DateTime checkIn, DateTime checkOut)
     {
@@ -42,19 +43,34 @@ public class HotelApiService : IHotelApiService
             _logger.LogInformation(
                 "Hotel search: {City} | {In:d} – {Out:d}", safeCity, checkIn, checkOut);
 
-            // In production, uncomment and point at a real endpoint:
-            // var url = $"v1/hotels?city={Uri.EscapeDataString(city)}&checkIn={checkIn:yyyy-MM-dd}&checkOut={checkOut:yyyy-MM-dd}";
-            // return await _http.GetFromJsonAsync<List<HotelResult>>(url) ?? [];
-
-            await Task.Delay(150); // simulate network latency
-
-            return new[]
+            var apiKey = _config["HotelApi:ApiKey"] ?? "";
+            if (string.IsNullOrEmpty(apiKey))
             {
-                new HotelResult($"Hotel Europa {city}",       "Grote Markt 1",    89.99m,  "https://booking.example.com/1"),
-                new HotelResult($"City Inn {city}",           "Stationsstraat 12",119.00m, "https://booking.example.com/2"),
-                new HotelResult($"Champions Suites {city}",   "Stadionlaan 3",    149.50m, "https://booking.example.com/3"),
-                new HotelResult($"Budget Stay {city}",        "Kerkstraat 5",     59.00m,  "https://booking.example.com/4"),
-            };
+                _logger.LogWarning("HotelApi:ApiKey not configured");
+                return Enumerable.Empty<HotelResult>();
+            }
+
+            using var request = new HttpRequestMessage(HttpMethod.Get,
+                $"https://booking-com15.p.rapidapi.com/api/v1/hotels/searchDestination" +
+                $"?query={Uri.EscapeDataString(safeCity)}");
+
+            request.Headers.Add("x-rapidapi-key", apiKey);
+            request.Headers.Add("x-rapidapi-host", "booking-com15.p.rapidapi.com");
+
+            var response = await _http.SendAsync(request);
+            var json = await response.Content.ReadAsStringAsync();
+
+            var data = JsonSerializer.Deserialize<JsonElement>(json)
+                                     .GetProperty("data")
+                                     .EnumerateArray()
+                                     .Take(4);
+
+            return data.Select(item => new HotelResult(
+                item.GetProperty("name").GetString() ?? "Hotel",
+                item.GetProperty("city_name").GetString() ?? safeCity,
+                0m,
+                "https://www.booking.com"
+            )).ToList();
         }
         catch (Exception ex)
         {
