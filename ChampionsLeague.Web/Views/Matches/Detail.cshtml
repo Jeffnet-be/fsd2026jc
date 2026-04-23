@@ -29,7 +29,16 @@
     </div>
 </div>
 
-@if (!Model.IsSaleOpen)
+    @if (!Model.IsSaleOpen && DateTime.UtcNow < Model.MatchDate)
+{
+    <div class="alert alert-warning d-flex align-items-center gap-2">
+        <span style="font-size:1.5rem">🔒</span>
+        <div>
+                <strong>@Tr.T("detail_match_past")</strong>
+        </div>
+    </div>
+}
+else if (!Model.IsSaleOpen && DateTime.UtcNow >= Model.MatchDate.AddMonths(-1))
 {
     <div class="alert alert-warning d-flex align-items-center gap-2">
         <span style="font-size:1.5rem">🔒</span>

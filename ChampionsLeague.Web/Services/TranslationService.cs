@@ -100,6 +100,7 @@ public class TranslationService
         ["detail_added"]         = new(){ ["nl"]="Toegevoegd aan winkelwagen!", ["fr"]="Ajouté au panier!", ["en"]="Added to cart!" },
         ["detail_ticket_s"]      = new(){ ["nl"]="ticket",            ["fr"]="billet",     ["en"]="ticket" },
         ["detail_tickets_pl"]    = new(){ ["nl"]="tickets",           ["fr"]="billets",    ["en"]="tickets" },
+        ["detail_match_past"]    = new(){ ["nl"] = "Deze wedstrijd heeft al plaatsgevonden. Tickets zijn niet meer beschikbaar.", ["fr"] = "Ce match a déjà eu lieu. Les billets ne sont plus disponibles.", ["en"] = "This match has already taken place. Tickets are no longer available."},
 
         // ── Cart ──────────────────────────────────────────────────────
         ["cart_title"]        = new(){ ["nl"]="Winkelwagen",       ["fr"]="Panier",              ["en"]="Shopping Cart" },
