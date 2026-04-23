@@ -106,8 +106,15 @@ public class HotelApiService : IHotelApiService
                         pb.TryGetProperty("grossPrice", out var gp) &&
                         gp.TryGetProperty("value", out var pv))
                         price = pv.GetDecimal();
+                    var hotelId = prop.TryGetProperty("id", out var id)
+                                    ? id.GetInt32().ToString() : "";
 
-                    return new HotelResult(name, address, price, "https://www.booking.com");
+                    var bookingUrl = !string.IsNullOrEmpty(hotelId)
+                        ? $"https://www.booking.com/hotel/xx/hotel-{hotelId}.html" +
+                          $"?checkin={checkIn:yyyy-MM-dd}&checkout={checkOut:yyyy-MM-dd}&adults=1"
+                        : "https://www.booking.com";
+
+                    return new HotelResult(name, address, price, bookingUrl);
                 })
                 .ToList();
         }
