@@ -29,27 +29,8 @@
     </div>
 </div>
 
-    @if (!Model.IsSaleOpen && DateTime.UtcNow < Model.MatchDate)
-{
-    <div class="alert alert-warning d-flex align-items-center gap-2">
-        <span style="font-size:1.5rem">🔒</span>
-        <div>
-                <strong>@Tr.T("detail_match_past")</strong>
-        </div>
-    </div>
-}
-else if (!Model.IsSaleOpen && DateTime.UtcNow >= Model.MatchDate.AddMonths(-1))
-{
-    <div class="alert alert-warning d-flex align-items-center gap-2">
-        <span style="font-size:1.5rem">🔒</span>
-        <div>
-            <strong>@Tr.T("detail_sale_closed")</strong>
-            @Tr.T("detail_sale_opens") <strong>@Model.MatchDate.AddMonths(-1).ToString("dd/MM/yyyy")</strong>.
-        </div>
-    </div>
-}
-else
-{
+    @if (Model.IsSaleOpen)
+    {
     <div id="purchase-feedback" class="mb-3"></div>
     <h3 class="mb-3 fw-bold" style="color:#001489">🎟️ @Tr.T("detail_select_sector")</h3>
 
@@ -112,7 +93,27 @@ else
             🛒 @Tr.T("detail_view_cart")
         </a>
     </div>
+    }  
+    else if (DateTime.UtcNow < Model.MatchDate.AddMonths(-1))
+{
+    <div class="alert alert-warning d-flex align-items-center gap-2">
+        <span style="font-size:1.5rem">🔒</span>
+        <div>
+            <strong>@Tr.T("detail_sale_closed")</strong>
+            @Tr.T("detail_sale_opens") <strong>@Model.MatchDate.AddMonths(-1).ToString("dd/MM/yyyy")</strong>
+        </div>
+    </div>
 }
+    else if (DateTime.UtcNow >= Model.MatchDate)
+{
+<div class="alert alert-warning d-flex align-items-center gap-2">
+        <span style="font-size:1.5rem">🔒</span>
+        <div>
+            <strong>@Tr.T("detail_match_past")</strong>
+        </div>
+    </div>
+    }
+
 </div>
 
 @Html.AntiForgeryToken()
