@@ -7,8 +7,12 @@
     if (!string.IsNullOrEmpty(_cartJson))
     {
         try {
+            var _jsonOpts = new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
             var _cart = System.Text.Json.JsonSerializer
-                .Deserialize<ChampionsLeague.Web.ViewModels.CartVM>(_cartJson);
+                .Deserialize<ChampionsLeague.Web.ViewModels.CartVM>(_cartJson, _jsonOpts);
             _cartCount = _cart?.Count ?? 0;
         } catch { }
     }

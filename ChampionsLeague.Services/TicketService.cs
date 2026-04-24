@@ -13,10 +13,31 @@ public record PurchaseRequest(string UserId, int MatchId, int SectorId, int Quan
 /// emails only after ALL cart items have been successfully saved, so a partial
 /// failure never results in confirmation emails for items that weren't booked.
 /// </summary>
+/// <summary>
+/// Foutcodes voor aankoop-fouten.
+/// De Web-laag (CheckoutController) vertaalt deze codes naar de juiste taal.
+/// Zo blijft de Services-laag taalongevoelig.
+/// </summary>
+public enum PurchaseErrorCode
+{
+    None,
+    MatchNotFound,
+    SaleNotOpen,
+    MaxTicketsExceeded,
+    MinQuantity,
+    SameDayMatch,
+    SectorNotFound,
+    NotEnoughSeats
+}
+
 public record PurchaseResult(
     bool                  Success,
     string?               ErrorMessage = null,
-    IEnumerable<Ticket>?  Tickets      = null);
+    IEnumerable<Ticket>?  Tickets      = null,
+    PurchaseErrorCode     ErrorCode    = PurchaseErrorCode.None,
+    int                   SeatsLeft    = 0,
+    int                   AlreadyOwned = 0,
+    DateTime              SaleOpensOn  = default);
 
 public record CancelResult(bool Success, string? ErrorMessage = null);
 
@@ -62,26 +83,26 @@ public class TicketService : ITicketService
         var matches = await _matches.GetAllWithClubsAsync();
         var match   = matches.FirstOrDefault(m => m.Id == req.MatchId);
         if (match is null)
-            return new PurchaseResult(false, "Match not found.");
+            return new PurchaseResult(false, "Match not found.", ErrorCode: PurchaseErrorCode.MatchNotFound);
 
         // ── Rule 2: sale window open ──────────────────────────────────
         if (!match.IsSaleOpen)
             return new PurchaseResult(false,
-                $"Ticket sale is not open. Sale opens on {match.MatchDate.AddMonths(-1):dd/MM/yyyy}.");
+                "sale_not_open", ErrorCode: PurchaseErrorCode.SaleNotOpen, SaleOpensOn: match.MatchDate.AddMonths(-1));
 
         // ── Rule 3: max 4 tickets per person per match ────────────────
         var alreadyOwned = await _tickets.GetUserTicketCountForMatchAsync(req.UserId, req.MatchId);
         if (alreadyOwned + req.Quantity > 4)
             return new PurchaseResult(false,
-                $"Maximum 4 tickets per person per match. You already have {alreadyOwned} ticket(s). You can add {4 - alreadyOwned} more.");
+                "max_exceeded", ErrorCode: PurchaseErrorCode.MaxTicketsExceeded, AlreadyOwned: alreadyOwned);
 
         if (req.Quantity < 1)
-            return new PurchaseResult(false, "You must purchase at least 1 ticket.");
+            return new PurchaseResult(false, "min_quantity", ErrorCode: PurchaseErrorCode.MinQuantity);
 
         // ── Rule 4: no two matches on the same day ────────────────────
         if (await _orders.UserHasMatchOnDayAsync(req.UserId, match.MatchDate))
             return new PurchaseResult(false,
-                "You already have a ticket for another match on this day.");
+                "same_day", ErrorCode: PurchaseErrorCode.SameDayMatch);
 
         // ── Rule 5: capacity check (excl. season seats) ───────────────
         var seasonSeats = (await _seasonTickets.GetSeasonReservedSeatsAsync(req.SectorId)).ToHashSet();
@@ -91,7 +112,7 @@ public class TicketService : ITicketService
         var club   = await _clubs.GetWithStadiumAndSectorsAsync(match.HomeClubId);
         var sector = club?.Stadium?.Sectors.FirstOrDefault(s => s.Id == req.SectorId);
         if (sector is null)
-            return new PurchaseResult(false, "Sector not found.");
+            return new PurchaseResult(false, "sector_not_found", ErrorCode: PurchaseErrorCode.SectorNotFound);
 
         var freeSeats = Enumerable.Range(1, sector.Capacity)
                                   .Where(s => !allTaken.Contains(s))
@@ -100,7 +121,7 @@ public class TicketService : ITicketService
 
         if (freeSeats.Count < req.Quantity)
             return new PurchaseResult(false,
-                $"Not enough seats available. Only {freeSeats.Count} seat(s) left in this sector.");
+                "not_enough_seats", ErrorCode: PurchaseErrorCode.NotEnoughSeats, SeatsLeft: freeSeats.Count);
 
         // ── Save Order + OrderLine + Tickets ──────────────────────────
         var order = new Order

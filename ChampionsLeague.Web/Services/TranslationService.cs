@@ -320,6 +320,35 @@ public class TranslationService
             ["nl"]="De competitie is gestart. Abonnementen zijn niet meer beschikbaar. Koop losse tickets via de wedstrijdkalender.",
             ["fr"]="La competition a commence. Les abonnements ne sont plus disponibles.",
             ["en"]="The competition has started. Season tickets are no longer available. Buy single tickets via the match calendar." },
+        // ── Aankoop-foutmeldingen ─────────────────────────────────────
+        ["purchase_err_match_not_found"] = new(){
+            ["nl"] = "Wedstrijd niet gevonden.",
+            ["fr"] = "Match introuvable.",
+            ["en"] = "Match not found." },
+        ["purchase_err_sale_not_open"] = new(){
+            ["nl"] = "Ticketverkoop is nog niet open. Verkoop start op {0}.",
+            ["fr"] = "La vente de billets n'est pas encore ouverte. Elle commence le {0}.",
+            ["en"] = "Ticket sale is not open. Sale opens on {0}." },
+        ["purchase_err_max_tickets"] = new(){
+            ["nl"] = "Maximum 4 tickets per persoon per wedstrijd. U heeft al {0} ticket(s). U kunt nog {1} toevoegen.",
+            ["fr"] = "Maximum 4 billets par personne par match. Vous avez déjà {0} billet(s). Vous pouvez en ajouter {1}.",
+            ["en"] = "Maximum 4 tickets per person per match. You already have {0} ticket(s). You can add {1} more." },
+        ["purchase_err_min_quantity"] = new(){
+            ["nl"] = "U moet minstens 1 ticket aankopen.",
+            ["fr"] = "Vous devez acheter au moins 1 billet.",
+            ["en"] = "You must purchase at least 1 ticket." },
+        ["purchase_err_same_day"] = new(){
+            ["nl"] = "U heeft al een ticket voor een andere wedstrijd op dezelfde dag.",
+            ["fr"] = "Vous avez déjà un billet pour un autre match ce jour-là.",
+            ["en"] = "You already have a ticket for another match on this day." },
+        ["purchase_err_sector_not_found"] = new(){
+            ["nl"] = "Sector niet gevonden.",
+            ["fr"] = "Secteur introuvable.",
+            ["en"] = "Sector not found." },
+        ["purchase_err_not_enough_seats"] = new(){
+            ["nl"] = "Niet genoeg plaatsen beschikbaar. Nog {0} plaats(en) vrij in dit vak.",
+            ["fr"] = "Pas assez de places disponibles. Il reste {0} place(s) dans ce secteur.",
+            ["en"] = "Not enough seats available. Only {0} seat(s) left in this sector." },
     };
 
     /// <summary>Returns the translated UI string for the given key in the current culture.</summary>

@@ -84,7 +84,19 @@ public class CheckoutController : Controller
 
             if (!result.Success)
             {
-                errors.Add($"{item.MatchDescription} — {result.ErrorMessage}");
+                // Vertaal de foutcode naar de huidige taal
+                var errMsg = result.ErrorCode switch
+                {
+                    PurchaseErrorCode.SaleNotOpen      => string.Format(_tr.T("purchase_err_sale_not_open"), result.SaleOpensOn.ToString("dd/MM/yyyy")),
+                    PurchaseErrorCode.MaxTicketsExceeded => string.Format(_tr.T("purchase_err_max_tickets"), result.AlreadyOwned, 4 - result.AlreadyOwned),
+                    PurchaseErrorCode.MinQuantity       => _tr.T("purchase_err_min_quantity"),
+                    PurchaseErrorCode.SameDayMatch      => _tr.T("purchase_err_same_day"),
+                    PurchaseErrorCode.SectorNotFound    => _tr.T("purchase_err_sector_not_found"),
+                    PurchaseErrorCode.NotEnoughSeats    => string.Format(_tr.T("purchase_err_not_enough_seats"), result.SeatsLeft),
+                    PurchaseErrorCode.MatchNotFound     => _tr.T("purchase_err_match_not_found"),
+                    _                                   => result.ErrorMessage ?? "Onbekende fout."
+                };
+                errors.Add($"{item.MatchDescription} — {errMsg}");
             }
             else if (result.Tickets is not null)
             {
