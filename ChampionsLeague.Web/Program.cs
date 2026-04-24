@@ -95,22 +95,17 @@ builder.Services.AddScoped<IClubRepository,         ClubRepository>();
 builder.Services.AddScoped<ISeasonTicketRepository, SeasonTicketRepository>();
 
 // ── Application services ──────────────────────────────────────────────
-// Nieuwe services die de directe repository-afhankelijkheden uit de Web-laag verwijderen.
-// Regel: controllers injecteren ENKEL interfaces uit de Services-laag,
-// niet langer interfaces uit de Domain/Infrastructure-laag.
-
-builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddScoped<IMatchService, MatchService>();
-builder.Services.AddScoped<IClubService, ClubService>();
-builder.Services.AddScoped<ISeasonTicketService, SeasonTicketService>();
-builder.Services.AddScoped<IUserTicketService, UserTicketService>();
-
-
-// Bestaande services (ongewijzigd):
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ChampionsLeague.Web.Services.TranslationService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<IEmailService, EmailService>(); // MailKit — reads Email:* from config
+
+// ── Nieuwe service-laag (vervangt directe repository-injectie in controllers) ──
+builder.Services.AddScoped<IAccountService,      AccountService>();
+builder.Services.AddScoped<IMatchService,         MatchService>();
+builder.Services.AddScoped<IClubService,          ClubService>();
+builder.Services.AddScoped<ISeasonTicketService,  SeasonTicketService>();
+builder.Services.AddScoped<IUserTicketService,    UserTicketService>();
 
 // ── Hotel API ─────────────────────────────────────────────────────────
 builder.Services.AddHttpClient<IHotelApiService, HotelApiService>(client =>
@@ -197,20 +192,13 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 app.UseHttpsRedirection();
 app.UseRequestLocalization();
 app.UseStaticFiles();
-
-// ── KRITIEK: UseSession VOOR UseRouting ──────────────────────────────────
-// Als UseSession na UseRouting staat, is de sessie niet gegarandeerd
-// beschikbaar tijdens het verwerken van de request op Azure.
-// Dit veroorzaakte de bug waarbij de wagen leeg leek na navigatie:
-// de controller las een verse lege sessie in plaats van de bestaande.
-app.UseSession();         // ← EERST
-app.UseRouting();         // ← DAN ROUTING
-
+app.UseSession();   // moet VOOR UseRouting staan
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
-    name: "default",
+    name:    "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

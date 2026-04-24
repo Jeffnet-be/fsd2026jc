@@ -26,4 +26,12 @@ public interface ITicketRepository : IRepository<Ticket>
     Task<int> GetUserTicketCountForMatchAsync(string userId, int matchId);
 
     Task<Ticket?> GetByIdTrackedAsync(int id);
+
+    /// <summary>
+    /// Geeft alle bezette stoelnummers in een sector terug over ALLE wedstrijden.
+    /// Gebruikt door SeasonTicketService om dubbele toewijzing te voorkomen:
+    /// een stoel die als los ticket verkocht is mag niet ook als abonnement
+    /// worden toegewezen, ongeacht voor welke wedstrijd het losse ticket geldt.
+    /// </summary>
+    Task<IEnumerable<int>> GetAllReservedSeatsInSectorAsync(int sectorId);
 }
