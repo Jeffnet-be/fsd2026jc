@@ -42,7 +42,7 @@ public class MatchService : IMatchService
     /// Logica die data combineert uit meerdere repositories hoort in de service,
     /// niet in de controller — controllers zijn verantwoordelijk voor HTTP, niet voor data.
     /// </summary>
-    public async Task<MatchDetailVM?> GetDetailAsync(int matchId)
+    public async Task<ServiceMatchDetailVM?> GetDetailAsync(int matchId)
     {
         var allMatches = await _matches.GetAllWithClubsAsync();
         var match      = allMatches.FirstOrDefault(m => m.Id == matchId);
@@ -52,14 +52,14 @@ public class MatchService : IMatchService
         var sectors = club?.Stadium?.Sectors?.ToList() ?? new List<Sector>();
 
         // Beschikbaarheid per sector berekenen — sequentieel om EF Core thread-safety te garanderen
-        var sectorVms = new List<SectorAvailabilityVM>();
+        var sectorVms = new List<ServiceSectorAvailabilityVM>();
         foreach (var sec in sectors)
         {
             int sold = 0;
             try { sold = await _matches.GetSoldCountAsync(matchId, sec.Id); }
             catch { sold = 0; }
 
-            sectorVms.Add(new SectorAvailabilityVM
+            sectorVms.Add(new ServiceSectorAvailabilityVM
             {
                 SectorId   = sec.Id,
                 SectorName = sec.Name,
@@ -69,7 +69,7 @@ public class MatchService : IMatchService
             });
         }
 
-        return new MatchDetailVM
+        return new ServiceMatchDetailVM
         {
             Id            = match.Id,
             HomeClubName  = match.HomeClub?.Name  ?? string.Empty,

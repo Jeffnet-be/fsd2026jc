@@ -1,5 +1,4 @@
 using ChampionsLeague.Domain.Entities;
-using ChampionsLeague.Web.ViewModels;
 
 namespace ChampionsLeague.Services;
 

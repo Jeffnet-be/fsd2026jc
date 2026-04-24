@@ -1,5 +1,5 @@
 using ChampionsLeague.Domain.Entities;
-using ChampionsLeague.Web.ViewModels;
+using ChampionsLeague.Services.ViewModels;
 
 namespace ChampionsLeague.Services;
 
@@ -29,7 +29,7 @@ public interface ISeasonTicketService
     /// slaat op in de database. Roept validatieregels op (sector vol, seizoen al gestart).
     /// </summary>
     Task<(bool Success, string? Error, SeasonTicket? Created)> FinalizeAsync(
-        string userId, SeasonCartItemVM item);
+        string userId, ServiceSeasonCartItemVM item);
 
     /// <summary>
     /// Annuleert een seizoensabonnement als de gebruiker de eigenaar is en het nog actief is.

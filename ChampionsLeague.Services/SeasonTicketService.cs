@@ -1,6 +1,6 @@
 using ChampionsLeague.Domain.Entities;
 using ChampionsLeague.Domain.Interfaces;
-using ChampionsLeague.Web.ViewModels;
+using ChampionsLeague.Services.ViewModels;
 
 namespace ChampionsLeague.Services;
 
@@ -53,7 +53,7 @@ public class SeasonTicketService : ISeasonTicketService
     /// zijn voor een stoel, mag die niet als abonnement verkocht worden.
     /// </summary>
     public async Task<(bool Success, string? Error, SeasonTicket? Created)> FinalizeAsync(
-        string userId, SeasonCartItemVM item)
+        string userId, ServiceSeasonCartItemVM item)
     {
         // Stoelen bezet door actieve abonnementen in dit vak
         var seasonSeats = (await _seasonTickets.GetSeasonReservedSeatsAsync(item.SectorId))

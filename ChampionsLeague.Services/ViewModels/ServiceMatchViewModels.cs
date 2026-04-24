@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace ChampionsLeague.Services.ViewModels;
 
 /// <summary>ViewModel/DTO for a single row in the match calendar list (DataTable).</summary>
-public class MatchListItemVM
+public class ServiceMatchListItemVM
 {
     public int      Id            { get; set; }
     public string   HomeClubName  { get; set; } = string.Empty;
@@ -18,7 +18,7 @@ public class MatchListItemVM
 }
 
 /// <summary>ViewModel/DTO for the match detail page, including sector availability.</summary>
-public class MatchDetailVM
+public class ServiceMatchDetailVM
 {
     public int      Id            { get; set; }
     public string   HomeClubName  { get; set; } = string.Empty;
@@ -30,11 +30,11 @@ public class MatchDetailVM
     public string   StadiumName   { get; set; } = string.Empty;
     public string   StadiumCity   { get; set; } = string.Empty;
     public bool     IsSaleOpen    { get; set; }
-    public List<SectorAvailabilityVM> Sectors { get; set; } = new();
+    public List<ServiceSectorAvailabilityVM> Sectors { get; set; } = new();
 }
 
 /// <summary>Shows remaining availability in one sector for a match.</summary>
-public class SectorAvailabilityVM
+public class ServiceSectorAvailabilityVM
 {
     public int     SectorId   { get; set; }
     public string  SectorName { get; set; } = string.Empty;
@@ -47,9 +47,9 @@ public class SectorAvailabilityVM
 /// Wraps the match list with filter/club data for the calendar index view.
 /// Passed to the jQuery DataTable in Views/Matches/Index.cshtml.
 /// </summary>
-public class MatchListVM
+public class ServiceMatchListVM
 {
-    public IEnumerable<MatchListItemVM> Matches    { get; set; } = Enumerable.Empty<MatchListItemVM>();
+    public IEnumerable<ServiceMatchListItemVM> Matches    { get; set; } = Enumerable.Empty<ServiceMatchListItemVM>();
     public IEnumerable<string>          Clubs      { get; set; } = Enumerable.Empty<string>();
     public string?                      FilterClub { get; set; }
 }

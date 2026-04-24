@@ -27,7 +27,7 @@ public interface IMatchService
     /// Combineert match-info, sector-capaciteit en beschikbaarheid in één aanroep.
     /// De controller hoeft geen LINQ of businesslogica te kennen.
     /// </summary>
-    Task<MatchDetailVM?> GetDetailAsync(int matchId);
+    Task<ServiceMatchDetailVM?> GetDetailAsync(int matchId);
 
     /// <summary>Geeft het aantal verkochte (niet-geannuleerde) tickets terug per sector.</summary>
     Task<int> GetSoldCountAsync(int matchId, int sectorId);
