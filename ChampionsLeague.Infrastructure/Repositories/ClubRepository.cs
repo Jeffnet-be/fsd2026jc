@@ -29,4 +29,10 @@ public class ClubRepository : BaseRepository<Club>, IClubRepository
                 .ThenInclude(s => s.Sectors)
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == clubId);
+
+    /// <inheritdoc/>
+    public async Task<Sector?> GetSectorByIdAsync(int sectorId)
+        => await _context.Set<Sector>()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == sectorId);
 }
