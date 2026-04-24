@@ -91,7 +91,7 @@ public class TicketsApiController : ControllerBase
             BadgeUrl    = d.BadgeUrl,
             StadiumName = d.StadiumName,
             StadiumCity = d.StadiumCity,
-            Sectors     = d.Sectors.Select(s => new SectorCardVM
+            Sectors     = d.Sectors.Select(s => new SectorVM
             {
                 Id        = s.Id,
                 Name      = s.Name,
