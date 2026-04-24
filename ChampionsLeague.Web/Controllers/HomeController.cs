@@ -1,6 +1,3 @@
-// ════════════════════════════════════════════════════════════════════════
-// HomeController.cs
-// ════════════════════════════════════════════════════════════════════════
 using ChampionsLeague.Services;
 using ChampionsLeague.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -8,8 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace ChampionsLeague.Web.Controllers;
 
 /// <summary>
-/// Startpagina. Haalt ClubDtos op via IClubService, mapt naar ClubCardVM hier in Web.
-/// AutoMapper kan ook gebruikt worden — beide zijn correct zolang de mapping in Web zit.
+/// Startpagina — toont alle clubs als kaarten via _ClubCard.cshtml partial.
+/// Mapt ClubDto naar ClubCardVM inclusief PrimaryColor, Country en TotalCapacity
+/// die de view nodig heeft voor de styling en het badge-tellen.
 /// </summary>
 public class HomeController : Controller
 {
@@ -24,15 +22,17 @@ public class HomeController : Controller
     {
         var dtos = await _clubService.GetAllWithStadiumsAsync();
 
-        // Mapping DTO → ViewModel gebeurt in de Web-laag (correct)
         var vms = dtos.Select(d => new ClubCardVM
         {
-            Id          = d.Id,
-            Name        = d.Name,
-            BadgeUrl    = d.BadgeUrl,
-            StadiumName = d.StadiumName,
-            StadiumCity = d.StadiumCity,
-            Sectors     = d.Sectors.Select(s => new SectorCardVM
+            Id            = d.Id,
+            Name          = d.Name,
+            Country       = d.Country,
+            BadgeUrl      = d.BadgeUrl,
+            PrimaryColor  = d.PrimaryColor,
+            StadiumName   = d.StadiumName,
+            StadiumCity   = d.StadiumCity,
+            TotalCapacity = d.TotalCapacity,
+            Sectors       = d.Sectors.Select(s => new SectorVM
             {
                 Id        = s.Id,
                 Name      = s.Name,

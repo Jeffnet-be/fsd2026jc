@@ -6,26 +6,19 @@ namespace ChampionsLeague.Services;
 
 /// <summary>
 /// Service-laag contract voor club-operaties.
-/// Gebruikt <see cref="ClubDto"/> — geen Web.ViewModels.
+/// Retourneert <see cref="ClubDto"/> met alle velden die de Web-laag nodig heeft.
 /// </summary>
 public interface IClubService
 {
-    /// <summary>Alle clubs met stadion- en sectordata, als DTOs.</summary>
     Task<IEnumerable<ClubDto>> GetAllWithStadiumsAsync();
-
-    /// <summary>Alle clubs (naam + id), als DTOs.</summary>
     Task<IEnumerable<ClubDto>> GetAllAsync();
-
-    /// <summary>
-    /// Één club met stadion en sectoren op basis van clubId.
-    /// Geeft de ruwe entiteit terug voor gebruik in TicketService/SeasonTicketService.
-    /// </summary>
     Task<Club?> GetEntityWithStadiumAndSectorsAsync(int clubId);
 }
 
 /// <summary>
 /// Implementatie van <see cref="IClubService"/>.
-/// Mapt Club-entiteiten naar ClubDto — geen Web-afhankelijkheden.
+/// Mapt Club-entiteiten naar ClubDto — bevat PrimaryColor, Country en TotalCapacity
+/// zodat de Web-laag ClubCardVM volledig kan vullen zonder zelf de entiteit te kennen.
 /// </summary>
 public class ClubService : IClubService
 {
@@ -36,21 +29,25 @@ public class ClubService : IClubService
         _clubs = clubs;
     }
 
-    /// <inheritdoc/>
     public async Task<IEnumerable<ClubDto>> GetAllWithStadiumsAsync()
     {
         var clubs = await _clubs.GetAllWithStadiumsAsync();
-        return clubs.Select(ToDto);
+        return clubs.Select(c => ToDto(c));
     }
 
-    /// <inheritdoc/>
     public async Task<IEnumerable<ClubDto>> GetAllAsync()
     {
         var clubs = await _clubs.GetAllAsync();
-        return clubs.Select(c => new ClubDto { Id = c.Id, Name = c.Name, BadgeUrl = c.BadgeUrl ?? string.Empty });
+        return clubs.Select(c => new ClubDto
+        {
+            Id           = c.Id,
+            Name         = c.Name,
+            Country      = c.Country,
+            BadgeUrl     = c.BadgeUrl     ?? string.Empty,
+            PrimaryColor = c.PrimaryColor ?? "#000000"
+        });
     }
 
-    /// <inheritdoc/>
     public Task<Club?> GetEntityWithStadiumAndSectorsAsync(int clubId)
         => _clubs.GetWithStadiumAndSectorsAsync(clubId);
 
@@ -58,12 +55,15 @@ public class ClubService : IClubService
 
     private static ClubDto ToDto(Club c) => new()
     {
-        Id          = c.Id,
-        Name        = c.Name,
-        BadgeUrl    = c.BadgeUrl    ?? string.Empty,
-        StadiumName = c.Stadium?.Name ?? string.Empty,
-        StadiumCity = c.Stadium?.City ?? string.Empty,
-        Sectors     = c.Stadium?.Sectors.Select(s => new SectorDto
+        Id            = c.Id,
+        Name          = c.Name,
+        Country       = c.Country,
+        BadgeUrl      = c.BadgeUrl      ?? string.Empty,
+        PrimaryColor  = c.PrimaryColor  ?? "#000000",
+        StadiumName   = c.Stadium?.Name ?? string.Empty,
+        StadiumCity   = c.Stadium?.City ?? string.Empty,
+        TotalCapacity = c.Stadium?.Sectors.Sum(s => s.Capacity) ?? 0,
+        Sectors       = c.Stadium?.Sectors.Select(s => new SectorDto
         {
             Id        = s.Id,
             Name      = s.Name,

@@ -2,8 +2,6 @@ using ChampionsLeague.Services;
 using ChampionsLeague.Services.DTOs;
 using ChampionsLeague.Web.Services;
 using ChampionsLeague.Web.ViewModels;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Text.Json;
@@ -11,16 +9,15 @@ using System.Text.Json;
 namespace ChampionsLeague.Web.Controllers;
 
 /// <summary>
-/// Abonnements-pagina: overzicht en toevoegen aan winkelwagen.
-/// Gebruikt IClubService (DTOs) en ISeasonTicketService — geen repositories.
-/// De SeasonCartItemDto (Services.DTOs) wordt doorgegeven aan de service bij checkout.
-/// De SeasonCartItemVM (Web.ViewModels) zit in de sessie — enkel Web-laag kent die.
+/// Abonnements-pagina. Gebruikt dezelfde ClubCardVM als de homepagina
+/// zodat _ClubCard.cshtml hergebruikt kan worden.
+/// Alle ClubDto-velden (PrimaryColor, Country, TotalCapacity) worden doorgegeven.
 /// </summary>
 public class SeasonTicketController : Controller
 {
-    private readonly IClubService        _clubService;
+    private readonly IClubService         _clubService;
     private readonly ISeasonTicketService _seasonTicketService;
-    private readonly TranslationService  _tr;
+    private readonly TranslationService   _tr;
 
     private const string CartSessionKey = "CART";
     private static readonly DateTime CompetitionStart = new DateTime(2026, 4, 25);
@@ -45,15 +42,17 @@ public class SeasonTicketController : Controller
 
         var dtos = await _clubService.GetAllWithStadiumsAsync();
 
-        // Mapping ClubDto → ClubCardVM voor de view
         var vms = dtos.Select(d => new ClubCardVM
         {
-            Id          = d.Id,
-            Name        = d.Name,
-            BadgeUrl    = d.BadgeUrl,
-            StadiumName = d.StadiumName,
-            StadiumCity = d.StadiumCity,
-            Sectors     = d.Sectors.Select(s => new SectorCardVM
+            Id            = d.Id,
+            Name          = d.Name,
+            Country       = d.Country,
+            BadgeUrl      = d.BadgeUrl,
+            PrimaryColor  = d.PrimaryColor,
+            StadiumName   = d.StadiumName,
+            StadiumCity   = d.StadiumCity,
+            TotalCapacity = d.TotalCapacity,
+            Sectors       = d.Sectors.Select(s => new SectorVM
             {
                 Id        = s.Id,
                 Name      = s.Name,
@@ -95,7 +94,6 @@ public class SeasonTicketController : Controller
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var cart   = GetCart();
 
-        // Max-4-per-club controle via service
         var sectorIdsForClub = club.Sectors.Select(s => s.Id);
         var countInDb        = await _seasonTicketService.CountActiveForClubAsync(userId, sectorIdsForClub);
         var countInCart      = cart.SeasonItems.Count(i => sectorIdsForClub.Contains(i.SectorId));
@@ -106,7 +104,6 @@ public class SeasonTicketController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        // Toevoegen aan winkelwagen als SeasonCartItemVM (Web-ViewModel, sessie-opslag)
         cart.SeasonItems.Add(new SeasonCartItemVM
         {
             SectorId    = sectorId,

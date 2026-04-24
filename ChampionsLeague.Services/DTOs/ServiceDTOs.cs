@@ -35,13 +35,21 @@ public class MatchDetailDto
 
 // ── Club DTOs ─────────────────────────────────────────────────────────────
 
+/// <summary>
+/// Club-data die de services-laag teruggeeft.
+/// Bevat alle velden die de Web-laag nodig heeft om ClubCardVM te vullen,
+/// inclusief PrimaryColor, Country en TotalCapacity.
+/// </summary>
 public class ClubDto
 {
-    public int    Id          { get; set; }
-    public string Name        { get; set; } = string.Empty;
-    public string BadgeUrl    { get; set; } = string.Empty;
-    public string StadiumName { get; set; } = string.Empty;
-    public string StadiumCity { get; set; } = string.Empty;
+    public int    Id            { get; set; }
+    public string Name          { get; set; } = string.Empty;
+    public string Country       { get; set; } = string.Empty;
+    public string BadgeUrl      { get; set; } = string.Empty;
+    public string PrimaryColor  { get; set; } = "#000000";
+    public string StadiumName   { get; set; } = string.Empty;
+    public string StadiumCity   { get; set; } = string.Empty;
+    public int    TotalCapacity { get; set; }
     public List<SectorDto> Sectors { get; set; } = new();
 }
 
@@ -96,11 +104,6 @@ public class TicketHistoryDto
 
 // ── Account DTOs ──────────────────────────────────────────────────────────
 
-/// <summary>
-/// Minimale gebruikersdata die de service teruggeeft na validatie.
-/// Bevat geen wachtwoord of gevoelige Identity-internals.
-/// AccountController gebruikt dit om via SignInManager in te loggen.
-/// </summary>
 public class UserDto
 {
     public string Id        { get; set; } = string.Empty;
@@ -109,11 +112,6 @@ public class UserDto
     public string LastName  { get; set; } = string.Empty;
 }
 
-/// <summary>
-/// Resultaat van een registratie-poging.
-/// CreatedUserId is ingevuld bij succes zodat de controller
-/// de gebruiker kan ophalen voor SignInAsync.
-/// </summary>
 public class RegisterResultDto
 {
     public bool         Success       { get; set; }
