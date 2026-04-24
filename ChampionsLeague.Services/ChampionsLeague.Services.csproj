@@ -13,4 +13,7 @@
     <PackageReference Include="MailKit" Version="4.16.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DTOs\" />
+  </ItemGroup>
 </Project>

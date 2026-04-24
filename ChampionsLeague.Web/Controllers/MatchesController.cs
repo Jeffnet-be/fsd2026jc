@@ -1,4 +1,3 @@
-using AutoMapper;
 using ChampionsLeague.Services;
 using ChampionsLeague.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -6,62 +5,82 @@ using Microsoft.AspNetCore.Mvc;
 namespace ChampionsLeague.Web.Controllers;
 
 /// <summary>
-/// Wedstrijdkalender en wedstrijd-detailpagina.
-///
-/// REFACTOR: IMatchRepository + IClubRepository vervangen door IMatchService.
-/// Vroeger bouwde deze controller zelf het MatchDetailVM op via LINQ en meerdere
-/// repository-calls. Die logica zit nu in MatchService.GetDetailAsync().
-/// De controller doet alleen nog: request ontvangen → service aanroepen → view teruggeven.
-///
-/// Voordeel: als de manier waarop MatchDetailVM samengesteld wordt verandert,
-/// hoef je enkel MatchService aan te passen — de controller blijft ongewijzigd.
+/// Wedstrijdkalender en detail.
+/// Haalt MatchDto / MatchDetailDto op via IMatchService.
+/// Mapt DTOs naar ViewModels hier in de Web-laag — services kennen geen ViewModels.
 /// </summary>
 public class MatchesController : Controller
 {
     private readonly IMatchService _matchService;
     private readonly IClubService  _clubService;
-    private readonly IMapper       _mapper;
 
-    public MatchesController(IMatchService matchService, IClubService clubService, IMapper mapper)
+    public MatchesController(IMatchService matchService, IClubService clubService)
     {
         _matchService = matchService;
         _clubService  = clubService;
-        _mapper       = mapper;
     }
 
-    /// <summary>
-    /// Wedstrijdkalender — optioneel gefilterd op club.
-    /// </summary>
     public async Task<IActionResult> Index(int? clubId)
     {
-        var matchEntities = clubId.HasValue
+        var matchDtos = clubId.HasValue
             ? await _matchService.GetByClubAsync(clubId.Value)
-            : await _matchService.GetAllWithClubsAsync();
+            : await _matchService.GetAllAsync();
 
-        var allClubs = await _clubService.GetAllAsync();
+        var clubDtos = await _clubService.GetAllAsync();
 
+        // Mapping DTO → ViewModel in Web-laag
         var vm = new MatchListVM
         {
-            Matches    = _mapper.Map<IEnumerable<MatchListItemVM>>(matchEntities),
-            Clubs      = allClubs.Select(c => c.Name),
+            Matches = matchDtos.Select(d => new MatchListItemVM
+            {
+                Id            = d.Id,
+                HomeClubName  = d.HomeClubName,
+                AwayClubName  = d.AwayClubName,
+                HomeClubBadge = d.HomeClubBadge,
+                AwayClubBadge = d.AwayClubBadge,
+                StadiumName   = d.StadiumName,
+                StadiumCity   = d.StadiumCity,
+                MatchDate     = d.MatchDate,
+                Phase         = d.Phase,
+                IsSaleOpen    = d.IsSaleOpen
+            }),
+            Clubs      = clubDtos.Select(c => c.Name),
             FilterClub = clubId.HasValue
-                ? allClubs.FirstOrDefault(c => c.Id == clubId)?.Name
+                ? clubDtos.FirstOrDefault(c => c.Id == clubId)?.Name
                 : null
         };
 
         return View(vm);
     }
 
-    /// <summary>
-    /// Wedstrijd-detailpagina met sector-beschikbaarheid.
-    ///
-    /// REFACTOR: de volledige opbouw van MatchDetailVM zit nu in IMatchService.GetDetailAsync().
-    /// Deze controller bevat geen LINQ of repository-calls meer.
-    /// </summary>
     public async Task<IActionResult> Detail(int id)
     {
-        var vm = await _matchService.GetDetailAsync(id);
-        if (vm is null) return NotFound();
+        var dto = await _matchService.GetDetailAsync(id);
+        if (dto is null) return NotFound();
+
+        // Mapping DTO → ViewModel
+        var vm = new MatchDetailVM
+        {
+            Id            = dto.Match.Id,
+            HomeClubName  = dto.Match.HomeClubName,
+            AwayClubName  = dto.Match.AwayClubName,
+            HomeClubBadge = dto.Match.HomeClubBadge,
+            AwayClubBadge = dto.Match.AwayClubBadge,
+            MatchDate     = dto.Match.MatchDate,
+            Phase         = dto.Match.Phase,
+            StadiumName   = dto.Match.StadiumName,
+            StadiumCity   = dto.Match.StadiumCity,
+            IsSaleOpen    = dto.Match.IsSaleOpen,
+            Sectors       = dto.Sectors.Select(s => new SectorAvailabilityVM
+            {
+                SectorId   = s.SectorId,
+                SectorName = s.SectorName,
+                Capacity   = s.Capacity,
+                Available  = s.Available,
+                Price      = s.Price
+            }).ToList()
+        };
+
         return View(vm);
     }
 }

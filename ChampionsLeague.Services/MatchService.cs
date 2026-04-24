@@ -1,24 +1,19 @@
 using ChampionsLeague.Domain.Entities;
 using ChampionsLeague.Domain.Interfaces;
-using ChampionsLeague.Services.ViewModels;
+using ChampionsLeague.Services.DTOs;
 
 namespace ChampionsLeague.Services;
 
 /// <summary>
 /// Implementatie van <see cref="IMatchService"/>.
-/// Combineert data uit meerdere repositories en past businesslogica toe.
-/// Leeft in de Services-laag zodat de Web-laag geen repository-interfaces hoeft te kennen.
+/// Mapt Domain-entiteiten naar <see cref="MatchDto"/> / <see cref="MatchDetailDto"/>.
+/// Geen enkele import van ChampionsLeague.Web.
 /// </summary>
 public class MatchService : IMatchService
 {
     private readonly IMatchRepository _matches;
     private readonly IClubRepository  _clubs;
 
-    /// <summary>
-    /// Repositories worden via constructor-injectie aangeleverd.
-    /// MatchService kent de interfaces, niet de concrete implementaties —
-    /// dit maakt unit-testing eenvoudig via mock-objecten.
-    /// </summary>
     public MatchService(IMatchRepository matches, IClubRepository clubs)
     {
         _matches = matches;
@@ -26,23 +21,29 @@ public class MatchService : IMatchService
     }
 
     /// <inheritdoc/>
+    public async Task<IEnumerable<MatchDto>> GetAllAsync()
+    {
+        var entities = await _matches.GetAllWithClubsAsync();
+        return entities.Select(x => ToDto(x));
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<MatchDto>> GetByClubAsync(int clubId)
+    {
+        var entities = await _matches.GetByClubAsync(clubId);
+        return entities.Select(x => ToDto(x));
+    }
+
+    /// <inheritdoc/>
     public Task<IEnumerable<Match>> GetAllWithClubsAsync()
         => _matches.GetAllWithClubsAsync();
 
-    /// <inheritdoc/>
-    public Task<IEnumerable<Match>> GetByClubAsync(int clubId)
-        => _matches.GetByClubAsync(clubId);
-
-    /// <inheritdoc/>
-    public Task<int> GetSoldCountAsync(int matchId, int sectorId)
-        => _matches.GetSoldCountAsync(matchId, sectorId);
-
     /// <summary>
-    /// Bouwt het volledige MatchDetailVM op voor de detailpagina.
-    /// Logica die data combineert uit meerdere repositories hoort in de service,
-    /// niet in de controller — controllers zijn verantwoordelijk voor HTTP, niet voor data.
+    /// Bouwt MatchDetailDto op: combineert match-info en sector-beschikbaarheid.
+    /// Deze logica hoort hier in de service, niet in de controller.
+    /// Geeft null terug als de wedstrijd niet bestaat.
     /// </summary>
-    public async Task<ServiceMatchDetailVM?> GetDetailAsync(int matchId)
+    public async Task<MatchDetailDto?> GetDetailAsync(int matchId)
     {
         var allMatches = await _matches.GetAllWithClubsAsync();
         var match      = allMatches.FirstOrDefault(m => m.Id == matchId);
@@ -51,15 +52,15 @@ public class MatchService : IMatchService
         var club    = await _clubs.GetWithStadiumAndSectorsAsync(match.HomeClubId);
         var sectors = club?.Stadium?.Sectors?.ToList() ?? new List<Sector>();
 
-        // Beschikbaarheid per sector berekenen — sequentieel om EF Core thread-safety te garanderen
-        var sectorVms = new List<ServiceSectorAvailabilityVM>();
+        // Beschikbaarheid sequentieel berekenen — EF Core DbContext is niet thread-safe
+        var sectorDtos = new List<SectorAvailabilityDto>();
         foreach (var sec in sectors)
         {
             int sold = 0;
             try { sold = await _matches.GetSoldCountAsync(matchId, sec.Id); }
-            catch { sold = 0; }
+            catch { /* bij fout: 0 verkocht, pagina crasht niet */ }
 
-            sectorVms.Add(new ServiceSectorAvailabilityVM
+            sectorDtos.Add(new SectorAvailabilityDto
             {
                 SectorId   = sec.Id,
                 SectorName = sec.Name,
@@ -69,19 +70,29 @@ public class MatchService : IMatchService
             });
         }
 
-        return new ServiceMatchDetailVM
+        return new MatchDetailDto
         {
-            Id            = match.Id,
-            HomeClubName  = match.HomeClub?.Name  ?? string.Empty,
-            AwayClubName  = match.AwayClub?.Name  ?? string.Empty,
-            HomeClubBadge = match.HomeClub?.BadgeUrl ?? string.Empty,
-            AwayClubBadge = match.AwayClub?.BadgeUrl ?? string.Empty,
-            MatchDate     = match.MatchDate,
-            Phase         = match.Phase,
-            StadiumName   = club?.Stadium?.Name ?? string.Empty,
-            StadiumCity   = club?.Stadium?.City ?? string.Empty,
-            IsSaleOpen    = match.IsSaleOpen,
-            Sectors       = sectorVms
+            Match   = ToDto(match, club),
+            Sectors = sectorDtos
         };
     }
+
+    // ── Mapping helpers ──────────────────────────────────────────────────
+
+    private static MatchDto ToDto(Match m, ChampionsLeague.Domain.Entities.Club? club = null)
+        => new()
+        {
+            Id            = m.Id,
+            HomeClubId    = m.HomeClubId,
+            HomeClubName  = m.HomeClub?.Name     ?? string.Empty,
+            HomeClubBadge = m.HomeClub?.BadgeUrl ?? string.Empty,
+            AwayClubId    = m.AwayClubId,
+            AwayClubName  = m.AwayClub?.Name     ?? string.Empty,
+            AwayClubBadge = m.AwayClub?.BadgeUrl ?? string.Empty,
+            MatchDate     = m.MatchDate,
+            Phase         = m.Phase,
+            StadiumName   = club?.Stadium?.Name  ?? m.HomeClub?.Stadium?.Name ?? string.Empty,
+            StadiumCity   = club?.Stadium?.City  ?? string.Empty,
+            IsSaleOpen    = m.IsSaleOpen
+        };
 }

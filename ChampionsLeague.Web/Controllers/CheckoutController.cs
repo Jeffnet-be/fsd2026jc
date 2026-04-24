@@ -1,6 +1,7 @@
 using ChampionsLeague.Domain.Entities;
 using ChampionsLeague.Infrastructure.Services;
 using ChampionsLeague.Services;
+using ChampionsLeague.Services.DTOs;
 using ChampionsLeague.Web.Services;
 using ChampionsLeague.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -14,46 +15,36 @@ namespace ChampionsLeague.Web.Controllers;
 /// <summary>
 /// Verwerkt de afrekening van de winkelwagen.
 ///
-/// REFACTOR: IMatchRepository en ISeasonTicketRepository vervangen door
-/// IMatchService en ISeasonTicketService.
-/// De controller injecteert enkel service-interfaces — geen repositories.
-///
-/// OVERBOEKING FIX: De aankoop van abonnementen in Confirm() verloopt nu via
-/// ISeasonTicketService.FinalizeAsync() dat de capaciteitscontrole uitvoert
-/// inclusief de check op reeds bezette stoelen door losse tickets.
-///
-/// ANNULATIE-BUG FIX: Zit in SeasonTicketService (IsActive = false) en
-/// in TicketService (Status = Cancelled) — de query filtert al op die velden.
+/// LAGENREGEL: Injecteert enkel service-interfaces.
+/// De Web-ViewModel SeasonCartItemVM (sessie) wordt hier omgezet naar
+/// SeasonCartItemDto (Services.DTOs) voordat het naar de service gaat.
+/// Zo weet de service-laag niets van Web-ViewModels.
 /// </summary>
 [Authorize]
 public class CheckoutController : Controller
 {
     private const string CartSessionKey = "CART";
 
-    private readonly ITicketService               _ticketService;
-    private readonly ISeasonTicketService         _seasonTicketService;
-    private readonly IMatchService                _matchService;
-    private readonly IEmailService                _email;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly TranslationService           _tr;
+    private readonly ITicketService       _ticketService;
+    private readonly ISeasonTicketService _seasonTicketService;
+    private readonly IMatchService        _matchService;
+    private readonly IEmailService        _email;
+    private readonly TranslationService   _tr;
 
     public CheckoutController(
-        ITicketService               ticketService,
-        ISeasonTicketService         seasonTicketService,
-        IMatchService                matchService,
-        IEmailService                email,
-        UserManager<ApplicationUser> userManager,
-        TranslationService           tr)
+        ITicketService       ticketService,
+        ISeasonTicketService seasonTicketService,
+        IMatchService        matchService,
+        IEmailService        email,
+        TranslationService   tr)
     {
         _ticketService       = ticketService;
         _seasonTicketService = seasonTicketService;
         _matchService        = matchService;
         _email               = email;
-        _userManager         = userManager;
         _tr                  = tr;
     }
 
-    /// <summary>Toont de overzichtspagina vóór bevestiging.</summary>
     public IActionResult Review()
     {
         var cart = GetCart();
@@ -62,29 +53,15 @@ public class CheckoutController : Controller
         return View(cart);
     }
 
-    /// <summary>
-    /// Verwerkt de volledige winkelwagen.
-    ///
-    /// Strategie:
-    /// 1. Verwerk elk item. Bij fout: voeg toe aan errors-lijst, ga verder met de rest.
-    /// 2. Als er GEEN fouten zijn: leeg de wagen en stuur e-mail.
-    /// 3. Als er WEL fouten zijn: stuur de gebruiker terug naar Review met foutmelding.
-    ///    Items die succesvol waren zijn dan wel al in de DB — dit is een design-keuze
-    ///    (alternatieven: alles-of-niets via transactie, of pre-validatie).
-    ///
-    /// OVERBOEKING: TicketService.PurchaseAsync() en SeasonTicketService.FinalizeAsync()
-    /// doen elk hun eigen capaciteitscontrole op basis van DB-data op het moment van aankoop.
-    /// </summary>
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Confirm()
     {
         var cart   = GetCart();
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var user   = await _userManager.FindByIdAsync(userId);
         var errors = new List<string>();
 
         var purchasedTickets       = new List<(Ticket ticket, Match match)>();
-        var purchasedSeasonTickets = new List<(SeasonTicket ticket, string sectorName, string stadiumName)>();
+        var purchasedSeasonTickets = new List<(SeasonTicketDto dto, string sectorName, string stadiumName)>();
 
         // ── Losse tickets ──────────────────────────────────────────────
         foreach (var item in cart.Items)
@@ -103,18 +80,28 @@ public class CheckoutController : Controller
             }
             else if (result.Tickets is not null)
             {
-                var allMatches = await _matchService.GetAllWithClubsAsync();
-                var match      = allMatches.FirstOrDefault(m => m.Id == item.MatchId);
+                var matches = await _matchService.GetAllWithClubsAsync();
+                var match   = matches.FirstOrDefault(m => m.Id == item.MatchId);
                 if (match is not null)
                     foreach (var t in result.Tickets)
                         purchasedTickets.Add((t, match));
             }
         }
 
-        // ── Seizoensabonnementen — via service (geen directe repo-aanroep) ──
+        // ── Seizoensabonnementen ───────────────────────────────────────
         foreach (var item in cart.SeasonItems)
         {
-            var (success, error, created) = await _seasonTicketService.FinalizeAsync(userId, item);
+            // Web-ViewModel → Service-DTO (conversie in de Web-laag, correct)
+            var dto = new SeasonCartItemDto
+            {
+                SectorId    = item.SectorId,
+                SectorName  = item.SectorName,
+                StadiumName = item.StadiumName,
+                ClubName    = item.ClubName,
+                TotalPrice  = item.TotalPrice
+            };
+
+            var (success, error, created) = await _seasonTicketService.FinalizeAsync(userId, dto);
 
             if (!success || created is null)
             {
@@ -131,11 +118,13 @@ public class CheckoutController : Controller
             return RedirectToAction(nameof(Review));
         }
 
-        // Alles geslaagd: wagen leegmaken en e-mail sturen
         HttpContext.Session.Remove(CartSessionKey);
 
-        if (user is not null && (purchasedTickets.Any() || purchasedSeasonTickets.Any()))
-            await SendConfirmationEmailAsync(user, purchasedTickets, purchasedSeasonTickets);
+        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "";
+        var firstName = User.FindFirstValue(ClaimTypes.GivenName) ?? "";
+
+        if (purchasedTickets.Any() || purchasedSeasonTickets.Any())
+            await SendConfirmationEmailAsync(userEmail, firstName, purchasedTickets, purchasedSeasonTickets);
 
         TempData["Success"] = _tr.T("checkout_confirmed_msg");
         return RedirectToAction(nameof(Confirmation));
@@ -143,12 +132,12 @@ public class CheckoutController : Controller
 
     public IActionResult Confirmation() => View();
 
-    // ── E-mail helper (ongewijzigd t.o.v. origineel) ──────────────────────
+    // ── E-mail helper ─────────────────────────────────────────────────────
 
     private async Task SendConfirmationEmailAsync(
-        ApplicationUser user,
+        string userEmail, string firstName,
         List<(Ticket ticket, Match match)> tickets,
-        List<(SeasonTicket ticket, string sectorName, string stadiumName)> seasonTickets)
+        List<(SeasonTicketDto dto, string sectorName, string stadiumName)> seasonTickets)
     {
         var lang = System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName;
         if (lang is not ("nl" or "fr" or "en")) lang = "nl";
@@ -156,69 +145,44 @@ public class CheckoutController : Controller
         var (subject, intro, matchLabel, seatLabel, voucherLabel, seasonSection, footer) = lang switch
         {
             "fr" => ("Confirmation de votre commande — CL Tickets",
-                     $"Merci, {user.FirstName}! Voici votre récapitulatif:",
-                     "Match", "Siège", "Bon", "Abonnements saison",
-                     "Présentez ce bon à l'entrée du stade le jour du match."),
+                     $"Merci, {firstName}!", "Match", "Siège", "Bon",
+                     "Abonnements saison", "Présentez ce bon à l'entrée du stade."),
             "en" => ("Your order confirmation — CL Tickets",
-                     $"Thank you, {user.FirstName}! Here is your order summary:",
-                     "Match", "Seat", "Voucher", "Season tickets",
-                     "Present your voucher code at the stadium entrance on match day."),
+                     $"Thank you, {firstName}!", "Match", "Seat", "Voucher",
+                     "Season tickets", "Present your voucher at the stadium entrance."),
             _ =>   ("Bevestiging van uw bestelling — CL Tickets",
-                    $"Bedankt, {user.FirstName}! Hieronder vindt u uw bestelbevestiging:",
-                    "Wedstrijd", "Zitplaats", "Voucher", "Seizoensabonnementen",
-                    "Toon uw vouchercode aan de ingang van het stadion op wedstrijddag.")
+                    $"Bedankt, {firstName}!", "Wedstrijd", "Zitplaats", "Voucher",
+                    "Seizoensabonnementen", "Toon uw voucher aan de ingang van het stadion.")
         };
 
-        var ticketRows = "";
-        if (tickets.Any())
+        var ticketRows = string.Join("", tickets.GroupBy(p => p.match.Id).Select(g =>
         {
-            var grouped = tickets.GroupBy(p => p.match.Id);
-            ticketRows  = string.Join("", grouped.Select(g =>
-            {
-                var m    = g.First().match;
-                var desc = $"{m.HomeClub?.Name} vs {m.AwayClub?.Name}";
-                var date = m.MatchDate.ToString("dd MMMM yyyy HH:mm") + " UTC";
-                var rows = string.Join("", g.Select(p => $@"
-      <tr style='background:#f8f9ff'>
-        <td style='padding:6px 16px 6px 24px;color:#444'>{seatLabel} {p.ticket.SeatNumber}</td>
-        <td style='padding:6px 8px;font-family:monospace;font-size:12px;color:#001489'>{p.ticket.VoucherId:D}</td>
-      </tr>"));
-                return $@"
-    <tr style='background:#001489'>
-      <td colspan='2' style='padding:10px 16px;color:#FFD700;font-weight:bold'>{desc} — {date}</td>
-    </tr>{rows}";
-            }));
-        }
+            var m    = g.First().match;
+            var desc = $"{m.HomeClub?.Name} vs {m.AwayClub?.Name}";
+            var date = m.MatchDate.ToString("dd MMMM yyyy HH:mm") + " UTC";
+            var rows = string.Join("", g.Select(p =>
+                $"<tr style='background:#f8f9ff'><td style='padding:6px 16px 6px 24px'>{seatLabel} {p.ticket.SeatNumber}</td>" +
+                $"<td style='font-family:monospace;font-size:12px;color:#001489'>{p.ticket.VoucherId:D}</td></tr>"));
+            return $"<tr style='background:#001489'><td colspan='2' style='padding:10px 16px;color:#FFD700;font-weight:bold'>{desc} — {date}</td></tr>{rows}";
+        }));
 
-        var seasonRows = "";
-        if (seasonTickets.Any())
-        {
-            seasonRows = $@"
-    <tr style='background:#C8A600'>
-      <td colspan='2' style='padding:10px 16px;color:#001489;font-weight:bold'>{seasonSection}</td>
-    </tr>"
-            + string.Join("", seasonTickets.Select(s => $@"
-    <tr style='background:#f8f9ff'>
-      <td style='padding:8px 16px;color:#444'>{s.stadiumName} — {s.sectorName}</td>
-      <td style='padding:8px 8px;font-weight:bold;color:#001489'>{seatLabel} {s.ticket.SeatNumber}</td>
-    </tr>"));
-        }
+        var seasonRows = seasonTickets.Any()
+            ? $"<tr style='background:#C8A600'><td colspan='2' style='padding:10px 16px;color:#001489;font-weight:bold'>{seasonSection}</td></tr>"
+              + string.Join("", seasonTickets.Select(s =>
+                  $"<tr style='background:#f8f9ff'><td style='padding:8px 16px'>{s.stadiumName} — {s.sectorName}</td>" +
+                  $"<td style='font-weight:bold;color:#001489'>{seatLabel} {s.dto.SeatNumber}</td></tr>"))
+            : "";
 
         await _email.SendAsync(
-            to      : user.Email!,
+            to      : userEmail,
             subject : subject,
-            htmlBody: $@"
-<p>{intro}</p>
+            htmlBody: $@"<p>{intro}</p>
 <table style='border-collapse:collapse;font-family:Arial,sans-serif;width:100%;max-width:580px'>
-  <tr style='background:#001489'>
-    <th style='padding:10px 16px;color:#FFD700;text-align:left'>{matchLabel}</th>
-    <th style='padding:10px 16px;color:#FFD700;text-align:left'>{voucherLabel}</th>
-  </tr>
-  {ticketRows}
-  {seasonRows}
+  <tr style='background:#001489'><th style='padding:10px 16px;color:#FFD700;text-align:left'>{matchLabel}</th>
+  <th style='padding:10px 16px;color:#FFD700;text-align:left'>{voucherLabel}</th></tr>
+  {ticketRows}{seasonRows}
 </table>
-<p style='margin-top:16px'>{footer}</p>
-<p>CL Tickets Portal</p>"
+<p style='margin-top:16px'>{footer}</p><p>CL Tickets Portal</p>"
         );
     }
 

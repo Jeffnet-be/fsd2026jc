@@ -99,10 +99,12 @@ builder.Services.AddScoped<ISeasonTicketRepository, SeasonTicketRepository>();
 // Regel: controllers injecteren ENKEL interfaces uit de Services-laag,
 // niet langer interfaces uit de Domain/Infrastructure-laag.
 
+builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<IClubService, ClubService>();
 builder.Services.AddScoped<ISeasonTicketService, SeasonTicketService>();
 builder.Services.AddScoped<IUserTicketService, UserTicketService>();
+
 
 // Bestaande services (ongewijzigd):
 builder.Services.AddHttpContextAccessor();

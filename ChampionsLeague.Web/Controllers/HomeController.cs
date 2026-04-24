@@ -1,4 +1,6 @@
-using AutoMapper;
+// ════════════════════════════════════════════════════════════════════════
+// HomeController.cs
+// ════════════════════════════════════════════════════════════════════════
 using ChampionsLeague.Services;
 using ChampionsLeague.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -6,36 +8,39 @@ using Microsoft.AspNetCore.Mvc;
 namespace ChampionsLeague.Web.Controllers;
 
 /// <summary>
-/// Startpagina van het portaal — grid van clubkaarten.
-///
-/// REFACTOR: injecteert nu <see cref="IMatchService"/> in plaats van
-/// <see cref="ChampionsLeague.Domain.Interfaces.IClubRepository"/> rechtstreeks.
-/// Het Web-project heeft zo geen directe afhankelijkheid meer op de Infrastructure-laag
-/// voor deze controller.
-///
-/// Afhankelijkheidsgraph na de fix:
-///   HomeController → IMatchService (Services) → IClubRepository (Infrastructure)
+/// Startpagina. Haalt ClubDtos op via IClubService, mapt naar ClubCardVM hier in Web.
+/// AutoMapper kan ook gebruikt worden — beide zijn correct zolang de mapping in Web zit.
 /// </summary>
 public class HomeController : Controller
 {
-    private readonly IMatchService _matchService;
-    private readonly IMapper       _mapper;
+    private readonly IClubService _clubService;
 
-    public HomeController(IMatchService matchService, IMapper mapper)
+    public HomeController(IClubService clubService)
     {
-        _matchService = matchService;
-        _mapper       = mapper;
+        _clubService = clubService;
     }
 
-    /// <summary>
-    /// Laadt alle zes clubs met hun stadion en sectoren via de service-laag.
-    /// AutoMapper zet Club-entiteiten om naar ClubCardVM zodat de view
-    /// nooit rechtstreeks met domeinobjecten werkt.
-    /// </summary>
     public async Task<IActionResult> Index()
     {
-        var clubs = await _matchService.GetAllClubsWithStadiumsAsync();
-        var vms   = _mapper.Map<IEnumerable<ClubCardVM>>(clubs);
+        var dtos = await _clubService.GetAllWithStadiumsAsync();
+
+        // Mapping DTO → ViewModel gebeurt in de Web-laag (correct)
+        var vms = dtos.Select(d => new ClubCardVM
+        {
+            Id          = d.Id,
+            Name        = d.Name,
+            BadgeUrl    = d.BadgeUrl,
+            StadiumName = d.StadiumName,
+            StadiumCity = d.StadiumCity,
+            Sectors     = d.Sectors.Select(s => new SectorCardVM
+            {
+                Id        = s.Id,
+                Name      = s.Name,
+                Capacity  = s.Capacity,
+                BasePrice = s.BasePrice
+            }).ToList()
+        });
+
         return View(vms);
     }
 
