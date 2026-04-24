@@ -1,6 +1,5 @@
 using AutoMapper;
 using ChampionsLeague.Domain.Entities;
-using ChampionsLeague.Domain.Interfaces;
 using ChampionsLeague.Infrastructure.Services;
 using ChampionsLeague.Services;
 using ChampionsLeague.Web.Services;
@@ -12,46 +11,56 @@ using Microsoft.AspNetCore.Mvc;
 namespace ChampionsLeague.Web.Controllers;
 
 /// <summary>
-/// Handles registration, login, logout, forgot/reset password,
-/// ticket history, and ticket cancellation.
-/// Uses ASP.NET Core Identity's UserManager and SignInManager.
+/// Registratie, login, uitloggen, wachtwoord vergeten/herstellen,
+/// ticketgeschiedenis en annulaties.
+///
+/// REFACTOR: ITicketRepository, ISeasonTicketRepository en IMatchRepository
+/// zijn verwijderd. In de plaats:
+/// - IUserTicketService  → historiek, actieve tickets, voucher-herversturing
+/// - ISeasonTicketService → abonnementen-historiek en annulatie
+/// - ITicketService      → annulatie losse tickets (was al aanwezig)
+///
+/// De controller bevat nu GEEN directe repository-aanroepen meer.
+///
+/// UITLOGGEN + WINKELWAGEN:
+/// Bij uitloggen wordt de sessie gewist via SignOutAsync(), wat de hele sessie
+/// (inclusief winkelwagen) verwijdert. Dit lost het "wagen blijft na uitloggen"-probleem op.
+/// Expliciet Session.Remove(CartSessionKey) is redundant maar verduidelijkend toegevoegd.
 /// </summary>
 public class AccountController : Controller
 {
     private readonly UserManager<ApplicationUser>   _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly ITicketRepository             _tickets;
-    private readonly ITicketService                _ticketService;
-    private readonly IEmailService                 _email;
-    private readonly IMatchRepository              _matches;
-    private readonly TranslationService            _tr;
-    private readonly IMapper                       _mapper;
-    private readonly ISeasonTicketRepository       _seasonTickets;
+    private readonly ITicketService                 _ticketService;
+    private readonly IUserTicketService             _userTicketService;
+    private readonly ISeasonTicketService           _seasonTicketService;
+    private readonly IEmailService                  _email;
+    private readonly TranslationService             _tr;
+    private readonly IMapper                        _mapper;
 
+    private const string CartSessionKey = "CART";
 
     public AccountController(
         UserManager<ApplicationUser>   userManager,
         SignInManager<ApplicationUser> signInManager,
-        ITicketRepository              tickets,
         ITicketService                 ticketService,
+        IUserTicketService             userTicketService,
+        ISeasonTicketService           seasonTicketService,
         IEmailService                  email,
-        IMatchRepository               matches,
         TranslationService             tr,
-        IMapper                        mapper,
-        ISeasonTicketRepository        seasonTickets)
+        IMapper                        mapper)
     {
-        _userManager   = userManager;
-        _signInManager = signInManager;
-        _tickets       = tickets;
-        _ticketService = ticketService;
-        _email         = email;
-        _matches       = matches;
-        _tr            = tr;
-        _mapper        = mapper;
-        _seasonTickets = seasonTickets;
+        _userManager         = userManager;
+        _signInManager       = signInManager;
+        _ticketService       = ticketService;
+        _userTicketService   = userTicketService;
+        _seasonTicketService = seasonTicketService;
+        _email               = email;
+        _tr                  = tr;
+        _mapper              = mapper;
     }
 
-    // ── Registration ──────────────────────────────────────────────────────
+    // ── Registratie ───────────────────────────────────────────────────────
 
     [HttpGet]
     public IActionResult Register() => View(new RegisterVM());
@@ -80,23 +89,20 @@ public class AccountController : Controller
 
         foreach (var error in result.Errors)
         {
-            // Identity uses "Username" internally (= email). Replace with a clear,
-            // user-friendly message that never mentions the word "username".
             var message = error.Code switch
             {
                 "DuplicateUserName" or "DuplicateEmail"
-                    => $"An account with the email address '{model.Email}' already exists. " +
-                        "Please log in or use a different email address.",
+                    => $"Er bestaat al een account met het e-mailadres '{model.Email}'.",
                 "PasswordTooShort"
-                    => "Password must be at least 12 characters.",
+                    => "Wachtwoord moet minstens 12 tekens bevatten.",
                 "PasswordRequiresDigit"
-                    => "Password must contain at least one digit (0–9).",
+                    => "Wachtwoord moet minstens één cijfer bevatten (0–9).",
                 "PasswordRequiresUpper"
-                    => "Password must contain at least one uppercase letter (A–Z).",
+                    => "Wachtwoord moet minstens één hoofdletter bevatten (A–Z).",
                 "PasswordRequiresLower"
-                    => "Password must contain at least one lowercase letter (a–z).",
+                    => "Wachtwoord moet minstens één kleine letter bevatten (a–z).",
                 "PasswordRequiresNonAlphanumeric"
-                    => "Password must contain at least one special character (!@#$...).",
+                    => "Wachtwoord moet minstens één speciaal teken bevatten (!@#$...).",
                 _ => error.Description
             };
             ModelState.AddModelError(string.Empty, message);
@@ -125,28 +131,36 @@ public class AccountController : Controller
         if (result.Succeeded)
             return LocalRedirect(returnUrl ?? "/");
 
-        ModelState.AddModelError(string.Empty, "Invalid email or password.");
+        ModelState.AddModelError(string.Empty, "Ongeldig e-mailadres of wachtwoord.");
         return View(model);
     }
 
-    // ── Logout ────────────────────────────────────────────────────────────
+    // ── Uitloggen ─────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Logt de gebruiker uit en wist de sessie (inclusief winkelwagen).
+    ///
+    /// BUG FIX UITLOGGEN + WINKELWAGEN:
+    /// SignOutAsync() roept intern HttpContext.Session.Clear() aan als de sessie
+    /// gekoppeld is aan de authenticatie-cookie. Om absoluut zeker te zijn dat
+    /// de wagen verdwijnt, wissen we hem hier expliciet vóór het uitloggen.
+    /// Zonder deze regel bleef de sessie-data soms staan bij bepaalde configuraties.
+    /// </summary>
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
+        // Winkelwagen expliciet wissen vóór uitloggen
+        HttpContext.Session.Remove(CartSessionKey);
+
         await _signInManager.SignOutAsync();
         return RedirectToAction("Index", "Home");
     }
 
-    // ── Forgot Password ───────────────────────────────────────────────────
+    // ── Wachtwoord vergeten ───────────────────────────────────────────────
 
     [HttpGet]
     public IActionResult ForgotPassword() => View(new ForgotPasswordVM());
 
-    /// <summary>
-    /// Generates a password-reset token via Identity and sends it by email.
-    /// Always shows the same confirmation (no user enumeration).
-    /// </summary>
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> ForgotPassword(ForgotPasswordVM model)
     {
@@ -155,36 +169,33 @@ public class AccountController : Controller
         var user = await _userManager.FindByEmailAsync(model.Email);
         if (user != null)
         {
-            var token       = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var resetLink   = Url.Action("ResetPassword", "Account",
-                                  new { token, email = model.Email },
-                                  Request.Scheme)!;
+            var token     = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var resetLink = Url.Action("ResetPassword", "Account",
+                                new { token, email = model.Email }, Request.Scheme)!;
 
             await _email.SendAsync(
                 to      : model.Email,
-                subject : "Reset your CL Tickets password",
-                htmlBody: $@"<p>Hello {user.FirstName},</p>
-                             <p>Click the link below to reset your password:</p>
+                subject : "Reset uw CL Tickets-wachtwoord",
+                htmlBody: $@"<p>Hallo {user.FirstName},</p>
+                             <p>Klik op de onderstaande link om uw wachtwoord te herstellen:</p>
                              <p><a href='{resetLink}'>{resetLink}</a></p>
-                             <p>This link is valid for 24 hours.</p>"
+                             <p>Deze link is 24 uur geldig.</p>"
             );
         }
 
-        // Always redirect to confirmation — prevents user enumeration
         return RedirectToAction(nameof(ForgotPasswordConfirmation));
     }
 
     [HttpGet]
     public IActionResult ForgotPasswordConfirmation() => View();
 
-    // ── Reset Password ────────────────────────────────────────────────────
+    // ── Wachtwoord herstellen ─────────────────────────────────────────────
 
     [HttpGet]
     public IActionResult ResetPassword(string? token = null, string? email = null)
     {
         if (token == null || email == null)
-            return BadRequest("Invalid password reset link.");
-
+            return BadRequest("Ongeldige wachtwoord-herstelkoppeling.");
         return View(new ResetPasswordVM { Token = token, Email = email });
     }
 
@@ -211,177 +222,149 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult ResetPasswordConfirmation() => View();
 
-    // ── Ticket history ────────────────────────────────────────────────────
+    // ── Ticketgeschiedenis ────────────────────────────────────────────────
 
+    /// <summary>
+    /// Toont de volledige ticket- en abonnementsgeschiedenis van de gebruiker.
+    ///
+    /// REFACTOR: vroeger riep dit rechtstreeks _tickets.GetUserTicketHistoryAsync()
+    /// en _seasonTickets.GetAllUserSeasonTicketsAsync() aan.
+    /// Nu gebruikt het IUserTicketService en ISeasonTicketService — geen repository-calls.
+    /// </summary>
     [Authorize]
     public async Task<IActionResult> MyTickets()
     {
         var userId = _userManager.GetUserId(User)!;
-        var tickets = await _tickets.GetUserTicketHistoryAsync(userId);
-        var seasonTickets = await _seasonTickets.GetAllUserSeasonTicketsAsync(userId);
+
+        var tickets       = await _userTicketService.GetHistoryAsync(userId);
+        var seasonTickets = await _seasonTicketService.GetAllUserSeasonTicketsAsync(userId);
 
         var vms = _mapper.Map<IEnumerable<TicketHistoryItemVM>>(tickets);
 
         var seasonVms = seasonTickets.Select(st => new SeasonTicketHistoryVM
         {
-            Id = st.Id,
-            ClubName = st.Sector?.Stadium?.Club?.Name ?? "",
-            StadiumName = st.Sector?.Stadium?.Name ?? "",
-            SectorName = st.Sector?.Name ?? "",
-            SeatNumber = st.SeatNumber,
-            TotalPrice = st.TotalPrice,
+            Id          = st.Id,
+            ClubName    = st.Sector?.Stadium?.Club?.Name    ?? "",
+            StadiumName = st.Sector?.Stadium?.Name          ?? "",
+            SectorName  = st.Sector?.Name                   ?? "",
+            SeatNumber  = st.SeatNumber,
+            TotalPrice  = st.TotalPrice,
             PurchasedAt = st.PurchasedAt,
-            IsActive = st.IsActive,
-            VoucherId = st.VoucherId
+            IsActive    = st.IsActive,
+            VoucherId   = st.VoucherId
         });
 
         ViewBag.SeasonTickets = seasonVms;
         return View(vms);
     }
 
-    // ── Cancel regular ticket ─────────────────────────────────────────────────────
+    // ── Annulatie los ticket ──────────────────────────────────────────────
 
+    /// <summary>
+    /// Annuleert een los ticket via ITicketService.
+    /// Na annulatie (Status = Cancelled) wordt het stoelnummer terug vrijgegeven:
+    /// GetReservedSeatsAsync filtert op Status != Cancelled, dus de stoel is automatisch vrij.
+    ///
+    /// BUG FIX ANNULATIE: De eerder gemelde bug (ticket niet terug vrij na annulatie)
+    /// is opgelost in TicketRepository.GetReservedSeatsAsync(), dat al filtert op
+    /// t.Status != TicketStatus.Cancelled. De service zet Status correct op Cancelled.
+    /// </summary>
     [HttpPost, ValidateAntiForgeryToken, Authorize]
     public async Task<IActionResult> CancelTicket(int ticketId)
     {
         var userId = _userManager.GetUserId(User)!;
         var result = await _ticketService.CancelAsync(ticketId, userId);
 
-        if (result.Success)
-            TempData["Success"] = _tr.T("tickets_cancel_success");
-        else
-            TempData["Error"] = result.ErrorMessage;
+        TempData[result.Success ? "Success" : "Error"] =
+            result.Success ? _tr.T("tickets_cancel_success") : result.ErrorMessage;
 
         return RedirectToAction(nameof(MyTickets));
     }
 
-    // ── Resend voucher email regular ticket ──────────────────────────────────────────
+    // ── Voucher herversturing ─────────────────────────────────────────────
 
     /// <summary>
-    /// POST /Account/ResendVoucher — resends the voucher email for a single ticket.
-    /// Only allowed for the ticket owner, and only for Paid (non-cancelled) tickets.
+    /// Stuurt de voucher-e-mail opnieuw voor een los ticket.
+    /// De logica (eigenaarschapscontrole, e-mail) zit nu in IUserTicketService.
     /// </summary>
     [HttpPost, ValidateAntiForgeryToken, Authorize]
     public async Task<IActionResult> ResendVoucher(int ticketId)
     {
-        var userId  = _userManager.GetUserId(User)!;
-        var user    = await _userManager.FindByIdAsync(userId);
-        var tickets = await _tickets.GetUserTicketsAsync(userId);
-        var ticket  = tickets.FirstOrDefault(t => t.Id == ticketId);
+        var userId     = _userManager.GetUserId(User)!;
+        var user       = await _userManager.FindByIdAsync(userId);
+        var lang       = System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName;
 
-        if (ticket is null || user is null)
-        {
-            TempData["Error"] = _tr.T("voucher_resend_error");
-            return RedirectToAction(nameof(MyTickets));
-        }
+        var (success, error) = await _userTicketService.ResendVoucherAsync(
+            ticketId, userId, user?.Email ?? "", user?.FirstName ?? "", lang);
 
-        if (ticket.Status == TicketStatus.Cancelled)
-        {
-            TempData["Error"] = _tr.T("voucher_resend_cancelled");
-            return RedirectToAction(nameof(MyTickets));
-        }
+        TempData[success ? "Success" : "Error"] =
+            success ? _tr.T("voucher_resend_success") : error;
 
-        var allMatches  = await _matches.GetAllWithClubsAsync();
-        var match       = allMatches.FirstOrDefault(m => m.Id == ticket.MatchId);
-        var matchDesc   = match is not null
-            ? $"{match.HomeClub?.Name} vs {match.AwayClub?.Name}"
-            : "Unknown match";
-        var matchDate   = match?.MatchDate.ToString("dd MMMM yyyy") ?? "";
-
-        await _email.SendAsync(
-            to      : user.Email!,
-            subject : $"{_tr.T("voucher_resend_subject")} — {matchDesc}",
-            htmlBody: $@"
-<p>Hello {user.FirstName},</p>
-<p>{_tr.T("voucher_resend_intro")} <strong>{matchDesc}</strong> ({matchDate}):</p>
-<table style='border-collapse:collapse;font-family:Arial,sans-serif'>
-  <tr><td style='padding:6px 16px 6px 0;color:#666'>{_tr.T("tickets_col_sector")}:</td>
-      <td style='padding:6px 0;font-weight:bold'>{ticket.Sector?.Name ?? ""}</td></tr>
-  <tr><td style='padding:6px 16px 6px 0;color:#666'>{_tr.T("tickets_col_seat")}:</td>
-      <td style='padding:6px 0;font-weight:bold'>{ticket.SeatNumber}</td></tr>
-  <tr><td style='padding:6px 16px 6px 0;color:#666'>{_tr.T("tickets_col_voucher")}:</td>
-      <td style='padding:6px 0;font-family:monospace;font-size:14px;font-weight:bold;color:#001489'>{ticket.VoucherId:D}</td></tr>
-</table>
-<p>{_tr.T("voucher_resend_footer")}</p>
-<p>CL Tickets Portal</p>"
-        );
-
-        TempData["Success"] = _tr.T("voucher_resend_success");
         return RedirectToAction(nameof(MyTickets));
     }
 
+    // ── Annulatie abonnement ──────────────────────────────────────────────
 
-    // ── Cancel season ticket ─────────────────────────────────────────────────────
+    /// <summary>
+    /// Annuleert een seizoensabonnement via ISeasonTicketService.
+    ///
+    /// BUG FIX: Vroeger deed de controller dit rechtstreeks via de repository.
+    /// Nu zit de businesslogica (eigenaarschapscontrole, IsActive = false) in de service.
+    /// Na annulatie (IsActive = false) filtert GetSeasonReservedSeatsAsync dat stoelnummer
+    /// niet meer mee → het is automatisch terug beschikbaar.
+    /// </summary>
     [HttpPost, ValidateAntiForgeryToken, Authorize]
     public async Task<IActionResult> CancelSeasonTicket(int seasonTicketId)
     {
-        var userId = _userManager.GetUserId(User)!;
+        var userId          = _userManager.GetUserId(User)!;
+        var (success, error) = await _seasonTicketService.CancelAsync(seasonTicketId, userId);
 
-        // Fetch WITH tracking (no AsNoTracking) so EF Core detects the change
-        var ticket = await _seasonTickets.GetByIdAsync(seasonTicketId);
+        TempData[success ? "Success" : "Error"] =
+            success ? "Abonnement geannuleerd." : error;
 
-        if (ticket is null || ticket.UserId != userId)
-        {
-            TempData["Error"] = "Season ticket not found.";
-            return RedirectToAction(nameof(MyTickets));
-        }
-
-        if (!ticket.IsActive)
-        {
-            TempData["Error"] = "This season ticket is already cancelled.";
-            return RedirectToAction(nameof(MyTickets));
-        }
-
-        ticket.IsActive = false;
-        await _seasonTickets.SaveChangesAsync();
-
-        TempData["Success"] = "Season ticket cancelled successfully.";
         return RedirectToAction(nameof(MyTickets));
     }
 
-    // ── Resend voucher email season ticket ──────────────────────────────────────────
+    // ── Voucher herversturing abonnement ──────────────────────────────────
 
-    /// <summary>
-    /// POST /Account/ResendSeasonVoucher — resends the voucher email for a single season ticket.
-    /// Only allowed for the ticket owner, and only for active season tickets.
-    /// </summary>
     [HttpPost, ValidateAntiForgeryToken, Authorize]
     public async Task<IActionResult> ResendSeasonVoucher(int seasonTicketId)
     {
         var userId = _userManager.GetUserId(User)!;
-        var user = await _userManager.FindByIdAsync(userId);
-        var tickets = await _seasonTickets.GetUserSeasonTicketsAsync(userId);
-        var ticket = tickets.FirstOrDefault(t => t.Id == seasonTicketId);
+        var user   = await _userManager.FindByIdAsync(userId);
+
+        var tickets = await _seasonTicketService.GetUserSeasonTicketsAsync(userId);
+        var ticket  = tickets.FirstOrDefault(t => t.Id == seasonTicketId);
 
         if (ticket is null || user is null)
         {
-            TempData["Error"] = "Season ticket not found.";
+            TempData["Error"] = "Abonnement niet gevonden.";
             return RedirectToAction(nameof(MyTickets));
         }
 
         await _email.SendAsync(
-            to: user.Email!,
-            subject: $"Your Season Ticket — {ticket.Sector?.Stadium?.Club?.Name}",
+            to      : user.Email!,
+            subject : $"Uw abonnement — {ticket.Sector?.Stadium?.Club?.Name}",
             htmlBody: $@"
-<p>Hello {user.FirstName},</p>
-<p>Here are the details of your season ticket:</p>
+<p>Hallo {user.FirstName},</p>
+<p>Hieronder vindt u de gegevens van uw seizoensabonnement:</p>
 <table style='border-collapse:collapse;font-family:Arial,sans-serif'>
   <tr><td style='padding:6px 16px 6px 0;color:#666'>Club:</td>
       <td style='padding:6px 0;font-weight:bold'>{ticket.Sector?.Stadium?.Club?.Name}</td></tr>
-  <tr><td style='padding:6px 16px 6px 0;color:#666'>Stadium:</td>
+  <tr><td style='padding:6px 16px 6px 0;color:#666'>Stadion:</td>
       <td style='padding:6px 0;font-weight:bold'>{ticket.Sector?.Stadium?.Name}</td></tr>
-  <tr><td style='padding:6px 16px 6px 0;color:#666'>Sector:</td>
+  <tr><td style='padding:6px 16px 6px 0;color:#666'>Vak:</td>
       <td style='padding:6px 0;font-weight:bold'>{ticket.Sector?.Name}</td></tr>
-  <tr><td style='padding:6px 16px 6px 0;color:#666'>Seat:</td>
+  <tr><td style='padding:6px 16px 6px 0;color:#666'>Zitplaats:</td>
       <td style='padding:6px 0;font-weight:bold'>{ticket.SeatNumber}</td></tr>
-  <tr><td style='padding:6px 16px 6px 0;color:#666'>Total Price:</td>
+  <tr><td style='padding:6px 16px 6px 0;color:#666'>Totaalprijs:</td>
       <td style='padding:6px 0;font-weight:bold'>€ {ticket.TotalPrice:0.00}</td></tr>
 </table>
-<p>This ticket is valid for all home matches of the season.</p>
+<p>Dit abonnement is geldig voor alle thuiswedstrijden van het seizoen.</p>
 <p>CL Tickets Portal</p>"
         );
 
-        TempData["Success"] = "Season ticket voucher resent to your email.";
+        TempData["Success"] = "Voucher opnieuw verzonden.";
         return RedirectToAction(nameof(MyTickets));
     }
 }

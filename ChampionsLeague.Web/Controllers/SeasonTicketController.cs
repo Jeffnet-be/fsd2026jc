@@ -1,33 +1,53 @@
-using ChampionsLeague.Domain.Entities;
-using ChampionsLeague.Domain.Interfaces;
+using ChampionsLeague.Services;
+using ChampionsLeague.Web.Services;
 using ChampionsLeague.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using ChampionsLeague.Domain.Entities;
 
 namespace ChampionsLeague.Web.Controllers;
 
+/// <summary>
+/// Abonnementen-pagina: overzicht en toevoegen aan winkelwagen.
+///
+/// REFACTOR: IClubRepository en ISeasonTicketRepository vervangen door
+/// IClubService en ISeasonTicketService.
+/// De controller bevat geen directe repository-aanroepen meer.
+///
+/// WINKELWAGEN-BUGS: Verklaring waarom de originele winkelwagen minder problemen had:
+/// De cart-logica hier gebruikt (MatchId, SectorId) als samengestelde sleutel voor
+/// Remove(). Seizoensabonnementen hebben geen MatchId, maar wel SectorId als sleutel.
+/// Het "hele wagen leeg"-probleem trad op bij bepaalde UI-flows, niet bij alle removes.
+/// In de meegegeven code is de Remove-logica correct per (MatchId, SectorId) —
+/// het probleem zat eerder in hoe de knop het form submitde in de view.
+/// </summary>
 public class SeasonTicketController : Controller
 {
-    private readonly IClubRepository _clubs;
-    private readonly ISeasonTicketRepository _seasonTickets;
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IClubService                         _clubService;
+    private readonly ISeasonTicketService                 _seasonTicketService;
+    private readonly UserManager<ApplicationUser>         _userManager;
+    private readonly TranslationService                   _tr;
 
     private const string CartSessionKey = "CART";
-
     private static readonly DateTime CompetitionStart = new DateTime(2026, 4, 25);
 
     public SeasonTicketController(
-        IClubRepository clubs,
-        ISeasonTicketRepository seasonTickets,
-        UserManager<ApplicationUser> userManager)
+        IClubService                         clubService,
+        ISeasonTicketService                 seasonTicketService,
+        UserManager<ApplicationUser>         userManager,
+        TranslationService                   tr)
     {
-        _clubs = clubs;
-        _seasonTickets = seasonTickets;
-        _userManager = userManager;
+        _clubService         = clubService;
+        _seasonTicketService = seasonTicketService;
+        _userManager         = userManager;
+        _tr                  = tr;
     }
 
+    /// <summary>
+    /// Toont de abonnements-pagina met alle clubs en beschikbare sectoren.
+    /// </summary>
     public async Task<IActionResult> Index()
     {
         if (DateTime.UtcNow >= CompetitionStart)
@@ -36,27 +56,22 @@ public class SeasonTicketController : Controller
             return View();
         }
 
-        var clubs = await _clubs.GetAllWithStadiumsAsync();
+        var clubs = await _clubService.GetAllWithStadiumsAsync();
         return View(clubs);
     }
 
     /// <summary>
-    /// Adds the season ticket to the SESSION CART only.
-    /// No DB write happens here — seat assignment happens at checkout.
+    /// Voegt een seizoensabonnement toe aan de sessie-winkelwagen.
+    /// Geen DB-write hier — dat gebeurt bij checkout (Checkout/Confirm).
+    ///
+    /// De max-4-per-club controle gebruikt ISeasonTicketService, niet de repository.
     /// </summary>
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Purchase(int sectorId, string totalPrice)
     {
-        // Manual auth check — redirects to login with returnUrl pointing to Index, not Purchase
         if (!User.Identity?.IsAuthenticated ?? true)
             return RedirectToAction("Login", "Account",
                 new { returnUrl = Url.Action("Index", "SeasonTicket") });
-
-        var userId = _userManager.GetUserId(User)!;
-        decimal price = decimal.Parse(
-       totalPrice,
-       System.Globalization.NumberStyles.Any,
-       System.Globalization.CultureInfo.InvariantCulture);
 
         if (DateTime.UtcNow >= CompetitionStart)
         {
@@ -64,9 +79,12 @@ public class SeasonTicketController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        // Get club/sector info for display in the cart
-        var clubs = await _clubs.GetAllWithStadiumsAsync();
-        var club = clubs.FirstOrDefault(c => c.Stadium?.Sectors.Any(s => s.Id == sectorId) == true);
+        decimal price = decimal.Parse(totalPrice,
+            System.Globalization.NumberStyles.Any,
+            System.Globalization.CultureInfo.InvariantCulture);
+
+        var clubs  = await _clubService.GetAllWithStadiumsAsync();
+        var club   = clubs.FirstOrDefault(c => c.Stadium?.Sectors.Any(s => s.Id == sectorId) == true);
         var sector = club?.Stadium?.Sectors.FirstOrDefault(s => s.Id == sectorId);
 
         if (sector is null || club is null)
@@ -75,70 +93,35 @@ public class SeasonTicketController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        // Load existing cart from session
-        var cart = GetCart();
+        var userId = _userManager.GetUserId(User)!;
+        var cart   = GetCart();
 
-        // Count existing season tickets for this club in DB + cart combined - Max of 4 per sector per user
-        // Get all sectorIds that belong to this club
-        var sectorIdsForClub = club.Stadium?.Sectors.Select(s => s.Id).ToHashSet() ?? new HashSet<int>();
-
-        // Count existing season tickets for this CLUB in DB + cart combined
-        var existingInDb = await _seasonTickets.GetUserSeasonTicketsAsync(userId);
-        var countInDb = existingInDb.Count(t => sectorIdsForClub.Contains(t.SectorId) && t.IsActive);
+        // Max-4-per-club: DB-teller via service + cart-teller samen
+        var sectorIdsForClub = club.Stadium!.Sectors.Select(s => s.Id);
+        var countInDb   = await _seasonTicketService.CountActiveForClubAsync(userId, sectorIdsForClub);
         var countInCart = cart.SeasonItems.Count(i => sectorIdsForClub.Contains(i.SectorId));
 
         if (countInDb + countInCart >= 4)
         {
-            TempData["Error"] = $"You can only purchase a maximum of 4 season tickets for {club.Name}.";
+            TempData["Error"] = $"U kunt maximaal 4 abonnementen kopen voor {club.Name}.";
             return RedirectToAction(nameof(Index));
         }
 
-        // Add to cart — NO seat number yet, NO DB write yet
         cart.SeasonItems.Add(new SeasonCartItemVM
         {
-            SectorId = sectorId,
-            SectorName = sector.Name,
-            ClubName = club.Name,
+            SectorId    = sectorId,
+            SectorName  = sector.Name,
+            ClubName    = club.Name,
             StadiumName = club.Stadium?.Name ?? "",
-            TotalPrice = price
+            TotalPrice  = price
         });
 
         SaveCart(cart);
-
-        TempData["Success"] = "Season ticket added to your cart!";
+        TempData["Success"] = _tr.T("season_added_to_cart");
         return RedirectToAction(nameof(Index));
     }
 
-    /// <summary>
-    /// Called by CheckoutController AFTER payment confirmation.
-    /// This is where the seat number is assigned and saved to DB.
-    /// </summary>
-    public async Task<(bool Success, string? Error, int SeatNumber)> FinalizeAsync(
-        string userId, SeasonCartItemVM item)
-    {
-        var reserved = (await _seasonTickets.GetSeasonReservedSeatsAsync(item.SectorId)).ToHashSet();
-        var nextSeat = Enumerable.Range(1, 1000).FirstOrDefault(s => !reserved.Contains(s));
-
-        if (nextSeat == 0)
-            return (false, "No seats available in this sector.", 0);
-
-        var seasonTicket = new SeasonTicket
-        {
-            UserId = userId,
-            SectorId = item.SectorId,
-            SeatNumber = nextSeat,
-            TotalPrice = item.TotalPrice,
-            PurchasedAt = DateTime.UtcNow,
-            IsActive = true
-        };
-
-        await _seasonTickets.AddAsync(seasonTicket);
-        await _seasonTickets.SaveChangesAsync();
-
-        return (true, null, nextSeat);
-    }
-
-    // ── Session helpers ───────────────────────────────────────────────
+    // ── Session helpers ─────────────────────────────────────────────────
     private CartVM GetCart()
     {
         var json = HttpContext.Session.GetString(CartSessionKey);

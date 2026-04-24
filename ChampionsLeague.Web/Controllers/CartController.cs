@@ -8,7 +8,7 @@ namespace ChampionsLeague.Web.Controllers;
 /// Manages the session-based shopping cart.
 /// Cart data is stored as JSON in the ASP.NET Core session (configured in Program.cs).
 /// AddToCart returns a PartialView so the navbar badge updates via AJAX without a
-/// full page reload — demonstrating the unobtrusive-AJAX pattern.
+/// full page reload.
 /// </summary>
 public class CartController : Controller
 {

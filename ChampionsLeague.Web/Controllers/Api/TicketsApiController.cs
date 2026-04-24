@@ -1,87 +1,82 @@
 using AutoMapper;
-using ChampionsLeague.Domain.Interfaces;
+using ChampionsLeague.Domain.Entities;
 using ChampionsLeague.Services;
 using ChampionsLeague.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using ChampionsLeague.Domain.Entities;
 
 namespace ChampionsLeague.Web.Controllers.Api;
 
 /// <summary>
-/// REST API for the Champions League Ticket Portal.
-/// Used with Swagger UI (/swagger) and Postman for testing.
+/// REST API voor het Champions League Ticket Portaal.
+/// Gedocumenteerd via Swagger UI (/swagger).
+///
+/// REFACTOR: IMatchRepository, IClubRepository en ITicketRepository zijn
+/// vervangen door IMatchService (voor club/wedstrijddata) en ITicketService
+/// (voor beschikbaarheid en aankoop/annulatie).
+///
+/// De API-controller heeft zo géén directe Infrastructure-afhankelijkheden meer.
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
 public class TicketsApiController : ControllerBase
 {
-    private readonly IMatchRepository  _matches;
-    private readonly IClubRepository   _clubs;
-    private readonly ITicketRepository _tickets;
-    private readonly ITicketService    _ticketService;
+    private readonly IMatchService                _matchService;   // ← vervangt IMatchRepository + IClubRepository
+    private readonly ITicketService               _ticketService;  // ← vervangt ITicketRepository voor beschikbaarheid
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IMapper _mapper;
+    private readonly IAccountService              _accountService; // ← vervangt ITicketRepository voor history
+    private readonly IMapper                      _mapper;
 
     public TicketsApiController(
-        IMatchRepository  matches,
-        IClubRepository   clubs,
-        ITicketRepository tickets,
-        ITicketService    ticketService,
+        IMatchService                matchService,
+        ITicketService               ticketService,
+        IAccountService              accountService,
         UserManager<ApplicationUser> userManager,
-        IMapper mapper)
+        IMapper                      mapper)
     {
-        _matches       = matches;
-        _clubs         = clubs;
-        _tickets       = tickets;
-        _ticketService = ticketService;
-        _userManager   = userManager;
-        _mapper        = mapper;
+        _matchService   = matchService;
+        _ticketService  = ticketService;
+        _accountService = accountService;
+        _userManager    = userManager;
+        _mapper         = mapper;
     }
 
-    // ── GET /api/tickets/matches ──────────────────────────────────────────
-
-    /// <summary>Returns all matches with club and stadium information.</summary>
+    /// <summary>Geeft alle wedstrijden terug met club- en stadioninformatie.</summary>
     [HttpGet("matches")]
     [ProducesResponseType(typeof(IEnumerable<MatchListItemVM>), 200)]
     public async Task<IActionResult> GetMatches()
     {
-        var matches = await _matches.GetAllWithClubsAsync();
-        var vms     = _mapper.Map<IEnumerable<MatchListItemVM>>(matches);
-        return Ok(vms);
+        var matches = await _matchService.GetAllWithClubsAsync();
+        return Ok(_mapper.Map<IEnumerable<MatchListItemVM>>(matches));
     }
 
-    // ── GET /api/tickets/matches/{id} ─────────────────────────────────────
-
-    /// <summary>Returns a single match by ID.</summary>
+    /// <summary>Geeft één wedstrijd terug op id.</summary>
     [HttpGet("matches/{id:int}")]
     [ProducesResponseType(typeof(MatchListItemVM), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetMatch(int id)
     {
-        var all   = await _matches.GetAllWithClubsAsync();
+        var all   = await _matchService.GetAllWithClubsAsync();
         var match = all.FirstOrDefault(m => m.Id == id);
         if (match is null) return NotFound(new { error = $"Match {id} not found." });
         return Ok(_mapper.Map<MatchListItemVM>(match));
     }
 
-    // ── GET /api/tickets/clubs ────────────────────────────────────────────
-
-    /// <summary>Returns all clubs with their stadium and sector information.</summary>
+    /// <summary>Geeft alle clubs terug met hun stadion en sectoren.</summary>
     [HttpGet("clubs")]
     [ProducesResponseType(typeof(IEnumerable<ClubCardVM>), 200)]
     public async Task<IActionResult> GetClubs()
     {
-        var clubs = await _clubs.GetAllWithStadiumsAsync();
-        var vms   = _mapper.Map<IEnumerable<ClubCardVM>>(clubs);
-        return Ok(vms);
+        var clubs = await _matchService.GetAllClubsWithStadiumsAsync();
+        return Ok(_mapper.Map<IEnumerable<ClubCardVM>>(clubs));
     }
 
-    // ── GET /api/tickets/availability/{matchId}/{sectorId} ────────────────
-
-    /// <summary>Returns available seat numbers for a given match and sector.</summary>
+    /// <summary>
+    /// Geeft het aantal beschikbare plaatsen terug voor een wedstrijd en sector.
+    /// Combineert losse tickets + abonnementen voor een correct getal.
+    /// </summary>
     [HttpGet("availability/{matchId:int}/{sectorId:int}")]
     [ProducesResponseType(typeof(object), 200)]
     public async Task<IActionResult> GetAvailability(int matchId, int sectorId)
@@ -91,14 +86,12 @@ public class TicketsApiController : ControllerBase
         {
             matchId,
             sectorId,
-            availableSeats  = seats,
-            availableCount  = seats.Count()
+            availableSeats = seats,
+            availableCount = seats.Count()
         });
     }
 
-    // ── GET /api/tickets/mytickets ────────────────────────────────────────
-
-    /// <summary>Returns the authenticated user's ticket history. Requires login.</summary>
+    /// <summary>Geeft de ticketgeschiedenis van de ingelogde gebruiker terug.</summary>
     [HttpGet("mytickets")]
     [Authorize]
     [ProducesResponseType(typeof(IEnumerable<TicketHistoryItemVM>), 200)]
@@ -106,28 +99,23 @@ public class TicketsApiController : ControllerBase
     public async Task<IActionResult> GetMyTickets()
     {
         var userId  = _userManager.GetUserId(User)!;
-        var tickets = await _tickets.GetUserTicketsAsync(userId);
-        var vms     = _mapper.Map<IEnumerable<TicketHistoryItemVM>>(tickets);
-        return Ok(vms);
+        var history = await _accountService.GetUserHistoryAsync(userId);
+        return Ok(_mapper.Map<IEnumerable<TicketHistoryItemVM>>(history.Tickets));
     }
 
-    // ── POST /api/tickets/purchase ────────────────────────────────────────
-
     /// <summary>
-    /// Purchases tickets for a match. Enforces all business rules:
-    /// sale window, max 4 per person, no same-day double booking, capacity check.
-    /// Requires authentication.
+    /// Koopt tickets voor een wedstrijd.
+    /// Handhaaft alle business rules: verkoopvenster, max 4 per persoon,
+    /// geen dubbele wedstrijd op dezelfde dag, capaciteitslimiet.
     /// </summary>
     [HttpPost("purchase")]
-    [ValidateAntiForgeryToken]
     [Authorize]
     [ProducesResponseType(typeof(object), 200)]
     [ProducesResponseType(typeof(object), 400)]
     [ProducesResponseType(401)]
     public async Task<IActionResult> Purchase([FromBody] ApiPurchaseRequest req)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var userId = _userManager.GetUserId(User)!;
         var result = await _ticketService.PurchaseAsync(new PurchaseRequest(
@@ -138,20 +126,14 @@ public class TicketsApiController : ControllerBase
 
         return Ok(new
         {
-            success      = true,
-            ticketCount  = result.Tickets?.Count() ?? 0,
-            vouchers     = result.Tickets?.Select(t => t.VoucherId.ToString("D"))
+            success     = true,
+            ticketCount = result.Tickets?.Count() ?? 0,
+            vouchers    = result.Tickets?.Select(t => t.VoucherId.ToString("D"))
         });
     }
 
-    // ── POST /api/tickets/cancel/{ticketId} ───────────────────────────────
-
-    /// <summary>
-    /// Cancels a ticket. Free cancellation up to 7 days before match.
-    /// Requires authentication — you can only cancel your own tickets.
-    /// </summary>
+    /// <summary>Annuleert een ticket. Alleen de eigenaar kan zijn eigen ticket annuleren.</summary>
     [HttpPost("cancel/{ticketId:int}")]
-    [ValidateAntiForgeryToken]
     [Authorize]
     [ProducesResponseType(typeof(object), 200)]
     [ProducesResponseType(typeof(object), 400)]
@@ -164,15 +146,15 @@ public class TicketsApiController : ControllerBase
         if (!result.Success)
             return BadRequest(new { error = result.ErrorMessage });
 
-        return Ok(new { success = true, message = "Ticket cancelled successfully." });
+        return Ok(new { success = true, message = "Ticket successfully cancelled." });
     }
 }
 
-/// <summary>Request body for the purchase endpoint.</summary>
+/// <summary>Request body voor het purchase-endpoint.</summary>
 public class ApiPurchaseRequest
 {
-    public int     MatchId    { get; set; }
-    public int     SectorId   { get; set; }
-    public int     Quantity   { get; set; }
-    public decimal UnitPrice  { get; set; }
+    public int     MatchId   { get; set; }
+    public int     SectorId  { get; set; }
+    public int     Quantity  { get; set; }
+    public decimal UnitPrice { get; set; }
 }

@@ -95,6 +95,16 @@ builder.Services.AddScoped<IClubRepository,         ClubRepository>();
 builder.Services.AddScoped<ISeasonTicketRepository, SeasonTicketRepository>();
 
 // ── Application services ──────────────────────────────────────────────
+// Nieuwe services die de directe repository-afhankelijkheden uit de Web-laag verwijderen.
+// Regel: controllers injecteren ENKEL interfaces uit de Services-laag,
+// niet langer interfaces uit de Domain/Infrastructure-laag.
+
+builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<IClubService, ClubService>();
+builder.Services.AddScoped<ISeasonTicketService, SeasonTicketService>();
+builder.Services.AddScoped<IUserTicketService, UserTicketService>();
+
+// Bestaande services (ongewijzigd):
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ChampionsLeague.Web.Services.TranslationService>();
 builder.Services.AddScoped<ITicketService, TicketService>();

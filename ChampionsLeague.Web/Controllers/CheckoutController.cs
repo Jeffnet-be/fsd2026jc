@@ -1,5 +1,4 @@
 using ChampionsLeague.Domain.Entities;
-using ChampionsLeague.Domain.Interfaces;
 using ChampionsLeague.Infrastructure.Services;
 using ChampionsLeague.Services;
 using ChampionsLeague.Web.Services;
@@ -12,34 +11,49 @@ using System.Text.Json;
 
 namespace ChampionsLeague.Web.Controllers;
 
+/// <summary>
+/// Verwerkt de afrekening van de winkelwagen.
+///
+/// REFACTOR: IMatchRepository en ISeasonTicketRepository vervangen door
+/// IMatchService en ISeasonTicketService.
+/// De controller injecteert enkel service-interfaces — geen repositories.
+///
+/// OVERBOEKING FIX: De aankoop van abonnementen in Confirm() verloopt nu via
+/// ISeasonTicketService.FinalizeAsync() dat de capaciteitscontrole uitvoert
+/// inclusief de check op reeds bezette stoelen door losse tickets.
+///
+/// ANNULATIE-BUG FIX: Zit in SeasonTicketService (IsActive = false) en
+/// in TicketService (Status = Cancelled) — de query filtert al op die velden.
+/// </summary>
 [Authorize]
 public class CheckoutController : Controller
 {
     private const string CartSessionKey = "CART";
 
     private readonly ITicketService               _ticketService;
+    private readonly ISeasonTicketService         _seasonTicketService;
+    private readonly IMatchService                _matchService;
     private readonly IEmailService                _email;
-    private readonly IMatchRepository             _matches;
-    private readonly ISeasonTicketRepository      _seasonTickets;
-    private readonly UserManager<ApplicationUser>  _userManager;
+    private readonly UserManager<ApplicationUser> _userManager;
     private readonly TranslationService           _tr;
 
     public CheckoutController(
-        ITicketService                ticketService,
-        IEmailService                 email,
-        IMatchRepository              matches,
-        ISeasonTicketRepository       seasonTickets,
-        UserManager<ApplicationUser>  userManager,
-        TranslationService            tr)
+        ITicketService               ticketService,
+        ISeasonTicketService         seasonTicketService,
+        IMatchService                matchService,
+        IEmailService                email,
+        UserManager<ApplicationUser> userManager,
+        TranslationService           tr)
     {
-        _ticketService  = ticketService;
-        _email          = email;
-        _matches        = matches;
-        _seasonTickets  = seasonTickets;
-        _userManager    = userManager;
-        _tr             = tr;
+        _ticketService       = ticketService;
+        _seasonTicketService = seasonTicketService;
+        _matchService        = matchService;
+        _email               = email;
+        _userManager         = userManager;
+        _tr                  = tr;
     }
 
+    /// <summary>Toont de overzichtspagina vóór bevestiging.</summary>
     public IActionResult Review()
     {
         var cart = GetCart();
@@ -48,6 +62,19 @@ public class CheckoutController : Controller
         return View(cart);
     }
 
+    /// <summary>
+    /// Verwerkt de volledige winkelwagen.
+    ///
+    /// Strategie:
+    /// 1. Verwerk elk item. Bij fout: voeg toe aan errors-lijst, ga verder met de rest.
+    /// 2. Als er GEEN fouten zijn: leeg de wagen en stuur e-mail.
+    /// 3. Als er WEL fouten zijn: stuur de gebruiker terug naar Review met foutmelding.
+    ///    Items die succesvol waren zijn dan wel al in de DB — dit is een design-keuze
+    ///    (alternatieven: alles-of-niets via transactie, of pre-validatie).
+    ///
+    /// OVERBOEKING: TicketService.PurchaseAsync() en SeasonTicketService.FinalizeAsync()
+    /// doen elk hun eigen capaciteitscontrole op basis van DB-data op het moment van aankoop.
+    /// </summary>
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Confirm()
     {
@@ -56,11 +83,10 @@ public class CheckoutController : Controller
         var user   = await _userManager.FindByIdAsync(userId);
         var errors = new List<string>();
 
-        // Collect all successfully purchased items before sending any email
-        var purchasedTickets      = new List<(Ticket ticket, Match match)>();
+        var purchasedTickets       = new List<(Ticket ticket, Match match)>();
         var purchasedSeasonTickets = new List<(SeasonTicket ticket, string sectorName, string stadiumName)>();
 
-        // ── Process regular tickets ───────────────────────────────────
+        // ── Losse tickets ──────────────────────────────────────────────
         foreach (var item in cart.Items)
         {
             var result = await _ticketService.PurchaseAsync(new PurchaseRequest(
@@ -77,7 +103,7 @@ public class CheckoutController : Controller
             }
             else if (result.Tickets is not null)
             {
-                var allMatches = await _matches.GetAllWithClubsAsync();
+                var allMatches = await _matchService.GetAllWithClubsAsync();
                 var match      = allMatches.FirstOrDefault(m => m.Id == item.MatchId);
                 if (match is not null)
                     foreach (var t in result.Tickets)
@@ -85,32 +111,18 @@ public class CheckoutController : Controller
             }
         }
 
-        // ── Process season tickets ────────────────────────────────────
+        // ── Seizoensabonnementen — via service (geen directe repo-aanroep) ──
         foreach (var item in cart.SeasonItems)
         {
-            var reserved = (await _seasonTickets.GetSeasonReservedSeatsAsync(item.SectorId)).ToHashSet();
-            var nextSeat = Enumerable.Range(1, 1000).FirstOrDefault(s => !reserved.Contains(s));
+            var (success, error, created) = await _seasonTicketService.FinalizeAsync(userId, item);
 
-            if (nextSeat == 0)
+            if (!success || created is null)
             {
-                errors.Add($"{item.ClubName} / {item.SectorName} — {_tr.T("season_err_full")}");
+                errors.Add($"{item.ClubName} / {item.SectorName} — {error ?? _tr.T("season_err_full")}");
                 continue;
             }
 
-            var seasonTicket = new SeasonTicket
-            {
-                UserId      = userId,
-                SectorId    = item.SectorId,
-                SeatNumber  = nextSeat,
-                TotalPrice  = item.TotalPrice,
-                PurchasedAt = DateTime.UtcNow,
-                IsActive    = true
-            };
-
-            await _seasonTickets.AddAsync(seasonTicket);
-            await _seasonTickets.SaveChangesAsync();
-
-            purchasedSeasonTickets.Add((seasonTicket, item.SectorName, item.StadiumName));
+            purchasedSeasonTickets.Add((created, item.SectorName, item.StadiumName));
         }
 
         if (errors.Any())
@@ -119,7 +131,7 @@ public class CheckoutController : Controller
             return RedirectToAction(nameof(Review));
         }
 
-        // ── ALL succeeded — clear cart, send ONE combined email ───────
+        // Alles geslaagd: wagen leegmaken en e-mail sturen
         HttpContext.Session.Remove(CartSessionKey);
 
         if (user is not null && (purchasedTickets.Any() || purchasedSeasonTickets.Any()))
@@ -131,7 +143,7 @@ public class CheckoutController : Controller
 
     public IActionResult Confirmation() => View();
 
-    // ── Email helper ──────────────────────────────────────────────────────
+    // ── E-mail helper (ongewijzigd t.o.v. origineel) ──────────────────────
 
     private async Task SendConfirmationEmailAsync(
         ApplicationUser user,
@@ -161,7 +173,7 @@ public class CheckoutController : Controller
         if (tickets.Any())
         {
             var grouped = tickets.GroupBy(p => p.match.Id);
-            ticketRows = string.Join("", grouped.Select(g =>
+            ticketRows  = string.Join("", grouped.Select(g =>
             {
                 var m    = g.First().match;
                 var desc = $"{m.HomeClub?.Name} vs {m.AwayClub?.Name}";
