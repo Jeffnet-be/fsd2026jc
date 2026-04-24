@@ -133,6 +133,7 @@ public class TicketsApiController : ControllerBase
     }
 
     /// <summary>Koopt tickets (alle businessregels worden gecontroleerd).</summary>
+    [HttpPost, ValidateAntiForgeryToken]
     [HttpPost("purchase")]
     [Authorize]
     public async Task<IActionResult> Purchase([FromBody] ApiPurchaseRequest req)
@@ -147,6 +148,7 @@ public class TicketsApiController : ControllerBase
     }
 
     /// <summary>Annuleert een ticket (gratis tot 7 dagen vóór de wedstrijd).</summary>
+    [HttpPost, ValidateAntiForgeryToken]
     [HttpPost("cancel/{ticketId:int}")]
     [Authorize]
     public async Task<IActionResult> Cancel(int ticketId)
