@@ -89,8 +89,11 @@ public class SeasonTicketService : ISeasonTicketService
                               .ToHashSet();
 
         // Stoelen bezet door losse tickets in dit vak — voorkomt dubbele verkoop
-        // matchId=0 → GetReservedSeatsAsync moet dit ondersteunen, of gebruik een aparte query
-        var looseSeats = (await _tickets.GetReservedSeatsAsync(0, item.SectorId))
+        // Losse tickets over ALLE wedstrijden in dit vak ophalen.
+        // GetReservedSeatsAsync(matchId, sectorId) filtert op een specifieke wedstrijd —
+        // dat is hier verkeerd: een abonnements-stoel moet uniek zijn over het hele seizoen.
+        // GetAllReservedSeatsInSectorAsync heeft geen matchId-filter.
+        var looseSeats = (await _tickets.GetAllReservedSeatsInSectorAsync(item.SectorId))
                               .ToHashSet();
 
         var allTaken = seasonSeats.Union(looseSeats);

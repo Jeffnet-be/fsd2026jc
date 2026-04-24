@@ -60,4 +60,18 @@ public class TicketRepository : BaseRepository<Ticket>, ITicketRepository
             .CountAsync();
     public async Task<Ticket?> GetByIdTrackedAsync(int id)
         => await _set.FirstOrDefaultAsync(t => t.Id == id);
+
+    /// <summary>
+    /// Geeft alle bezette stoelnummers in een sector terug over ALLE wedstrijden.
+    /// Geen filter op MatchId — een abonnements-stoel moet uniek zijn over het
+    /// volledige seizoen, niet enkel per wedstrijd.
+    /// Geannuleerde tickets worden uitgesloten: die stoelen zijn terug vrij.
+    /// </summary>
+    public async Task<IEnumerable<int>> GetAllReservedSeatsInSectorAsync(int sectorId)
+        => await _set
+            .Where(t => t.SectorId == sectorId
+                     && t.Status   != TicketStatus.Cancelled)
+            .Select(t => t.SeatNumber)
+            .Distinct()
+            .ToListAsync();
 }
