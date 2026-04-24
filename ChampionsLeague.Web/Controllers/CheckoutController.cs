@@ -25,6 +25,14 @@ public class CheckoutController : Controller
 {
     private const string CartSessionKey = "CART";
 
+    // Zelfde opties als CartController: camelCase JSON lezen/schrijven
+    // zodat MatchId en SectorId correct gedeserialiseerd worden.
+    private static readonly System.Text.Json.JsonSerializerOptions _jsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy        = System.Text.Json.JsonNamingPolicy.CamelCase
+    };
+
     private readonly ITicketService       _ticketService;
     private readonly ISeasonTicketService _seasonTicketService;
     private readonly IMatchService        _matchService;
@@ -190,6 +198,6 @@ public class CheckoutController : Controller
     {
         var json = HttpContext.Session.GetString(CartSessionKey);
         if (string.IsNullOrEmpty(json)) return new CartVM();
-        return JsonSerializer.Deserialize<CartVM>(json) ?? new CartVM();
+        return JsonSerializer.Deserialize<CartVM>(json, _jsonOptions) ?? new CartVM();
     }
 }

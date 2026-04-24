@@ -1,3 +1,4 @@
+using ChampionsLeague.Domain.Entities;
 using ChampionsLeague.Services;
 using ChampionsLeague.Services.DTOs;
 using ChampionsLeague.Web.Services;
@@ -9,9 +10,17 @@ using System.Text.Json;
 namespace ChampionsLeague.Web.Controllers;
 
 /// <summary>
-/// Abonnements-pagina. Gebruikt dezelfde ClubCardVM als de homepagina
-/// zodat _ClubCard.cshtml hergebruikt kan worden.
-/// Alle ClubDto-velden (PrimaryColor, Country, TotalCapacity) worden doorgegeven.
+/// Abonnements-pagina.
+///
+/// FIX: SeasonTicket/Index.cshtml verwacht
+/// @model IEnumerable&lt;ChampionsLeague.Domain.Entities.Club&gt;
+/// en gebruikt rechtstreeks club.PrimaryColor, club.Stadium?.Sectors, etc.
+/// De controller geeft nu de ruwe Club-entiteiten terug via
+/// IClubService.GetAllEntitiesWithStadiumsAsync() — de view hoeft niet
+/// aangepast te worden.
+///
+/// Voor de Purchase-actie wordt IClubService.GetAllWithStadiumsAsync()
+/// (DTOs) gebruikt omdat daar enkel naam en sectorId nodig zijn.
 /// </summary>
 public class SeasonTicketController : Controller
 {
@@ -21,6 +30,12 @@ public class SeasonTicketController : Controller
 
     private const string CartSessionKey = "CART";
     private static readonly DateTime CompetitionStart = new DateTime(2026, 4, 25);
+
+    private static readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy        = JsonNamingPolicy.CamelCase
+    };
 
     public SeasonTicketController(
         IClubService         clubService,
@@ -32,38 +47,27 @@ public class SeasonTicketController : Controller
         _tr                  = tr;
     }
 
+    /// <summary>
+    /// Toont de abonnements-pagina.
+    /// Geeft ruwe Club-entiteiten door zodat de bestaande view ongewijzigd blijft.
+    /// </summary>
     public async Task<IActionResult> Index()
     {
         if (DateTime.UtcNow >= CompetitionStart)
         {
             ViewBag.Closed = true;
-            return View();
+            return View((IEnumerable<Club>?)null);
         }
 
-        var dtos = await _clubService.GetAllWithStadiumsAsync();
-
-        var vms = dtos.Select(d => new ClubCardVM
-        {
-            Id            = d.Id,
-            Name          = d.Name,
-            Country       = d.Country,
-            BadgeUrl      = d.BadgeUrl,
-            PrimaryColor  = d.PrimaryColor,
-            StadiumName   = d.StadiumName,
-            StadiumCity   = d.StadiumCity,
-            TotalCapacity = d.TotalCapacity,
-            Sectors       = d.Sectors.Select(s => new SectorVM
-            {
-                Id        = s.Id,
-                Name      = s.Name,
-                Capacity  = s.Capacity,
-                BasePrice = s.BasePrice
-            }).ToList()
-        }).ToList();
-
-        return View(vms);
+        // Ruwe entiteiten — view verwacht IEnumerable<Club>
+        var clubs = await _clubService.GetAllEntitiesWithStadiumsAsync();
+        return View(clubs);
     }
 
+    /// <summary>
+    /// Voegt een seizoensabonnement toe aan de winkelwagen.
+    /// Gebruikt DTOs voor de capaciteits- en max-4-controle.
+    /// </summary>
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Purchase(int sectorId, string totalPrice)
     {
@@ -81,9 +85,10 @@ public class SeasonTicketController : Controller
             System.Globalization.NumberStyles.Any,
             System.Globalization.CultureInfo.InvariantCulture);
 
-        var clubs  = await _clubService.GetAllWithStadiumsAsync();
-        var club   = clubs.FirstOrDefault(c => c.Sectors.Any(s => s.Id == sectorId));
-        var sector = club?.Sectors.FirstOrDefault(s => s.Id == sectorId);
+        // DTOs voor de Purchase-logica
+        var clubDtos = await _clubService.GetAllWithStadiumsAsync();
+        var club     = clubDtos.FirstOrDefault(c => c.Sectors.Any(s => s.Id == sectorId));
+        var sector   = club?.Sectors.FirstOrDefault(s => s.Id == sectorId);
 
         if (sector is null || club is null)
         {
@@ -94,6 +99,7 @@ public class SeasonTicketController : Controller
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var cart   = GetCart();
 
+        // Max-4-per-club controle
         var sectorIdsForClub = club.Sectors.Select(s => s.Id);
         var countInDb        = await _seasonTicketService.CountActiveForClubAsync(userId, sectorIdsForClub);
         var countInCart      = cart.SeasonItems.Count(i => sectorIdsForClub.Contains(i.SectorId));
@@ -122,9 +128,10 @@ public class SeasonTicketController : Controller
     {
         var json = HttpContext.Session.GetString(CartSessionKey);
         if (string.IsNullOrEmpty(json)) return new CartVM();
-        return JsonSerializer.Deserialize<CartVM>(json) ?? new CartVM();
+        return JsonSerializer.Deserialize<CartVM>(json, _jsonOptions) ?? new CartVM();
     }
 
     private void SaveCart(CartVM cart)
-        => HttpContext.Session.SetString(CartSessionKey, JsonSerializer.Serialize(cart));
+        => HttpContext.Session.SetString(CartSessionKey,
+               JsonSerializer.Serialize(cart, _jsonOptions));
 }

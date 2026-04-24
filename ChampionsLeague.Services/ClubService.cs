@@ -6,19 +6,28 @@ namespace ChampionsLeague.Services;
 
 /// <summary>
 /// Service-laag contract voor club-operaties.
-/// Retourneert <see cref="ClubDto"/> met alle velden die de Web-laag nodig heeft.
 /// </summary>
 public interface IClubService
 {
+    /// <summary>Alle clubs als DTOs — voor controllers die mappen naar ViewModels.</summary>
     Task<IEnumerable<ClubDto>> GetAllWithStadiumsAsync();
+
+    /// <summary>Alle clubs (naam + id) als DTOs.</summary>
     Task<IEnumerable<ClubDto>> GetAllAsync();
+
+    /// <summary>
+    /// Alle clubs als ruwe domein-entiteiten.
+    /// Gebruikt door views die rechtstreeks Club.PrimaryColor,
+    /// Club.Stadium.Sectors etc. aanspreken (bv. SeasonTicket/Index.cshtml).
+    /// </summary>
+    Task<IEnumerable<Club>> GetAllEntitiesWithStadiumsAsync();
+
+    /// <summary>Één club met stadion en sectoren als ruwe entiteit.</summary>
     Task<Club?> GetEntityWithStadiumAndSectorsAsync(int clubId);
 }
 
 /// <summary>
 /// Implementatie van <see cref="IClubService"/>.
-/// Mapt Club-entiteiten naar ClubDto — bevat PrimaryColor, Country en TotalCapacity
-/// zodat de Web-laag ClubCardVM volledig kan vullen zonder zelf de entiteit te kennen.
 /// </summary>
 public class ClubService : IClubService
 {
@@ -29,12 +38,14 @@ public class ClubService : IClubService
         _clubs = clubs;
     }
 
+    /// <inheritdoc/>
     public async Task<IEnumerable<ClubDto>> GetAllWithStadiumsAsync()
     {
         var clubs = await _clubs.GetAllWithStadiumsAsync();
         return clubs.Select(c => ToDto(c));
     }
 
+    /// <inheritdoc/>
     public async Task<IEnumerable<ClubDto>> GetAllAsync()
     {
         var clubs = await _clubs.GetAllAsync();
@@ -48,6 +59,11 @@ public class ClubService : IClubService
         });
     }
 
+    /// <inheritdoc/>
+    public Task<IEnumerable<Club>> GetAllEntitiesWithStadiumsAsync()
+        => _clubs.GetAllWithStadiumsAsync();
+
+    /// <inheritdoc/>
     public Task<Club?> GetEntityWithStadiumAndSectorsAsync(int clubId)
         => _clubs.GetWithStadiumAndSectorsAsync(clubId);
 
