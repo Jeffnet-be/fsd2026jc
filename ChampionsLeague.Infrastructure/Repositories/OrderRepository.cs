@@ -34,14 +34,27 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
             .AsNoTracking()
             .ToListAsync();
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Business-rule check: returns true if the user already has at least one
+    /// ACTIVE (non-cancelled) ticket for any match on the same calendar day.
+    ///
+    /// BUG FIX: de vorige versie keek enkel naar OrderLines, zonder rekening te
+    /// houden met geannuleerde tickets. Een geannuleerde OrderLine blokkeerde
+    /// daardoor nog altijd nieuwe aankopen voor dezelfde dag.
+    ///
+    /// De fix: voeg een extra filter toe die controleert of de OrderLine
+    /// minstens één ticket heeft met Status != Cancelled.
+    /// Als alle tickets van die lijn geannuleerd zijn, telt de dag niet meer mee.
+    /// </summary>
     public async Task<bool> UserHasMatchOnDayAsync(string userId, DateTime matchDate)
     {
         var day = matchDate.Date;
         return await _context.OrderLines
-            .Where(ol => ol.Order.UserId    == userId
-                      && ol.Order.Status    == OrderStatus.Paid
-                      && ol.Match.MatchDate.Date == day)
+            .Where(ol => ol.Order.UserId         == userId
+                      && ol.Order.Status         == OrderStatus.Paid
+                      && ol.Match.MatchDate.Date == day
+                      // NIEUW: enkel blokkeren als er nog actieve tickets zijn
+                      && ol.Tickets.Any(t => t.Status != TicketStatus.Cancelled))
             .AnyAsync();
     }
 }

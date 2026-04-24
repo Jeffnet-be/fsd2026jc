@@ -197,13 +197,20 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 app.UseHttpsRedirection();
 app.UseRequestLocalization();
 app.UseStaticFiles();
-app.UseRouting();
-app.UseSession();
+
+// ── KRITIEK: UseSession VOOR UseRouting ──────────────────────────────────
+// Als UseSession na UseRouting staat, is de sessie niet gegarandeerd
+// beschikbaar tijdens het verwerken van de request op Azure.
+// Dit veroorzaakte de bug waarbij de wagen leeg leek na navigatie:
+// de controller las een verse lege sessie in plaats van de bestaande.
+app.UseSession();         // ← EERST
+app.UseRouting();         // ← DAN ROUTING
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
-    name:    "default",
+    name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
